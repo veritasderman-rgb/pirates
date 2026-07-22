@@ -168,23 +168,36 @@ export class AudioManager {
 
   private setMusic(state: MusicState): void {
     if (this.music === state) return
-    const prev = this.music
     this.music = state
     const next = this.ensureTrack(state)
-    next.currentTime = 0
-    void next.play().catch(() => { /* autoplay/404 — ticho */ })
-    const from = prev ? this.tracks[prev] : undefined
-    // crossfade přes RAF
-    cancelAnimationFrame(this.fadeTimer)
-    const start = performance.now()
+    if (next.paused) { next.currentTime = 0; void next.play().catch(() => { /* autoplay/404 */ }) }
+    this.startFade()
+  }
+
+  /**
+   * Jeden trvalý fade ticker: aktuální stopu ztlumí NAHORU na cílovou hlasitost,
+   * VŠECHNY ostatní načtené stopy dolů na 0 a při 0 je pauzne. Odolné vůči
+   * přerušení jiným přechodem (nikdy nenechá starou stopu hrát „pod" novou).
+   */
+  private startFade(): void {
+    if (this.fadeTimer) return
     const target = 0.6
-    const step = (): void => {
-      const k = Math.min(1, (performance.now() - start) / MUSIC_FADE_MS)
-      next.volume = target * k
-      if (from) from.volume = target * (1 - k)
-      if (k < 1) { this.fadeTimer = requestAnimationFrame(step) }
-      else if (from) { from.pause() }
+    let last = performance.now()
+    const loop = (): void => {
+      const now = performance.now()
+      const delta = ((now - last) / MUSIC_FADE_MS) * target
+      last = now
+      let active = false
+      for (const [name, el] of Object.entries(this.tracks)) {
+        if (!el) continue
+        const goal = name === this.music ? target : 0
+        if (el.volume < goal) el.volume = Math.min(goal, el.volume + delta)
+        else if (el.volume > goal) el.volume = Math.max(goal, el.volume - delta)
+        if (Math.abs(el.volume - goal) > 0.001) active = true
+        else if (goal === 0 && !el.paused) el.pause()
+      }
+      this.fadeTimer = active ? requestAnimationFrame(loop) : 0
     }
-    this.fadeTimer = requestAnimationFrame(step)
+    this.fadeTimer = requestAnimationFrame(loop)
   }
 }

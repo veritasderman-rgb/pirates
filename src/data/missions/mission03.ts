@@ -39,7 +39,9 @@ export const mission03: Scenario = {
       fireControl: { mode: 'hold', shot: 'round', engaged: false },
     },
     {
-      classId: 'qship-castilla', side: 'enemy', name: 'Santa Rosa',
+      // do odhalení se tváří jako neutrální kupec (disguise) — teprve zvrat
+      // z ní udělá nepřátelskou Q-loď (setSide + revealClass smaže masku)
+      classId: 'qship-castilla', side: 'neutral', name: 'Santa Rosa', disguise: 'merch',
       pos: { x: 1800, y: 200 }, vel: { x: 0, y: 0 }, heading: 3.0, doctrine: 'buoy',
       desc: 'Kupecká loď „Santa Rosa" — na papíře veze víno a olej. Sedí v úžině '
         + 'nízko na vodě, jako by čekala, až se někdo přiblíží.',
@@ -77,6 +79,7 @@ export const mission03: Scenario = {
       conditions: [{ kind: 'distanceBelow', shipA: FORTUNA, shipB: QSHIP, distance: 550 }],
       actions: [
         { kind: 'message', text: 'Santa Rosa odklápí boky — DĚLA! Je to Q-loď!' },
+        { kind: 'setSide', shipId: QSHIP, side: 'enemy' },
         { kind: 'setDoctrine', shipId: QSHIP, doctrine: 'attack' },
         { kind: 'revealClass', shipId: QSHIP },
         {

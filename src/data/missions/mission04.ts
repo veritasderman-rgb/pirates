@@ -28,39 +28,45 @@ export const mission04: Scenario = {
     + 'dolétnou dál než tvoje.',
   seed: 17031530,
   ambient: '#0e2b38',
-  wind: { baseDir: 3.1, baseSpeed: 8.5, rotationRate: 0.001, gustiness: 0.5 },
+  // vítr tak, aby plavba k přístavu (na východ) byla zadoboční (rychlá honba)
+  wind: { baseDir: 1.22, baseSpeed: 8.5, rotationRate: 0.001, gustiness: 0.5 },
 
   islands: [
-    { id: 'negra', name: 'Punta Negra', kind: 'island', poly: circlePoly(6200, -400, 720, 16, 0.3),
-      desc: 'Punta Negra — černý čedičový mys s castillským přístavem v závětří.' },
+    { id: 'negra', name: 'Punta Negra', kind: 'island', poly: circlePoly(6900, -300, 560, 16, 0.3),
+      desc: 'Punta Negra — černý čedičový mys; castillský přístav leží v jeho závětří, '
+        + 'hrdlo hlídá pobřežní baterie.' },
     { id: 'sisters', name: 'Sestry', kind: 'island', poly: circlePoly(2800, 1500, 420, 12, 0.35),
       desc: 'Dvě skaliska „Sestry" — úžina mezi nimi krátí cestu, kdo si troufne.' },
-    { id: 'shoal', name: 'Písečná lavice', kind: 'reef', depth: 3, poly: circlePoly(4200, -900, 340, 10, 0.4) },
+    { id: 'shoal', name: 'Písečná lavice', kind: 'reef', depth: 3, poly: circlePoly(4200, -1100, 340, 10, 0.4) },
   ],
 
   ships: [
     {
+      // hráč má weather gage: startuje vpředu a nad trasou kurýra, aby ho
+      // mohl zachytit úhlem (uříznout cestu), ne ho marně honit z ocasu
       classId: 'frigate-albion', side: 'player', name: 'HMS Fortuna',
-      pos: { x: 0, y: 0 }, vel: { x: 4, y: 0 }, heading: 0.2, doctrine: 'player',
+      pos: { x: 2600, y: 1100 }, vel: { x: 4, y: 0 }, heading: 0.2, doctrine: 'player',
       fireControl: { mode: 'hold', shot: 'chain', engaged: false },
     },
     {
+      // transit: pluje svůj kurz k přístavu a neutíká náhodně — drží termín honby
       classId: 'courier-castilla', side: 'enemy', name: 'Céfiro',
-      pos: { x: 1400, y: -300 }, vel: { x: 5, y: 0 }, heading: 0, doctrine: 'runner',
-      nav: { kind: 'course', dest: { x: 6000, y: -300 }, arriveAtRest: false }, trim: 1,
+      pos: { x: 1400, y: -1200 }, vel: { x: 5, y: 0 }, heading: 0.2, doctrine: 'transit',
+      nav: { kind: 'course', dest: { x: 6050, y: -300 }, arriveAtRest: false }, trim: 1,
       desc: 'Kurýrní šalup „Céfiro" — rychlý jako vítr sám, beze zbraní. Veze to, '
         + 'kvůli čemu tu jsme.',
     },
     {
+      // baterie u hrdla přístavu, na vodě; natočená tak, aby nesla děla k moři (na západ)
       classId: 'fort-coastal', side: 'enemy', name: 'Pevnost Punta Negra',
-      pos: { x: 6200, y: 300 }, vel: { x: 0, y: 0 }, heading: 0, doctrine: 'fort',
+      pos: { x: 6250, y: -300 }, vel: { x: 0, y: 0 }, heading: Math.PI / 2, doctrine: 'fort',
       sailsUp: false, trim: 0,
       desc: 'Pobřežní baterie Punta Negra — kamenné hrdlo castillského přístavu. '
         + 'Její žhavé koule dolétnou dál než lodní děla.',
     },
     {
       classId: 'merch', side: 'neutral', name: 'Vjezd do přístavu',
-      pos: { x: 6400, y: -300 }, vel: { x: 0, y: 0 }, heading: 0, doctrine: 'buoy',
+      pos: { x: 6150, y: -300 }, vel: { x: 0, y: 0 }, heading: 0, doctrine: 'buoy',
       sailsUp: false, trim: 0,
       desc: 'Vjezdová bóje přístavu Punta Negra — za ní je Céfiro pod ochranou '
         + 'pevnosti a mimo náš dosah.',

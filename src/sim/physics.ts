@@ -122,10 +122,11 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
   const sp = len(ship.vel)
   if (sp > SHIP_MAX_SPEED) ship.vel = scale(ship.vel, SHIP_MAX_SPEED / sp)
 
-  // (5) integrace + kolize s terénem
+  // (5) integrace + kolize s terénem (pobřežní pevnosti stojí na břehu —
+  // terénní kolize se jich netýká, jinak by se „potápěly" na vlastním ostrově)
   const prev = { ...ship.pos }
   ship.pos = add(ship.pos, scale(ship.vel, dt))
-  const isl = groundingAt(state, ship, ship.pos)
+  const isl = def.hullCode === 'FORT' ? null : groundingAt(state, ship, ship.pos)
   if (isl) {
     ship.pos = { ...prev }
     ship.vel = scale(ship.vel, 0.1)

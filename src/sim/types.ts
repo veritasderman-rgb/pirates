@@ -133,6 +133,12 @@ export interface ShipState {
   lastSurrenderDemandAt: number
   /** popisek pro detail po kliknutí (přístavy, kupci, bóje…) */
   desc?: string
+  /**
+   * Maskovací třída: dokud je nastavená, senzory hlásí TUTO třídu místo
+   * skutečné (Q-loď se tváří jako kupec). Zvrat odhalí přes `revealClass`,
+   * který disguise smaže. Chybí-li, hlásí se skutečná classId.
+   */
+  disguise?: string
 }
 
 /** Letící dělová koule. */

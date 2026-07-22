@@ -140,7 +140,9 @@ export const SHIP_CLASSES: Record<string, ShipClassDef> = {
   'courier-castilla': {
     id: 'courier-castilla', name: 'kurýrní šalup', hullCode: 'SLOOP', tons: 60,
     sailArea: 0.95, canRow: true, oarThrust: 0.2, draft: 1.3, turnRate: 0.15,
-    hullDrag: 0.028, hullPoints: 45, gunsPerBroadside: 1, gunDamage: 5, gunRange: 350,
+    // rychlý, ale ne nedostižný: o chlup rychlejší než fregata (0.044) —
+    // ve stern chase ujede, dostihne se JEN uříznutím cesty (weather gage)
+    hullDrag: 0.043, hullPoints: 45, gunsPerBroadside: 1, gunDamage: 5, gunRange: 350,
     crew: 30, lookoutRange: 3400, gunnery: 0.5,
     lore: 'Kurýrní šalup — v podstatě plachta na skořápce. Nejrychlejší trup, jaký '
       + 'castillské loděnice postaví, stavěný na jediné: doručit depeše dřív, než '

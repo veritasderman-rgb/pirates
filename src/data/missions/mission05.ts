@@ -107,22 +107,29 @@ export const mission05: Scenario = {
       id: 'trg-pack', once: true, conditions: [{ kind: 'flag', flag: 'p1' }, { kind: 'flag', flag: 'p2' }],
       actions: [{ kind: 'objectiveComplete', objectiveId: 'obj-pack' }],
     },
+    // vlajková loď vyřízena (potopena / vzdána) → flag + splněný dílčí cíl,
+    // ale VÍTĚZSTVÍ až po vyřízení celé smečky (obj-pack)
     {
       id: 'trg-flag-sunk', once: true, conditions: [{ kind: 'shipDestroyed', shipId: FLAG }],
       actions: [
         { kind: 'objectiveComplete', objectiveId: 'obj-flag' },
-        { kind: 'winMission', text: 'Černý příboj hoří a klesá. Rourke padl — ale jméno de Vega už znáš.' },
+        { kind: 'setFlag', flag: 'flag-out' },
       ],
     },
     {
       id: 'trg-flag-struck', once: true, conditions: [{ kind: 'shipSurrendered', shipId: FLAG }],
       actions: [
         { kind: 'objectiveComplete', objectiveId: 'obj-flag' },
+        { kind: 'setFlag', flag: 'flag-out' },
         { kind: 'comm', speaker: 'pirate-captain',
           text: 'Silas Rourke: „Dost! Spouštím vlajku… a jestli chcete de Vegu, kapitáne, '
             + 'poslední stříbro míří na úžinu u Tří majáků. Almirante Herrera. Víc nevím."' },
-        { kind: 'winMission', text: 'Rourke zajat. Vydal poslední kus sítě: Herrera, úžina u Tří majáků.' },
       ],
+    },
+    {
+      id: 'trg-win', once: true,
+      conditions: [{ kind: 'flag', flag: 'flag-out' }, { kind: 'flag', flag: 'p1' }, { kind: 'flag', flag: 'p2' }],
+      actions: [{ kind: 'winMission', text: 'Hnízdo vyčištěno a Rourke vyřízen. Síť má poslední jméno: Herrera, úžina u Tří majáků.' }],
     },
     {
       id: 'trg-player-lost', once: true, conditions: [{ kind: 'shipDestroyed', shipId: FORTUNA }],
