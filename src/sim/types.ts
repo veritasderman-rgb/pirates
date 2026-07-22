@@ -133,6 +133,12 @@ export interface ShipState {
   lastSurrenderDemandAt: number
   /** popisek pro detail po kliknutí (přístavy, kupci, bóje…) */
   desc?: string
+  /**
+   * Maskovací třída: dokud je nastavená, senzory hlásí TUTO třídu místo
+   * skutečné (Q-loď se tváří jako kupec). Zvrat odhalí přes `revealClass`,
+   * který disguise smaže. Chybí-li, hlásí se skutečná classId.
+   */
+  disguise?: string
 }
 
 /** Letící dělová koule. */
@@ -209,6 +215,8 @@ export type Order =
 export type Speaker =
   | 'captain' | 'mate' | 'gunner' | 'lookout' | 'bosun'
   | 'enemy-captain' | 'pirate' | 'port' | 'governor'
+  // pojmenované postavy kampaně (viz docs/LORE.md, docs/ART_PROMPTS.md)
+  | 'admiral' | 'agent' | 'pirate-captain' | 'castilian-admiral'
 
 export interface SimEvent {
   t: number

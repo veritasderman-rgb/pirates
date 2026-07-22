@@ -177,19 +177,36 @@ rozpoutá, nebo jí předejde.
 
 ## 5. Postavy
 
-- **Kapitán (hráč)** — důstojník Královského námořnictva Albionu. Kampaň ho
-  vede od velení šalupě po útočnou eskadru. Jeho rozhodnutí u děl i u vyjednávání
-  (potopit, nebo přinutit ke kapitulaci a obsadit) tvarují, jaký kapitán z něj
-  vzejde.
-- **Admiralita Albionu** — vydává rozkazy, drží rozpočet a ne vždy říká vše,
-  co ví. Hlas koruny, který kapitánovi zadává mise a soudí jejich výsledek.
-- **Kapitanát přístavu** — místní správa úžin. Hlásí podezřelé kontakty a
-  vybírá mýto; první, kdo si všimne, že něco nesedí.
-- **Pirátský kapitán Mělčiny** — velitel smečky, která napadá konvoje. Zprvu
-  vypadá jako obyčejný lupič; jeho zapečetěné rozkazy prozradí víc, než by měl
-  vědět obyčejný pirát.
-- **Castillský agent** — tvář, kterou hráč dlouho nevidí. Ruka, která platí
-  piráty a splétá síť napříč Halcyonem. Skutečný protivník kampaně.
+Jména v závorkách jsou klíče mluvčích (`Speaker` v `src/sim/types.ts`) a
+zároveň názvy souborů portrétů (`public/img/<klíč>.png`, viz
+[`ART_PROMPTS.md`](ART_PROMPTS.md)).
+
+**Albion (spojenci):**
+- **Kapitán (hráč)** *(`captain`)* — důstojník Královského námořnictva Albionu.
+  Kampaň ho vede od velení šalupě po útočnou eskadru. Jeho rozhodnutí u děl
+  i u vyjednávání (potopit, nebo přinutit ke kapitulaci a obsadit) tvarují,
+  jaký kapitán z něj vzejde.
+- **Admirál Edmund Thorne** *(`admiral`)* — Admiralita Albionu. Starý mořský
+  vlk s jizvou a s rozpočtem, který nikdy nestačí. Zadává mise, soudí je a ne
+  vždy říká vše, co ví.
+- **Přístavní kapitánka Odette Vaneová** *(`port`)* — správa úžin a kapitanát.
+  Hlásí podezřelé kontakty a vybírá mýto; první, kdo si všimne, že něco nesedí.
+- **I. důstojník Rusk** *(`mate`)* — kapitánova pravá ruka na palubě, hlas
+  taktiky a chladné rozvahy uprostřed boje.
+- **Dělmistr Hargrove** *(`gunner`)* — veterán u děl, hlas palby a střeliva.
+- **Hlídka Pip** *(`lookout`)* — nejmladší z posádky, oči na stěžni.
+- **Lodní mistr Tarr** *(`bosun`)* — drží loď pohromadě, velí opravám a výsadku.
+
+**Protivníci:**
+- **Silas Rourke „Černý příboj"** *(`pirate-captain`)* — pirátský kapitán
+  Mělčiny, velitel smečky. Zprvu obyčejný lupič; jeho zapečetěné rozkazy
+  prozradí, že slouží castillskému stříbru.
+- **Don Cristóbal de Vega** *(`agent`)* — castillský agent, ruka, která platí
+  piráty a splétá síť napříč Halcyonem. Tvář, kterou hráč dlouho nevidí — a
+  skutečný protivník kampaně.
+- **Almirante Ramón Herrera** *(`castilian-admiral`)* — velitel castillské
+  pokladní eskadry. Hrdý, přesvědčený o převaze tonáže — protivník finále
+  u Tří majáků.
 
 ---
 
@@ -354,7 +371,7 @@ férový.
 ## 8. Mise kampaně
 
 Kampaň je stavěná ze **scénářů** (lodě + cíle + skriptované triggery se zvraty).
-Dvě mise jsou hotové, další jsou v plánu (viz [`GAME_DESIGN.md`](GAME_DESIGN.md)).
+Šest misí tvoří ucelený oblouk od celní hlídky po řadovou bitvu:
 
 1. **Hlídka u Želvího ostrova** (tutoriál) — celní kontrola v úžině. „Kupec"
    *Mořská panna* po výzvě odhodí masku a prchá na volné moře. Učí vítr, body
@@ -363,12 +380,24 @@ Dvě mise jsou hotové, další jsou v plánu (viz [`GAME_DESIGN.md`](GAME_DESIG
 2. **Konvoj v Soutěsce** — eskorta dvou kupců úžinou mezi Kančím a Mlžným
    ostrovem. Z návětří udeří pirátská smečka (dvě šalupy + vlajková briga
    *Černý příboj*). Ubraň konvoj a vyřiď piráty — a v podpalubí brigy najdi
-   stejné zapečetěné rozkazy jako na *Mořské panně*. Nit se mění v síť.
+   stejné rozkazy jako na *Mořské panně*. Nit se mění v síť.
+3. **Vlčí past** — zdánlivě osamělý kupec *Santa Rosa* je castillská **Q-loď**,
+   která zblízka odklopí boky. Přežij přepad a znič či zajmi ji. Poprvé zazní
+   jméno **Don Cristóbal de Vega**. Učí raking a boj zblízka.
+4. **Depeše** — honba za rychlým kurýrem *Céfiro*, který veze rozkazy pod
+   ochranu pevnosti Punta Negra. Dostihni ho dřív, než se schová pod děla —
+   mistrovská lekce větru, křižování a vesel.
+5. **Hnízdo** — obléhání pirátské zátoky Kostivého ostrova pod pobřežní baterií.
+   S Fortunou a spojeneckou brigou rozbij smečku a zajmi *Silase Rourka*. Ten
+   vydá poslední kus sítě: **almirante Herrera**, úžina u Tří majáků.
+6. **Úžina u Tří majáků** (finále) — řadová bitva. Tři albionské lodě proti
+   castillské **řadové lodi Trueno** a fregatě *Rayo*. Zastav poslední stříbro
+   a s ním válku, kterou de Vega chystal. Řadovou loď obtancuj, rozděl palbu
+   a rakuj do zádi.
 
-**Plánovaný oblouk** (M5+): Q-loď (past castillského pomocného křižníku),
-honba za kurýrem s rozkazy, obléhání pirátského přístavu pod pobřežní pevností,
-a nakonec řadová bitva o úžiny, kde se rozhodne, jestli se castillský plán
-naplní, nebo padne.
+**Další oblouk** (budoucí): odhalení a dopadení de Vegy, odveta Castilly,
+a otázka, jestli lze Halcyonu udržet mír, když obě koruny vědí, co se u Tří
+majáků málem stalo.
 
 ---
 

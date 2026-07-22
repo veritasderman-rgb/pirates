@@ -43,7 +43,8 @@ export function updateSensors(state: SimState, dt: number): void {
         const isNew = !old || old.memory
         next.push({
           shipId: target.id, pos: { ...target.pos }, vel: { ...target.vel },
-          age: 0, idQuality, classGuess: target.classId, staticObject: staticObj,
+          // maskovaná loď (Q-loď) hlásí falešnou třídu, dokud ji zvrat neodhalí
+          age: 0, idQuality, classGuess: target.disguise ?? target.classId, staticObject: staticObj,
         })
         if (isNew) {
           state.events.push({

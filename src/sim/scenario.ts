@@ -45,6 +45,7 @@ export function spawnShip(state: SimState, spec: ShipSpec): ShipState {
     fireControl: spec.fireControl ?? { mode: 'hold', shot: 'round', engaged: false },
     lastSurrenderDemandAt: -1e9,
     desc: spec.desc,
+    disguise: spec.disguise,
   }
   state.ships.push(ship)
   return ship
@@ -120,9 +121,11 @@ function runAction(state: SimState, a: TriggerAction): void {
       if (a.ship) spawnShip(state, a.ship)
       break
     case 'revealClass': {
-      // zvýší kvalitu kontaktu hráče na danou loď (ať se v UI ukáže třída)
+      // odhalí skutečnou třídu: smaže masku a zvýší kvalitu kontaktu hráče
+      const s = shipById(state, a.shipId ?? -1)
+      if (s) s.disguise = undefined
       const con = state.contacts.player.find(k => k.shipId === a.shipId)
-      if (con) con.idQuality = 2
+      if (con) { con.idQuality = 2; if (s) con.classGuess = s.classId }
       break
     }
     case 'setFlag':

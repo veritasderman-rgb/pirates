@@ -35,6 +35,13 @@ export function collectAIOrders(state: SimState): Order[] {
         if (ship.sailsUp) orders.push({ kind: 'setSails', shipId: ship.id, on: false })
         break
 
+      case 'transit':
+        // pluje svůj nastavený kurz a nevšímá si nepřítele (kurýr, doprava) —
+        // nezahazuje nav, takže termín/úniková podmínka scénáře drží
+        if (!ship.sailsUp) orders.push({ kind: 'setSails', shipId: ship.id, on: true })
+        if (ship.trim < 1) orders.push({ kind: 'setTrim', shipId: ship.id, trim: 1 })
+        break
+
       case 'fort':
         // statická baterie: jen pálí, když má na koho
         if (ship.fireControl.mode !== 'auto') {
