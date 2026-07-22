@@ -8,8 +8,12 @@
 > jiné lodě a tři nové mechaniky: vítr, plavba podle úhlu k větru (+ vesla)
 > a ostrovy jako překážky.**
 >
-> **Stav:** fáze návrhu. Kód se zatím nepřenášel — tenhle dokument je plán,
-> co a v jakém pořadí udělat.
+> **Stav:** hratelný prototyp. Milníky **M1–M4 jsou hotové** (skelet enginu,
+> vítr + body plavby + vesla + křižování, ostrovy s kolizí/závětřím/mlhou,
+> boční dělové salvy se třemi typy střeliva, raking, kapitulace a boarding,
+> dvě mise se scénářovým systémem, deterministická simulace ve Web Workeru,
+> Canvas UI s růžicí větru). Zbývá **M5** (další mise, hudba/SFX, grafika,
+> žebříček) a **vyladění** (kap. 3, fáze 3). Spuštění viz README.
 
 ---
 
