@@ -209,6 +209,8 @@ export type Order =
 export type Speaker =
   | 'captain' | 'mate' | 'gunner' | 'lookout' | 'bosun'
   | 'enemy-captain' | 'pirate' | 'port' | 'governor'
+  // pojmenované postavy kampaně (viz docs/LORE.md, docs/ART_PROMPTS.md)
+  | 'admiral' | 'agent' | 'pirate-captain' | 'castilian-admiral'
 
 export interface SimEvent {
   t: number

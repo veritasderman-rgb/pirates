@@ -157,10 +157,13 @@ export class Panels {
     for (const e of state.events) {
       if (e.kind === 'ballMiss' || (!e.text && e.kind !== 'gunFire')) continue
       if (!e.text) continue
+      const portrait = e.speaker
+        ? `<img class="portrait" src="img/${e.speaker}.png" alt="" onerror="this.style.display='none'">`
+        : ''
       const sp = e.speaker ? `<b class="sp-${e.speaker}">${speakerName(e.speaker)}:</b> ` : ''
       const div = document.createElement('div')
       div.className = `logline ${e.speaker ? 'comm' : ''}`
-      div.innerHTML = `<span class="lt">${fmtTime(e.t)}</span> ${sp}${esc(e.text)}`
+      div.innerHTML = `${portrait}<span class="lt">${fmtTime(e.t)}</span> ${sp}${esc(e.text)}`
       this.log.appendChild(div)
     }
     while (this.log.childElementCount > 60) this.log.removeChild(this.log.firstChild!)
@@ -169,7 +172,9 @@ export class Panels {
 }
 
 const speakerName = (s: string): string => ({
-  captain: 'Kapitán', mate: 'Kormidelník', gunner: 'Dělmistr', lookout: 'Hlídka',
-  bosun: 'Lodní mistr', 'enemy-captain': 'Nepřítel', pirate: 'Pirát', port: 'Kapitanát',
-  governor: 'Guvernér',
+  captain: 'Kapitán', mate: 'Rusk (I. důstojník)', gunner: 'Hargrove (dělmistr)',
+  lookout: 'Pip (hlídka)', bosun: 'Tarr (lodní mistr)', 'enemy-captain': 'Nepřítel',
+  pirate: 'Pirát', port: 'kpt. Vaneová (kapitanát)', governor: 'Guvernér',
+  admiral: 'admirál Thorne', agent: 'Don Cristóbal de Vega',
+  'pirate-captain': 'Silas Rourke „Černý příboj"', 'castilian-admiral': 'almirante Herrera',
 }[s] ?? s)

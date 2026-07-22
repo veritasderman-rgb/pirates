@@ -26,6 +26,7 @@ const panels = new Panels(
 )
 const controller = new UIController(bridge, plot, panels, canvas)
 const audio = new AudioManager()
+audio.setMenuMode(true)
 window.addEventListener('pointerdown', () => audio.unlock(), { once: false })
 
 let outcomeShown = false
@@ -68,6 +69,7 @@ function showBriefing(sc: Scenario): void {
     + `<button id="btn-start">VYPLOUT</button>`)
   el.querySelector('#btn-start')!.addEventListener('click', () => {
     el.remove()
+    audio.setMenuMode(false) // konec briefingu → adaptivní bojová hudba
     controller.setCompression(1)
   })
 }

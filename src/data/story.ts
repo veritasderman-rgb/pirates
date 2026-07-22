@@ -50,4 +50,50 @@ export const MISSION_STORY: Record<string, MissionStory> = {
       'Konvoj zůstal na dně Soutěsky. Náklad, lodě, posádky — všechno pohltilo moře, '
       + 'zatímco piráti mizeli do závětří ostrovů.',
   },
+  mission03: {
+    prolog:
+      'Kotlový ostrov, mrtvé odpoledne. Osamělý kupec bez eskorty — přesně to, před '
+      + 'čím tě admiralita varovala. Připrav boky a přibližuj se pomalu.',
+    epilog:
+      'Nebyl to kupec, ale castillský vlk v beránčí kůži. Z jeho paluby zazněl poprvé '
+      + 'hlas, který má za vším stát: Don Cristóbal de Vega. Past sklapla naprázdno — '
+      + 'a síť má konečně jméno.',
+    epilogLose:
+      'Q-loď dostala první salvu zadarmo a Fortuna ji nepřežila. De Vega si škrtl '
+      + 'jednu fregatu ze seznamu.',
+  },
+  mission04: {
+    prolog:
+      'Vody u Punta Negry, čerstvý vítr. Kurýr už má náskok a míří pod děla pevnosti. '
+      + 'Jestli chceš ty depeše, musíš plout líp než on.',
+    epilog:
+      'Céfiro nedoplul. Z depeší se skládá obraz: de Vega odpovídá někomu výš, komusi '
+      + 's pokladní flotilou a hodností almiranteho. Stříbro a válka jsou tentýž plán.',
+    epilogLose:
+      'Kurýr proklouzl pod pevnost o vlásek. Depeše jsou v bezpečí Castilly — a ty '
+      + 'jsi zůstal stát v jejím dostřelu s prázdnýma rukama.',
+  },
+  mission05: {
+    prolog:
+      'Zátoka Kostivého ostrova za úsvitu. Někde v tom stínu kotví Silas Rourke — '
+      + 'pirát, kterého platí castillské stříbro. Ostříž ti kryje bok; vpluj a rozbij hnízdo.',
+    epilog:
+      'Hnízdo vyhořelo a Rourke padl — či klekl. Než zmlkl, vydal poslední kus sítě: '
+      + 'almirante Herrera a poslední stříbro míří na úžinu u Tří majáků. Tam se to rozhodne.',
+    epilogLose:
+      'Baterie a smečka byly nad síly dvou lodí. Fortuna zůstala v zátoce Kostivého '
+      + 'ostrova a Rourke se směje dál.',
+  },
+  mission06: {
+    prolog:
+      'Úžina u Tří majáků. Na obzoru castillská eskadra a s ní válka, kterou de Vega '
+      + 'chystal celou dobu. Tři tvé lodě proti řadové lodi a fregatě. Tady se to láme.',
+    epilog:
+      'Trueno mlčí, stříbro leží na dně úžiny a Herrerova eskadra je rozbita. Válka, '
+      + 'kterou někdo v Castille tak pečlivě splétal, se dnes u Tří majáků nekoná. '
+      + 'De Vega zmizel do stínu, odkud přišel — ale Halcyon dýchá. Prozatím.',
+    epilogLose:
+      'Fortuna padla u Tří majáků a stříbro proplulo na úžiny. Válka, které jsi měl '
+      + 'předejít, právě začala — a ty už u ní nebudeš.',
+  },
 }

@@ -113,11 +113,38 @@ export const SHIP_CLASSES: Record<string, ShipClassDef> = {
   'fort-coastal': {
     id: 'fort-coastal', name: 'pobřežní pevnost', hullCode: 'FORT', tons: 4000,
     sailArea: 0, canRow: false, oarThrust: 0, draft: 99, turnRate: 0,
-    hullDrag: 1, hullPoints: 800, gunsPerBroadside: 12, gunDamage: 9, gunRange: 700,
-    crew: 300, lookoutRange: 5000, gunnery: 0.85,
+    // nebezpečná, ale ne okamžitá smrt: dolet o něco delší než lodní děla,
+    // menší kadence přesnosti — dá se přežít průjezd na okraji dostřelu
+    hullDrag: 1, hullPoints: 700, gunsPerBroadside: 10, gunDamage: 7, gunRange: 620,
+    crew: 300, lookoutRange: 5000, gunnery: 0.72,
     lore: 'Kamenná pobřežní baterie, která hlídá vjezd do přístavu. Nikam se '
       + 'nehne, zato její žhavé koule dolétnou dál než lodní děla a kamenné zdi '
       + 'spolknou salvu za salvou. Dobýt přístav znamená nejdřív umlčet pevnost — '
       + 'nebo proklouznout mimo její dostřel.',
+  },
+
+  // ---------- zvláštní (zvraty misí) ----------
+  /** Q-loď: castillský pomocný křižník maskovaný za kupce — trup kupce, uvnitř děla */
+  'qship-castilla': {
+    id: 'qship-castilla', name: 'pomocný křižník (Q-loď)', hullCode: 'MERCH', tons: 780,
+    sailArea: 1.0, canRow: false, oarThrust: 0, draft: 3.6, turnRate: 0.07,
+    hullDrag: 0.075, hullPoints: 175, gunsPerBroadside: 9, gunDamage: 8, gunRange: 500,
+    crew: 200, lookoutRange: 4000, gunnery: 0.78,
+    lore: 'Pomocný křižník: trup kupecké lodi, pod nákladovými poklopy vojenská '
+      + 'paluba. Castilla je nasazuje jako pasti na eskorty — dokud drží masku, '
+      + 'vypadá jako pomalý obchodník; zblízka odklopí boky a vysype salvu, jakou '
+      + 'by u kupce nikdo nečekal. Jakmile je odhalen, zrazuje ho civilní trup '
+      + 'a improvizovaná paluba.',
+  },
+  /** kurýrní šalup: nejrychlejší trup, beze zbraní — nese zapečetěné rozkazy */
+  'courier-castilla': {
+    id: 'courier-castilla', name: 'kurýrní šalup', hullCode: 'SLOOP', tons: 60,
+    sailArea: 0.95, canRow: true, oarThrust: 0.2, draft: 1.3, turnRate: 0.15,
+    hullDrag: 0.028, hullPoints: 45, gunsPerBroadside: 1, gunDamage: 5, gunRange: 350,
+    crew: 30, lookoutRange: 3400, gunnery: 0.5,
+    lore: 'Kurýrní šalup — v podstatě plachta na skořápce. Nejrychlejší trup, jaký '
+      + 'castillské loděnice postaví, stavěný na jediné: doručit depeše dřív, než '
+      + 'je někdo dostihne. Beze zbraní a bez pancíře; jeho jedinou obranou je '
+      + 'rychlost, čistý vítr a vesla do bezvětří.',
   },
 }
