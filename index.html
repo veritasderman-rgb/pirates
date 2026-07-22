@@ -35,6 +35,21 @@
       overflow-y: auto; z-index: 6; display: flex; flex-direction: column; gap: 2px;
       font-size: 11px; pointer-events: auto; }
 
+    /* navigační pad (posun mapy bez myši) */
+    #navpad { position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      z-index: 7; display: grid; grid-template-columns: repeat(3, 34px); grid-auto-rows: 34px;
+      gap: 4px; opacity: .85;
+      grid-template-areas: ".  up  ." "left center right" ".  down  ." "zin . zout"; }
+    #navpad button { padding: 0; font-size: 15px; line-height: 1; background: #07222bd8; }
+    #navpad button[data-nav="up"] { grid-area: up; }
+    #navpad button[data-nav="left"] { grid-area: left; }
+    #navpad button[data-nav="center"] { grid-area: center; color: #7fd0e0; }
+    #navpad button[data-nav="right"] { grid-area: right; }
+    #navpad button[data-nav="down"] { grid-area: down; }
+    #navpad button[data-nav="in"] { grid-area: zin; }
+    #navpad button[data-nav="out"] { grid-area: zout; }
+    @media (max-width: 720px) { #navpad { top: auto; bottom: 92px; transform: none; } }
+
     .panel { border: 1px solid #1c4a55; padding: 5px 7px; background: #07222bd0;
       backdrop-filter: blur(2px); }
     .panel h3 { margin: 0 0 4px 0; font-size: 11px; color: #d8c24f; text-transform: uppercase; }
@@ -111,6 +126,15 @@
     <div id="hud-right" class="hud"></div>
     <div id="hud-bottom" class="hud"></div>
     <div id="hud-log"></div>
+    <div id="navpad">
+      <button data-nav="up" title="posun nahoru">▲</button>
+      <button data-nav="left" title="posun vlevo">◀</button>
+      <button data-nav="center" title="vycentrovat na loď">◎</button>
+      <button data-nav="right" title="posun vpravo">▶</button>
+      <button data-nav="down" title="posun dolů">▼</button>
+      <button data-nav="in" title="přiblížit">＋</button>
+      <button data-nav="out" title="oddálit">－</button>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
