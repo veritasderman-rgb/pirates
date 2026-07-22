@@ -8,10 +8,10 @@ const finite = (s: ShipState): boolean =>
   Number.isFinite(s.pos.x) && Number.isFinite(s.pos.y)
   && Number.isFinite(s.vel.x) && Number.isFinite(s.vel.y) && Number.isFinite(s.heading)
 
-describe('kampaň (6 misí)', () => {
-  it('všech 6 misí se vytvoří, má cíle a triggery', () => {
+describe('kampaň (11 misí)', () => {
+  it('všech 11 misí se vytvoří, má cíle a triggery', () => {
     const ids = Object.keys(SCENARIOS)
-    expect(ids.length).toBe(6)
+    expect(ids.length).toBe(11)
     for (const sc of Object.values(SCENARIOS)) {
       const st = sim.create(sc)
       expect(st.ships.length).toBeGreaterThan(0)

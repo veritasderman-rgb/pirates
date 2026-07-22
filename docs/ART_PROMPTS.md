@@ -157,9 +157,16 @@ cinematic light, muted teal-and-amber palette* + konkrétní námět.
 
 ## Lodě (obrázky tříd) — prompty
 
+Obrázky lodí se ve hře zobrazují v **panelu vlastní lodi a cíle** (a jako
+briefingy). **Hotovo:** `ship-sloop-albion`, `ship-brig-albion`,
+`ship-frigate-albion`, `ship-galleon-castilla`, `ship-liner-castilla`,
+`ship-brig-pirate`, `ship-sloop-pirate`, `ship-merch`. **Chybí ještě:**
+`ship-frigate-castilla`, `ship-galley-corsair`, `ship-fort-coastal`
+(+ nové třídy `ship-liner-albion`, `ship-flagship-castilla`) — dogeneruj je
+podle promptů níže a vlož do `public/img/`, naskočí samy.
+
 Engine kreslí lodě na mapě **vektorově**, takže obrázky lodí nejsou pro běh
-nutné. Hodí se ale pro **detail třídy** v UI (rozklik lodi), kartu do lore,
-nebo marketing — a rád je do detailu třídy zapojím (řekni). Doporučený formát:
+nutné. Doporučený formát:
 **PNG, 1024×576 (16:9) nebo 800×500**, loď z profilu (bok) na moři, ať je
 poznat silueta a olachtoví. Ulož jako `public/img/ship-<id třídy>.png`
 (id tříd viz `src/data/defs.ts`).
@@ -182,6 +189,9 @@ poznat silueta a olachtoví. Ulož jako `public/img/ship-<id třídy>.png`
 - **`ship-frigate-albion.png`** — *elegant Albion navy frigate, single gun
   deck of thirteen ports, tall masts, dark-blue-and-white hull, fast lines,
   white ensign snapping.* + styl
+- **`ship-liner-albion.png`** — *Albion navy ship of the line, three gun decks,
+  twenty-eight ports a side, imposing dark-blue-and-gold hull with white
+  gunstrakes, towering masts, an admiral's flag — disciplined and massive.* + styl
 
 ### Castilla (červená a zlato, tonáž, honosnost)
 
@@ -194,6 +204,9 @@ poznat silueta a olachtoví. Ulož jako `public/img/ship-<id třídy>.png`
 - **`ship-liner-castilla.png`** — *massive Castilian three-decker ship of the
   line, thirty gunports a side, imposing red-and-black hull with gold trim,
   a floating fortress, admiral's pennant.* + styl
+- **`ship-flagship-castilla.png`** — *the grandest Castilian flagship ever built,
+  four gun decks, thirty-four ports a side, drowning in gold carving and
+  ornament, a towering gilded sterncastle, deep-red hull — a floating throne.* + styl
 
 ### Piráti (látané, temné, kořistní)
 

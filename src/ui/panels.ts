@@ -85,6 +85,7 @@ export class Panels {
     const ss = sh.subsystems
     this.left.innerHTML =
       `<div class="panel"><h3>${esc(sh.name)}</h3>`
+      + `<img class="ship-img" src="img/ship-${esc(sh.classId)}.png" alt="" onerror="this.style.display='none'">`
       + `<div class="row"><span>${esc(def?.name ?? sh.classId)}</span></div>`
       + `<div class="row"><span>trup</span>${bar(sh.hull / hp, '#4fd0e0')}</div>`
       + `<div class="row"><span>morálka</span>${bar(sh.morale, '#d8c24f')}</div>`
@@ -108,11 +109,15 @@ export class Panels {
     let tHtml = '<div class="dim">— žádný cíl —</div>'
     const tgt = state.ships.find(s => s.id === ui.targetId)
     if (tgt) {
-      const def = SHIP_CLASSES[tgt.classId]
-      const hp = def?.hullPoints ?? 100
       const con = state.contacts.player.find(c => c.shipId === tgt.id)
-      const cls = con && con.idQuality >= 1 ? esc(def?.name ?? tgt.classId) : 'neznámá třída'
+      // respektuj masku: třídu i obrázek ber z classGuess (ne skutečné classId)
+      const shownClass = con?.classGuess ?? tgt.classId
+      const def = SHIP_CLASSES[shownClass]
+      const hp = SHIP_CLASSES[tgt.classId]?.hullPoints ?? 100
+      const known = con && con.idQuality >= 1
+      const cls = known ? esc(def?.name ?? shownClass) : 'neznámá třída'
       tHtml = `<div class="row"><b>${esc(tgt.name)}</b> ${tgt.surrendered ? '⚑' : ''}</div>`
+        + (known ? `<img class="ship-img" src="img/ship-${esc(shownClass)}.png" alt="" onerror="this.style.display='none'">` : '')
         + `<div class="row"><span>${cls}</span></div>`
         + `<div class="row"><span>trup</span>${bar(tgt.hull / hp, '#e0603a')}</div>`
     }

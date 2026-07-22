@@ -140,7 +140,7 @@ export const mission02: Scenario = {
     },
     {
       id: 'trg-player-lost', once: true,
-      conditions: [{ kind: 'shipDestroyed', shipId: OSTRIZ }],
+      conditions: [{ kind: 'allDestroyed', side: 'player' }],
       actions: [{ kind: 'loseMission', text: 'HMS Ostříž se potopila — konvoj zůstal bez ochrany.' }],
     },
   ],

@@ -31,10 +31,12 @@ export class UIController {
     this.state = state
     this.compression = compression
     if (compression > 0) this.lastRunning = compression
-    // výchozí výběr = vlastní loď
-    if (this.selectedId === null) {
-      const own = state.ships.find(s => s.side === 'player' && !s.destroyed)
-      if (own) { this.selectedId = own.id; this.plot.follow(own.id) }
+    // výchozí výběr / re-výběr po ztrátě lodi = aktuální velitelská loď hráče
+    const sel = state.ships.find(s => s.id === this.selectedId)
+    if (!sel || sel.destroyed || sel.side !== 'player') {
+      const cmd = state.ships.find(s => s.side === 'player' && s.doctrine === 'player' && !s.destroyed)
+        ?? state.ships.find(s => s.side === 'player' && !s.destroyed)
+      if (cmd) { this.selectedId = cmd.id; this.plot.follow(cmd.id) }
     }
     this.plot.setState(state)
     this.plot.selectedId = this.selectedId

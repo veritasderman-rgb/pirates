@@ -33,6 +33,24 @@ function scenarioFor(state: SimState): Scenario | null {
   return copy
 }
 
+/**
+ * Nástupnictví vlajky: pokud strana hráče nemá živou velitelskou loď (doctrine
+ * 'player'), ale má jinou živou loď, přenese na ni vlajku (velení). Prohru
+ * scénáře řeší podmínka 'allDestroyed' — až když padne CELÁ flotila.
+ */
+function updatePlayerCommand(state: SimState): void {
+  const alive = state.ships.filter(s => s.side === 'player' && !s.destroyed && !s.surrendered)
+  if (alive.length === 0) return
+  if (alive.some(s => s.doctrine === 'player')) return
+  const flag = alive[0]
+  flag.doctrine = 'player'
+  flag.fireControl.mode = 'auto'
+  state.events.push({
+    t: state.t, kind: 'comm', speaker: 'admiral', slowdown: true,
+    text: `Vlajková loď padla — vlajku přebírá ${flag.name}! Veď nás dál, kapitáne.`,
+  })
+}
+
 const shipById = (state: SimState, id: number): ShipState | undefined =>
   state.ships.find(s => s.id === id)
 
@@ -141,6 +159,9 @@ export const sim: SimApi = {
     updateFireControl(state)
     // (8) kapitulace
     updateSurrender(state, dt)
+    // (8b) nástupnictví vlajky: padne-li velitelská loď hráče, admirál přenese
+    // vlajku na jinou loď flotily (prohra až když padne celá flotila)
+    updatePlayerCommand(state)
     // (9) posádka
     updateCrew(state, dt)
     // (10) triggery

@@ -231,6 +231,9 @@ rozhoduje, které mělčiny loď přeplují. **Asymetrie stran** je ve výcviku 
   operace. Třináct děl na bok, nejlepší výcvik ve flotile a dohled z vysokých
   stěžňů. Loví nájezdníky a chrání obchod; proti řadové lodi ale nepostojí —
   pancíř má tenčí o třídu.
+- **Řadová loď (Albion) — `liner-albion`.** Kapitální loď pozdní kampaně:
+  dvacet osm děl na bok, špičkový výcvik a boky, které zblízka nepropustí.
+  Pomalá a těžko se otáčí, ale v linii nemá mezi albionskými trupy sobě rovného.
 
 ### Castillské království (soupeř)
 
@@ -244,6 +247,9 @@ rozhoduje, které mělčiny loď přeplují. **Asymetrie stran** je ve výcviku 
   palubách děl. Třicet hlavní na bok promění linii v ohnivou zeď. Daní je
   manévr: obrátit ji trvá věčnost a do mělčin se neodváží. Kdo se jí postaví
   bok po boku, prohrál; kdo ji obtančí a rakuje do zádi, má šanci.
+- **Vlajková loď Corona — `flagship-castilla`.** De Vegův plovoucí trůn a
+  poslední karta finále: čtyři paluby děl, největší trup, jaký Castilla
+  spustila. Bok po boku ji neporazí nikdo — jen ji rozebrat kus po kuse.
 
 ### Volní piráti
 
@@ -390,14 +396,24 @@ Kampaň je stavěná ze **scénářů** (lodě + cíle + skriptované triggery s
 5. **Hnízdo** — obléhání pirátské zátoky Kostivého ostrova pod pobřežní baterií.
    S Fortunou a spojeneckou brigou rozbij smečku a zajmi *Silase Rourka*. Ten
    vydá poslední kus sítě: **almirante Herrera**, úžina u Tří majáků.
-6. **Úžina u Tří majáků** (finále) — řadová bitva. Tři albionské lodě proti
-   castillské **řadové lodi Trueno** a fregatě *Rayo*. Zastav poslední stříbro
-   a s ním válku, kterou de Vega chystal. Řadovou loď obtancuj, rozděl palbu
-   a rakuj do zádi.
+6. **Úžina u Tří majáků** — řadová bitva. Albionské lodě proti castillské
+   **řadové lodi Trueno** a fregatě *Rayo*. Konec 1. dějství: Herrera padne,
+   ale de Vega, ruka za vším, unikne. Otevřená válka začíná.
+7. **Odveta** — Castilla vrací úder: eskadra fregat napadá albionskou stanici.
+   Zaženeš ji svou eskadrou (3+ lodě).
+8. **Lov na de Vegu** — honba za de Vegou; kurýr ti unikne, ale rozbiješ mu
+   eskortu (Q-loď + 2 fregaty).
+9. **Blokáda Cádizu** — poprvé velíš **kapitální lodi** (řadová loď HMS
+   Sovereign). Prolom pevnost a eskadru u brány Cádizu.
+10. **Stříbrná flotila** — přepadni poslední pokladní flotilu (2 galeony +
+    eskorta) a vezmi Castille stříbro, které platí válku.
+11. **Koruna** (finále) — velká flotilová bitva. Tvá flotila proti de Vegově
+    vlajkové lodi **Corona** a zbytku castillské moci. Ukonči de Vegovu hru
+    o Halcyon.
 
-**Další oblouk** (budoucí): odhalení a dopadení de Vegy, odveta Castilly,
-a otázka, jestli lze Halcyonu udržet mír, když obě koruny vědí, co se u Tří
-majáků málem stalo.
+Kampaň roste v měřítku: od šalupy v úžině po flotilu řadových lodí v rejdě
+Cádizu. Padne-li ti velitelská loď, **admirál přenese vlajku** na jinou loď
+flotily a bojuje se dál — prohra až když padne celá flotila.
 
 ---
 
