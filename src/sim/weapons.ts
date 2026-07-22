@@ -101,7 +101,7 @@ export function fireBroadside(
 
   state.events.push({
     t: state.t, kind: 'gunFire', shipId: ship.id, side: ship.side, count: n,
-    pos: { ...ship.pos }, slowdown: ship.doctrine === 'player',
+    pos: { ...ship.pos },
     speaker: ship.doctrine === 'player' ? 'gunner' : undefined,
     text: ship.doctrine === 'player'
       ? `${side === 'port' ? 'Levobok' : 'Pravobok'} — PAL! (${n} děl, ${shotName(shot)})`
@@ -210,7 +210,6 @@ export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec
 
   state.events.push({
     t: state.t, kind: 'ballHit', shipId: ship.id, side: ball.side, pos: { ...ship.pos },
-    slowdown: ship.doctrine === 'player',
     text: raked ? `${ship.name}: RAKING zásah do ${ball.shot === 'chain' ? 'ráhnoví' : ball.shot === 'grape' ? 'paluby' : 'trupu'}!`
       : evtText ? `${ship.name}: zásah — ${evtText}.` : '',
   })

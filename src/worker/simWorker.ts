@@ -68,7 +68,13 @@ setInterval(() => {
       for (; scanned < state.events.length; scanned++) {
         if (state.events[scanned].slowdown) hasSlowdown = true
       }
-      if (hasSlowdown) break
+      // důležitá událost (hláška, potopení, kapitulace…) SKUTEČNĚ zpomalí na 1×
+      // — dropneme kompresi, snapshot ji tak nahlásí UI (kontrakt SimEvent.slowdown)
+      if (hasSlowdown) {
+        if (compression > 1) compression = 1
+        stepAcc = 0
+        break
+      }
     }
   }
   sendSnapshot()

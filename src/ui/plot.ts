@@ -118,7 +118,8 @@ export class TacticalPlot {
     }
     for (const c of this.state.contacts.player) {
       const sh = this.state.ships.find(s => s.id === c.shipId)
-      if (sh && !sh.destroyed) consider(c.shipId, sh.pos)
+      // paměťový kontakt se vybírá na poslední ZNÁMÉ pozici, ne na živé
+      if (sh && !sh.destroyed) consider(c.shipId, c.memory ? c.pos : sh.pos)
     }
     return best
   }
@@ -215,9 +216,23 @@ export class TacticalPlot {
     const ctx = this.ctx
     const def = SHIP_CLASSES[sh.classId]
     // nepřátele/neutrály kreslíme jen když je hráč vidí (kontakt), jinak ne
-    const known = sh.side === 'player'
-      || st.contacts.player.some(c => c.shipId === sh.id)
-    if (!known) return
+    const isPlayer = sh.side === 'player'
+    const con = st.contacts.player.find(c => c.shipId === sh.id)
+    if (!isPlayer && !con) return
+
+    // paměťový kontakt (mimo dohled, např. za ostrovem): kresli GHOST na
+    // poslední známé pozici, ne loď v reálném čase
+    if (!isPlayer && con?.memory) {
+      const gs = this.w2s(con.pos)
+      ctx.strokeStyle = this.colorFor(sh.side, true); ctx.setLineDash([3, 3]); ctx.lineWidth = 1.5
+      ctx.beginPath(); ctx.arc(gs.x, gs.y, 9, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([])
+      if (this.scale > 0.015) {
+        ctx.fillStyle = this.colorFor(sh.side, true); ctx.font = '11px monospace'
+        const nm = con.idQuality >= 1 ? sh.name : 'ztracený kontakt'
+        ctx.fillText(`${nm} (?)`, gs.x + 12, gs.y)
+      }
+      return
+    }
     const s = this.w2s(sh.pos)
     const r = hitRadius(sh)
     const lenPx = Math.max(7, r * this.scale * 1.6)
@@ -251,7 +266,6 @@ export class TacticalPlot {
     if (sh.id === this.targetId) { ctx.strokeStyle = CLR.enemy; ctx.lineWidth = 2; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(s.x, s.y, lenPx + 9, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]) }
 
     // jméno (u vlastních vždy, u ostatních dle identifikace)
-    const con = st.contacts.player.find(c => c.shipId === sh.id)
     const showName = sh.side === 'player' || (con && con.idQuality >= 1) || sh.side === 'neutral'
     if (showName && this.scale > 0.015) {
       ctx.fillStyle = this.colorFor(sh.side)

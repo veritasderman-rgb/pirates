@@ -46,13 +46,15 @@ export const mission02: Scenario = {
       fireControl: { mode: 'auto', shot: 'round', engaged: false },
     },
     {
-      classId: 'merch', side: 'neutral', name: 'Naděje',
+      // eskortovaní kupci jsou albionští (strana player) — piráti (enemy) na ně
+      // útočí, hráč je chrání; doktrína freighter je nechá prchat, ne bojovat
+      classId: 'merch', side: 'player', name: 'Naděje',
       pos: { x: -200, y: 250 }, vel: { x: 2.5, y: 0 }, heading: 0.1, doctrine: 'freighter',
       nav: { kind: 'course', dest: { x: 6500, y: 400 }, arriveAtRest: false }, trim: 1,
       desc: 'Kupecká loď Naděje — náklad plátna a koření pro východní přístav.',
     },
     {
-      classId: 'merch', side: 'neutral', name: 'Vytrvalost',
+      classId: 'merch', side: 'player', name: 'Vytrvalost',
       pos: { x: -450, y: -200 }, vel: { x: 2.5, y: 0 }, heading: 0.1, doctrine: 'freighter',
       nav: { kind: 'course', dest: { x: 6500, y: -300 }, arriveAtRest: false }, trim: 1,
       desc: 'Kupecká loď Vytrvalost — sesterská loď Naděje, stejná linka.',

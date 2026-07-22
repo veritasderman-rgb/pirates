@@ -13,8 +13,9 @@ import {
   add, angleDiff, angleOf, dot, fromAngle, len, normAngle, scale, sub,
 } from './vec'
 import { SHIP_CLASSES } from '../data/defs'
-import { sailThrustAccel, oarThrustAccel, offWindAngle } from './sail'
+import { sailThrustAccel, oarThrustAccel } from './sail'
 import { groundingAt, shoreRepulsion } from './terrain'
+import { windAt } from './wind'
 
 const TACK_RAD = (TACK_ANGLE_DEG * Math.PI) / 180
 /** korridor kolem laylinie, ve kterém se drží aktuální hala (m) */
@@ -100,8 +101,10 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
     ship.heading = Math.abs(diff) <= maxTurn ? want : normAngle(ship.heading + Math.sign(diff) * maxTurn)
   }
 
-  // (3) dopředný tah: plachty + vesla, podél přídě
-  const aSail = sailThrustAccel(ship, def, state.wind)
+  // (3) dopředný tah: plachty + vesla, podél přídě.
+  // LOKÁLNÍ vítr (poryvy + závětří ostrovů) — v závětří slábne tah, ne jen kresba.
+  const localWind = windAt(state, ship.pos)
+  const aSail = sailThrustAccel(ship, def, localWind)
   const aOar = oarThrustAccel(ship, def)
   const aFwd = aSail + aOar
   const fwdDir = fromAngle(ship.heading)
@@ -127,6 +130,17 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
     ship.pos = { ...prev }
     ship.vel = scale(ship.vel, 0.1)
     ship.hull = Math.max(0, ship.hull - AGROUND_DAMAGE)
+    // trvalý náraz může loď potopit — pak ji vyřaď a ohlaš (jinak triggery
+    // typu „hráč potopen" na terénní poškození nezareagují)
+    if (ship.hull <= 0 && !ship.destroyed) {
+      ship.destroyed = true
+      state.events.push({
+        t: state.t, kind: 'shipDestroyed', shipId: ship.id, side: ship.side,
+        pos: { ...ship.pos }, slowdown: true,
+        text: `${ship.name} se roztříštila na ${isl.kind === 'reef' ? 'útesu' : 'mělčině'}!`,
+      })
+      return
+    }
     const key = `aground:${ship.id}`
     if (!state.flags[key]) {
       state.flags[key] = true
