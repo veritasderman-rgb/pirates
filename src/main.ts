@@ -45,12 +45,21 @@ function firstSentence(t: string): string {
   return i >= 0 ? t.slice(0, i + 1) : t
 }
 
+/** Úvodní scéna mise (public/img/<hodnota>.png); chybějící se skryje. */
+const MISSION_SCENES: Record<string, string> = {
+  mission02: 'scene-ambush',
+  mission04: 'scene-castilla-port',
+  mission05: 'scene-pirate-cove',
+  mission06: 'scene-beacons',
+}
+
 function showMissionSelect(): void {
   const rows = Object.values(SCENARIOS).map((sc, i) =>
     `<div class="mrow"><button data-mission="${esc(sc.id)}">${i + 1}. ${esc(sc.title)}</button>`
     + `<div class="mdesc">${esc(firstSentence(sc.briefing))}</div></div>`).join('')
   const el = overlay(
-    `<h1>PIRATES</h1>`
+    `<img class="menu-img" src="img/scene-court.png" alt="" onerror="this.remove()">`
+    + `<h1>PIRATES</h1>`
     + `<div class="brief story">${esc(CAMPAIGN_INTRO)}</div>`
     + `<h2>Výběr mise</h2>${rows}`)
   el.querySelectorAll<HTMLButtonElement>('button[data-mission]').forEach(b =>
@@ -59,8 +68,10 @@ function showMissionSelect(): void {
 
 function showBriefing(sc: Scenario): void {
   const prolog = MISSION_STORY[sc.id]?.prolog
+  const scene = MISSION_SCENES[sc.id]
   const el = overlay(
-    `<h2>${esc(sc.title)}</h2>`
+    (scene ? `<img class="brief-img" src="img/${scene}.png" alt="" onerror="this.remove()">` : '')
+    + `<h2>${esc(sc.title)}</h2>`
     + (prolog ? `<div class="brief story">${esc(prolog)}</div>` : '')
     + `<div class="brief">${esc(sc.briefing)}</div>`
     + `<div class="hint">Ovládání: klik na vlastní loď = výběr · klik na cíl = zaměření · `
