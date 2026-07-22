@@ -133,26 +133,96 @@ Jednotný vzhled je důležitější než detail. Drž se toho u všech postav:
 
 ---
 
-## Volitelná grafika (zatím ji hra nevykresluje)
+## Scény (briefingy a menu) — zapojeno ve hře
 
-Tyhle assety **nejsou nutné** — engine je nepoužívá. Pokud je vyrenderuješ,
-lze je snadno zapojit do briefing overlaye / menu (řekni a doplním kód).
+Hra vykresluje na začátku výběru mise a v briefingu obrázek scény (16:9,
+~1280×720 nebo 640×349). Chybějící se **tiše skryje**. Soubor → kde se použije:
 
-- **Ikona / favicon** — `public/img/icon-512.png` a `icon-192.png`
-  (a odkaz v `index.html`). Prompt: *emblém hry — zkřížené dělo a kotva pod
-  korunou, na tmavě modrozeleném poli, mosazný reliéf, plochý ikonický styl,
-  čitelný v malé velikosti.*
-- **Scény k briefingům misí** (16:9, ~1280×720), atmosféra každé mise —
-  volitelně jedna na misi:
-  - *mission01* — šalupa v ranní úžině u nízkého korálového ostrova.
-  - *mission02* — konvoj kupců v úzké soutěsce mezi dvěma ostrovy, plachty
-    pirátů v návětří.
-  - *mission03* — osamělý kupec za mrtvého bezvětří, tušení nebezpečí.
-  - *mission04* — rychlý kurýr prchá k černému mysu s pevností, čerstvý vítr.
-  - *mission05* — pirátská zátoka za úsvitu pod kamennou baterií.
-  - *mission06* — řadová loď a fregata v úžině mezi třemi majáky, kouř děl.
-  Styl: *dramatic maritime oil painting, golden age of sail, stormy cinematic
-  light, muted teal-and-amber palette* + konkrétní scéna.
+| Soubor | Kde | Námět |
+|---|---|---|
+| `public/img/scene-court.png` | menu / výběr mise | dvůr albionské koruny |
+| `public/img/scene-ambush.png` | briefing **mise 2** | pirátská flotila na obzoru (konvoj) |
+| `public/img/scene-castilla-port.png` | briefing **mise 4** | castillská flotila v zátoce (kurýr k přístavu) |
+| `public/img/scene-pirate-cove.png` | briefing **mise 5** | pirátská zátoka pod pevností |
+| `public/img/scene-beacons.png` | briefing **mise 6** | bitva v úžině u Tří majáků |
+
+Volitelně lze doplnit i `scene-*` pro mise 1 a 3 (ranní úžina u korálového
+ostrova; osamělý kupec za bezvětří, tušení nebezpečí) — přidej soubor a řekni,
+namapuji ho v `MISSION_SCENES` (`src/main.ts`).
+
+Styl scén: *dramatic maritime oil painting, golden age of sail, stormy
+cinematic light, muted teal-and-amber palette* + konkrétní námět.
+
+---
+
+## Lodě (obrázky tříd) — prompty
+
+Engine kreslí lodě na mapě **vektorově**, takže obrázky lodí nejsou pro běh
+nutné. Hodí se ale pro **detail třídy** v UI (rozklik lodi), kartu do lore,
+nebo marketing — a rád je do detailu třídy zapojím (řekni). Doporučený formát:
+**PNG, 1024×576 (16:9) nebo 800×500**, loď z profilu (bok) na moři, ať je
+poznat silueta a olachtoví. Ulož jako `public/img/ship-<id třídy>.png`
+(id tříd viz `src/data/defs.ts`).
+
+**Společný styl lodí** (připoj ke každému promptu):
+
+> *broadside profile view of a single sailing warship at sea, golden age of
+> sail, oil painting, dramatic overcast light, muted teal sea and sky, warm
+> wood-and-brass hull, rigging and sails detailed, three-quarter side angle,
+> cinematic, painterly — not a photo, not 3D, no text or labels*
+
+### Albion (studená modrá, čisté linie, disciplína)
+
+- **`ship-sloop-albion.png`** — *single-masted Albion navy sloop, small and
+  nimble, a few gunports, clean dark-blue hull with a white stripe, crisp
+  white sails, oars shipped along the side.* + styl
+- **`ship-brig-albion.png`** — *two-masted Albion navy brig, seven gunports a
+  side, dark-blue hull with white gunstrake, orderly rigging, a small white
+  ensign.* + styl
+- **`ship-frigate-albion.png`** — *elegant Albion navy frigate, single gun
+  deck of thirteen ports, tall masts, dark-blue-and-white hull, fast lines,
+  white ensign snapping.* + styl
+
+### Castilla (červená a zlato, tonáž, honosnost)
+
+- **`ship-frigate-castilla.png`** — *Castilian frigate, heavier and taller
+  than the Albion type, ornate stern gallery, deep-red hull with gilded
+  carvings, fourteen gunports a side.* + styl
+- **`ship-galleon-castilla.png`** — *tall Castilian treasure galleon, towering
+  fore- and sterncastles, richly gilded, deep-red and gold, few but heavy
+  guns, riding low with silver in her hold.* + styl
+- **`ship-liner-castilla.png`** — *massive Castilian three-decker ship of the
+  line, thirty gunports a side, imposing red-and-black hull with gold trim,
+  a floating fortress, admiral's pennant.* + styl
+
+### Piráti (látané, temné, kořistní)
+
+- **`ship-sloop-pirate.png`** — *ragged pirate sloop, patched dark sails,
+  weather-beaten hull of mismatched planks, a few guns, black flag, crew
+  crowding the rail.* + styl
+- **`ship-brig-pirate.png`** — *pirate brig, a captured merchantman refitted
+  for war, dark patched hull, extra gunports cut crudely, black flag with a
+  crude device, menacing.* + styl
+- **`ship-galley-corsair.png`** — *corsair war galley, long low oared hull,
+  a single lateen sail, a forward gun, banks of oars biting the water, built
+  for coastal straits and dead calms.* + styl
+
+### Neutrálové a stavby
+
+- **`ship-merch.png`** — *plump merchantman, round bluff-bowed hull heavy with
+  cargo, only a couple of small guns, plain tan sails, defenceless and
+  tempting.* + styl
+- **`ship-fort-coastal.png`** — *stone coastal fortress guarding a harbour
+  mouth, tiered gun batteries in the rock, cannons run out over the sea,
+  waves breaking at its base.* + styl (spíš pevnost než loď)
+
+---
+
+## Ikona / favicon (volitelné)
+
+- `public/img/icon-512.png` a `icon-192.png` (+ odkaz v `index.html`). Prompt:
+  *emblém hry — zkřížené dělo a kotva pod korunou, na tmavě modrozeleném poli,
+  mosazný reliéf, plochý ikonický styl, čitelný v malé velikosti.*
 
 ---
 
