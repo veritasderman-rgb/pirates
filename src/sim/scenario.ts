@@ -80,6 +80,11 @@ function condMet(state: SimState, c: TriggerCondition): boolean {
       return !!s && s.boarded
     }
     case 'aground': return state.flags[`aground:${c.shipId}`] === true
+    case 'allDestroyed': {
+      // všechny lodě dané strany potopené nebo vzdané (celá flotila padla)
+      const ships = state.ships.filter(s => s.side === c.side)
+      return ships.length > 0 && ships.every(s => s.destroyed || s.surrendered)
+    }
     case 'shipsDestroyedCount': {
       const n = state.ships.filter(s => s.side === c.side && s.destroyed).length
       return n >= (c.count ?? 1)

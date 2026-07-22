@@ -118,7 +118,7 @@ export const mission06: Scenario = {
       }],
     },
     {
-      id: 'trg-player-lost', once: true, conditions: [{ kind: 'shipDestroyed', shipId: FORTUNA }],
+      id: 'trg-player-lost', once: true, conditions: [{ kind: 'allDestroyed', side: 'player' }],
       actions: [{ kind: 'loseMission', text: 'HMS Fortuna padla u Tří majáků — a s ní poslední albionská naděje úžinu udržet.' }],
     },
   ],

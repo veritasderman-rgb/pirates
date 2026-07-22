@@ -45,12 +45,19 @@ function firstSentence(t: string): string {
   return i >= 0 ? t.slice(0, i + 1) : t
 }
 
-/** Úvodní scéna mise (public/img/<hodnota>.png); chybějící se skryje. */
+/** Úvodní scéna/obrázek mise (public/img/<hodnota>.png); chybějící se skryje. */
 const MISSION_SCENES: Record<string, string> = {
+  mission01: 'ship-sloop-albion',
   mission02: 'scene-ambush',
+  mission03: 'ship-merch',
   mission04: 'scene-castilla-port',
   mission05: 'scene-pirate-cove',
   mission06: 'scene-beacons',
+  mission07: 'ship-liner-castilla',
+  mission08: 'scene-castilla-port',
+  mission09: 'ship-frigate-albion',
+  mission10: 'ship-galleon-castilla',
+  mission11: 'scene-beacons',
 }
 
 function showMissionSelect(): void {

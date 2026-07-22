@@ -257,7 +257,7 @@ export interface Contact {
 export interface TriggerCondition {
   kind: 'time' | 'distanceBelow' | 'distanceAbove' | 'shipDestroyed' | 'flag'
     | 'shipsDestroyedCount' | 'shipSurrendered' | 'shipBoarded' | 'classified'
-    | 'flagNot' | 'hullBelow' | 'aground'
+    | 'flagNot' | 'hullBelow' | 'aground' | 'allDestroyed'
   t?: number
   shipA?: number
   shipB?: number

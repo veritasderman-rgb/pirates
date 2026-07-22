@@ -123,7 +123,34 @@ export const SHIP_CLASSES: Record<string, ShipClassDef> = {
       + 'nebo proklouznout mimo její dostřel.',
   },
 
+  /** řadová loď Albionu — kapitální loď hráče pro pozdní kampaň (m9+) */
+  'liner-albion': {
+    id: 'liner-albion', name: 'řadová loď (Albion)', hullCode: 'LINER', tons: 1900,
+    sailArea: 1.45, canRow: false, oarThrust: 0, draft: 5.0, turnRate: 0.046,
+    hullDrag: 0.08, hullPoints: 360, gunsPerBroadside: 28, gunDamage: 10, gunRange: 650,
+    crew: 520, lookoutRange: 5200, gunnery: 0.9,
+    lore: 'Řadová loď Královského námořnictva — odpověď Albionu na castillskou '
+      + 'tonáž. Kde Castilla staví hory oceli, staví Albion o něco menší, ale '
+      + 'lépe vycvičenou pěst: dvacet osm děl na bok, nejlepší dělmistři ve flotile '
+      + 'a boky, které zblízka nepropustí. Daní je stará známá — obrátit ji trvá '
+      + 'věčnost a do mělčin se neodváží. V linii ale nemá mezi albionskými trupy '
+      + 'sobě rovného.',
+  },
+
   // ---------- zvláštní (zvraty misí) ----------
+  /** velká vlajková loď Castilly — de Vegův plovoucí trůn, finále kampaně (m11) */
+  'flagship-castilla': {
+    id: 'flagship-castilla', name: 'vlajková loď Corona', hullCode: 'LINER', tons: 2400,
+    sailArea: 1.55, canRow: false, oarThrust: 0, draft: 5.5, turnRate: 0.038,
+    hullDrag: 0.086, hullPoints: 460, gunsPerBroadside: 34, gunDamage: 11, gunRange: 660,
+    crew: 650, lookoutRange: 5400, gunnery: 0.82,
+    lore: 'Corona — největší trup, jaký castillské loděnice kdy spustily na vodu. '
+      + 'Čtyři paluby děl, zlacení od kýlu po vlajkový koš a posádka půl tisíce '
+      + 'mužů. Není to jen loď, je to plovoucí trůn Dona Cristóbala de Vegy a '
+      + 'poslední karta jeho hry o Halcyon. Bok po boku ji neporazí nikdo; kdo ji '
+      + 'chce potopit, musí ji rozebrat kus po kuse — a doufat, že mu dřív nedojdou '
+      + 'lodě než jí paluby.',
+  },
   /** Q-loď: castillský pomocný křižník maskovaný za kupce — trup kupce, uvnitř děla */
   'qship-castilla': {
     id: 'qship-castilla', name: 'pomocný křižník (Q-loď)', hullCode: 'MERCH', tons: 780,

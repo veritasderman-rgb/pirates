@@ -90,10 +90,66 @@ export const MISSION_STORY: Record<string, MissionStory> = {
       + 'chystal celou dobu. Tři tvé lodě proti řadové lodi a fregatě. Tady se to láme.',
     epilog:
       'Trueno mlčí, stříbro leží na dně úžiny a Herrerova eskadra je rozbita. Válka, '
-      + 'kterou někdo v Castille tak pečlivě splétal, se dnes u Tří majáků nekoná. '
-      + 'De Vega zmizel do stínu, odkud přišel — ale Halcyon dýchá. Prozatím.',
+      + 'kterou někdo v Castille tak pečlivě splétal, se dnes u Tří majáků nekoná — '
+      + 'ale de Vega, ruka za vším, zmizel do stínu. Tohle nebyl konec. Byl to začátek '
+      + 'otevřené války.',
     epilogLose:
       'Fortuna padla u Tří majáků a stříbro proplulo na úžiny. Válka, které jsi měl '
       + 'předejít, právě začala — a ty už u ní nebudeš.',
+  },
+  mission07: {
+    prolog:
+      'Rackův ostrov, časné ráno. Kouř nad kotvící stanicí a plachty fregat v návětří — '
+      + 'Castilla vrací úder. De Vega chce krev za Tři majáky.',
+    epilog:
+      'Odveta odražena, tři castillské fregaty rozbité o Rackův ostrov. De Vega zjistil, '
+      + 'že hrubá síla proti tobě nestačí — a stáhl se plánovat něco většího. Válka se '
+      + 'přelévá k jeho břehům.',
+    epilogLose:
+      'Stanice u Rackova ostrova hoří a s ní tvá eskadra. De Vega má svou pomstu.',
+  },
+  mission08: {
+    prolog:
+      'Konečně stopa přímo k němu. De Vega osobně, na rychlém kurýru, prchá k Cádizu — '
+      + 'a jeho eskorta se ti staví do cesty. Tentokrát je to osobní.',
+    epilog:
+      'Kurýr ti utekl, ale jeho štít padl: Q-loď i obě fregaty leží na dně. De Vega '
+      + 'doplul do Cádizu nahý a zavřený — a ty víš, kde ho najít. Zbývá prolomit bránu.',
+    epilogLose:
+      'De Vega i jeho eskorta zmizeli za obzorem k Cádizu. Lov skončil neúspěchem.',
+  },
+  mission09: {
+    prolog:
+      'Poprvé pod tebou duní tři paluby děl: HMS Sovereign, řadová loď. Před tebou brána '
+      + 'Cádizu — pevnost a eskadra, za nimi de Vega a jeho stříbro.',
+    epilog:
+      'Vnější obrana Cádizu je prolomená a de Vega zavřený uvnitř s pokladní flotilou. '
+      + 'Sovereign se ukázala jako pěst, jakou Albion potřeboval. Zbývá vzít mu stříbro — '
+      + 'a pak jeho samotného.',
+    epilogLose:
+      'Sovereign klesla pod děly Cádizu. Blokáda je zlomena a de Vega volný.',
+  },
+  mission10: {
+    prolog:
+      'Za pevností kotví poslední pokladní flotila Castilly — dvě galeony stříbra a jejich '
+      + 'strážci. Tohle stříbro je motor de Vegovy války. Ber ho.',
+    epilog:
+      'Stříbrná flotila je vyřízena, galeony na dně nebo v tvých rukou. Bez stříbra '
+      + 'de Vegova válka umírá. Zbývá jediné: on sám a Corona, jeho plovoucí trůn.',
+    epilogLose:
+      'Sovereign padla mezi galeonami a stříbro proplulo. De Vega si válku ještě zaplatí.',
+  },
+  mission11: {
+    prolog:
+      'Rejda Cádizu, poslední den války. Proti tvé flotile stojí Corona — čtyři paluby '
+      + 'de Vegovy pýchy — a zbytek castillské moci. Tady se rozhodne, kdo je pánem Halcyonu.',
+    epilog:
+      'Corona mlčí. Castillská moc v Halcyonu je zlomená a de Vegova hra o dvě koruny '
+      + 'a jedno moře skončila. Vítr, ostrovy a stříbro patří zas těm, kdo je umí číst — '
+      + 'a to jsi dnes byl ty, kapitáne. Válce, které ses měl vyhnout, jsi nakonec '
+      + 'nepředešel; ale vyhrál jsi ji — a Halcyon si to bude pamatovat.',
+    epilogLose:
+      'Sovereign klesá do rejdy Cádizu a s ní albionská linie. Corona pluje dál a Halcyon '
+      + 'dostane nového pána — Dona Cristóbala de Vegu. Válka je prohraná.',
   },
 }

@@ -132,7 +132,7 @@ export const mission05: Scenario = {
       actions: [{ kind: 'winMission', text: 'Hnízdo vyčištěno a Rourke vyřízen. Síť má poslední jméno: Herrera, úžina u Tří majáků.' }],
     },
     {
-      id: 'trg-player-lost', once: true, conditions: [{ kind: 'shipDestroyed', shipId: FORTUNA }],
+      id: 'trg-player-lost', once: true, conditions: [{ kind: 'allDestroyed', side: 'player' }],
       actions: [{ kind: 'loseMission', text: 'HMS Fortuna padla v zátoce Kostivého ostrova.' }],
     },
   ],
