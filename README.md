@@ -35,6 +35,10 @@ aktuálním bodem plavby vybrané lodi.
 je prezentace (Canvas + DOM HUD), `src/data/` jsou třídy lodí, mise a příběh.
 Podrobnosti a plán dalších milníků viz níže.
 
+📖 **[Svět, příběh a mechanika](docs/LORE.md)** — historie Souostroví Halcyon,
+dvě koruny (Albion vs. Castilla) a volní piráti, hlavní zápletka kampaně,
+postavy, popis všech typů lodí a herní mechanika tak, jak ji hráč zažívá.
+
 📄 **[Herní návrh a plán přenosu](docs/GAME_DESIGN.md)** — koncept vesmír→moře,
 recyklační tabulka (co kopírovat / upravit / napsat nově), detailní návrh
 větru a plavby, třídy lodí, model boje, mise a milníky implementace.
