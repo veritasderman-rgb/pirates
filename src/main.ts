@@ -29,6 +29,32 @@ const audio = new AudioManager()
 audio.setMenuMode(true)
 window.addEventListener('pointerdown', () => audio.unlock(), { once: false })
 
+// navigační pad — posun/zoom mapy bez myši (klik i podržení)
+const navpad = document.getElementById('navpad')
+const NAV: Record<string, () => void> = {
+  up: () => plot.panByScreen(0, 110),
+  down: () => plot.panByScreen(0, -110),
+  left: () => plot.panByScreen(110, 0),
+  right: () => plot.panByScreen(-110, 0),
+  in: () => plot.zoomStep(1.18),
+  out: () => plot.zoomStep(1 / 1.18),
+  center: () => plot.recenter(),
+}
+let navTimer = 0
+const stopNav = (): void => { if (navTimer) { clearInterval(navTimer); navTimer = 0 } }
+navpad?.addEventListener('pointerdown', e => {
+  const b = (e.target as HTMLElement).closest('[data-nav]') as HTMLElement | null
+  if (!b) return
+  e.preventDefault()
+  const fn = NAV[b.dataset.nav ?? '']
+  if (!fn) return
+  fn()
+  if (b.dataset.nav !== 'center') { stopNav(); navTimer = window.setInterval(fn, 55) }
+})
+window.addEventListener('pointerup', stopNav)
+window.addEventListener('pointercancel', stopNav)
+navpad?.addEventListener('pointerleave', stopNav)
+
 let outcomeShown = false
 let currentMissionId = ''
 
@@ -82,7 +108,8 @@ function showBriefing(sc: Scenario): void {
     + (prolog ? `<div class="brief story">${esc(prolog)}</div>` : '')
     + `<div class="brief">${esc(sc.briefing)}</div>`
     + `<div class="hint">Ovládání: klik na vlastní loď = výběr · klik na cíl = zaměření · `
-    + `klik na vodu = kurz · Shift+táhnutí = posun mapy · kolečko = zoom · `
+    + `klik na vodu = kurz · <b>tažení = posun mapy</b> · kolečko = zoom · `
+    + `<b>tlačítka vpravo (šipky/＋/－/◎) = posun, zoom a vycentrování na loď</b> · `
     + `mezerník = pauza · W plachty · E vesla · Q/R boční salva · A auto · 1/2/3 náboj</div>`
     + `<button id="btn-start">VYPLOUT</button>`)
   el.querySelector('#btn-start')!.addEventListener('click', () => {

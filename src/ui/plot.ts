@@ -81,26 +81,51 @@ export class TacticalPlot {
   }
 
   // ---------- interakce ----------
+  private armed = false
+
   private bindPan(): void {
+    // kolečko / pinch = zoom (jemnější krok u pinch s ctrl/meta)
     this.canvas.addEventListener('wheel', e => {
       e.preventDefault()
-      const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15
-      this.scale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, this.scale * factor))
+      const step = (e.ctrlKey || e.metaKey) ? 1.08 : 1.15
+      this.zoomStep(e.deltaY < 0 ? step : 1 / step)
     }, { passive: false })
+
+    // TAŽENÍ (jakýmkoli tlačítkem/prstem) = posun mapy; TAP/KLIK bez pohybu
+    // zůstává klikem (výběr/kurz řeší controller). Funguje i na touchpadu.
     this.canvas.addEventListener('pointerdown', e => {
-      if (e.button === 2 || e.shiftKey) {
-        this.panning = true; this.userPanned = true
-        this.lastPan = { x: e.clientX, y: e.clientY }
-      }
-    })
-    window.addEventListener('pointermove', e => {
-      if (!this.panning) return
-      this.cam.x -= (e.clientX - this.lastPan.x) / this.scale
-      this.cam.y += (e.clientY - this.lastPan.y) / this.scale
+      this.armed = true
       this.lastPan = { x: e.clientX, y: e.clientY }
     })
-    window.addEventListener('pointerup', () => { this.panning = false })
+    window.addEventListener('pointermove', e => {
+      if (!this.armed) return
+      const dx = e.clientX - this.lastPan.x, dy = e.clientY - this.lastPan.y
+      if (!this.panning && Math.hypot(dx, dy) < 5) return // ještě to může být klik
+      this.panning = true; this.userPanned = true
+      this.cam.x -= dx / this.scale
+      this.cam.y += dy / this.scale
+      this.lastPan = { x: e.clientX, y: e.clientY }
+    })
+    window.addEventListener('pointerup', () => { this.armed = false; this.panning = false })
     this.canvas.addEventListener('contextmenu', e => e.preventDefault())
+  }
+
+  // ---------- veřejné ovládání kamery (tlačítka / klávesy) ----------
+  /** posun kamery o daný počet OBRAZOVKových pixelů (obsah se pohne opačně) */
+  panByScreen(dxPx: number, dyPx: number): void {
+    this.userPanned = true
+    this.cam.x -= dxPx / this.scale
+    this.cam.y += dyPx / this.scale
+  }
+  /** krok zoomu (>1 přiblíží, <1 oddálí) */
+  zoomStep(factor: number): void {
+    this.scale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, this.scale * factor))
+  }
+  /** znovu zaměř kameru na sledovanou loď (zruší ruční posun) */
+  recenter(): void {
+    this.userPanned = false
+    const f = this.state?.ships.find(s => s.id === this.followId)
+    if (f) this.cam = { ...f.pos }
   }
 
   /** loď/kontakt nejblíž kliknutí (do PICK_PX), nebo null. */
@@ -307,7 +332,8 @@ export class TacticalPlot {
   /** Kompasová růžice: směr větru + no-go zóna vůči přídi vybrané lodi. */
   private drawWindRose(st: SimState): void {
     const ctx = this.ctx
-    const cx = this.canvas.clientWidth - 66, cy = 66, R = 44
+    // horní střed — mimo boční HUD panely (dřív schovaná pod pravým panelem)
+    const cx = this.canvas.clientWidth / 2, cy = 74, R = 42
     ctx.save()
     ctx.globalAlpha = 0.92
     ctx.fillStyle = '#07222b'; ctx.strokeStyle = '#1c4a55'; ctx.lineWidth = 1
