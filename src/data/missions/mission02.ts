@@ -139,8 +139,10 @@ export const mission02: Scenario = {
       ],
     },
     {
+      // ztráta eskorty = prohra (kupci jsou bezbranní); m2 nemá bojovou flotilu,
+      // proto ne allDestroyed, ale konkrétní eskortní loď
       id: 'trg-player-lost', once: true,
-      conditions: [{ kind: 'allDestroyed', side: 'player' }],
+      conditions: [{ kind: 'shipDestroyed', shipId: OSTRIZ }],
       actions: [{ kind: 'loseMission', text: 'HMS Ostříž se potopila — konvoj zůstal bez ochrany.' }],
     },
   ],

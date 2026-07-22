@@ -17,10 +17,11 @@ export const mission09: Scenario = {
     'De Vega se stáhl do Cádizu — kotviště, kde Castilla shromažďuje poslední '
     + 'pokladní flotilu. Admiralita ti svěřila kapitální loď: řadovou loď HMS '
     + 'Sovereign, dvacet osm děl na bok.\n\n'
-    + 'Prolom vnější obranu: pobřežní pevnost a castillskou eskadru. Sovereign '
-    + 'je pomalá a špatně se otáčí — nech ji držet linii a sypat salvy, zatímco '
-    + 'Fortuna a Ostříž tančí kolem a rakují. Pozor na mělčiny, kapitální kýl '
-    + 'je hluboký.',
+    + 'Prober se kolem pobřežní baterie a rozbij castillskou eskadru u brány — '
+    + 'dvě fregaty a pokladní galeonu. Baterii nemusíš srovnat se zemí; stačí ji '
+    + 'umlčet nebo přežít její gauntlet a vyřídit lodě. Sovereign je pomalá a '
+    + 'špatně se otáčí — nech ji držet linii a sypat salvy, zatímco Fortuna '
+    + 'a Ostříž tančí kolem a rakují. Pozor na mělčiny, kapitální kýl je hluboký.',
   seed: 17051614,
   ambient: '#0b2833',
   wind: { baseDir: 1.5, baseSpeed: 8, rotationRate: 0.0012, gustiness: 0.6 },
@@ -42,7 +43,7 @@ export const mission09: Scenario = {
     { classId: 'galleon-castilla', side: 'enemy', name: 'Baluarte', pos: { x: 4200, y: 200 }, vel: { x: -1, y: 0 }, heading: Math.PI, doctrine: 'attack', fireControl: { mode: 'auto', shot: 'round', engaged: false } },
   ],
 
-  objectives: [{ id: 'obj-break', text: 'Prolom vnější obranu Cádizu (eskadra)', state: 'open' }],
+  objectives: [{ id: 'obj-break', text: 'Rozbij castillskou eskadru u brány Cádizu (2 fregaty + galeona)', state: 'open' }],
 
   triggers: [
     { id: 'trg-brief', once: true, conditions: [{ kind: 'time', t: 4 }], actions: [{ kind: 'comm', speaker: 'admiral', text: 'admirál Thorne: „Sovereign je vaše, kapitáne — velte jí dobře. Prolomte tu obranu a zavřete de Vegu v Cádizu. Zbytek dořešíme uvnitř."' }] },

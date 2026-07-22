@@ -404,7 +404,8 @@ Kampaň je stavěná ze **scénářů** (lodě + cíle + skriptované triggery s
 8. **Lov na de Vegu** — honba za de Vegou; kurýr ti unikne, ale rozbiješ mu
    eskortu (Q-loď + 2 fregaty).
 9. **Blokáda Cádizu** — poprvé velíš **kapitální lodi** (řadová loď HMS
-   Sovereign). Prolom pevnost a eskadru u brány Cádizu.
+   Sovereign). Prober se kolem pobřežní baterie a rozbij castillskou eskadru
+   u brány Cádizu.
 10. **Stříbrná flotila** — přepadni poslední pokladní flotilu (2 galeony +
     eskorta) a vezmi Castille stříbro, které platí válku.
 11. **Koruna** (finále) — velká flotilová bitva. Tvá flotila proti de Vegově

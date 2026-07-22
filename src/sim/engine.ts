@@ -42,7 +42,11 @@ function updatePlayerCommand(state: SimState): void {
   const alive = state.ships.filter(s => s.side === 'player' && !s.destroyed && !s.surrendered)
   if (alive.length === 0) return
   if (alive.some(s => s.doctrine === 'player')) return
-  const flag = alive[0]
+  // vlajku přebírá jen BOJOVÁ loď, ne civilní eskortovaný kupec/bóje;
+  // zbydou-li jen civilové, vlajku nepředávej (prohru vyřeší scénář)
+  const CIVIL = new Set(['freighter', 'merchant', 'buoy', 'anchor', 'transit'])
+  const flag = alive.find(s => !CIVIL.has(s.doctrine))
+  if (!flag) return
   flag.doctrine = 'player'
   flag.fireControl.mode = 'auto'
   state.events.push({
