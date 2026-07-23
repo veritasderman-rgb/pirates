@@ -12,8 +12,11 @@ import { fromAngle } from '../sim/vec'
 import { hitRadius } from '../sim/weapons'
 
 const ZOOM_MIN = 0.008 // px/m (hodně oddálené)
-const ZOOM_MAX = 0.6
+const ZOOM_MAX = 4.0   // px/m (těsně u lodí — jednotlivé koule a detaily)
 const PICK_PX = 18
+
+/** krátkodobý vizuální efekt (záblesk děl, jiskra zásahu, výbuch) ve světě */
+interface Fx { x: number; y: number; born: number; kind: 'muzzle' | 'hit' | 'boom' }
 
 const CLR = {
   own: '#4fd0e0', ownDim: '#2f8a96',
@@ -38,6 +41,8 @@ export class TacticalPlot {
   compression = 1
   selectedId: number | null = null
   targetId: number | null = null
+  private fx: Fx[] = []
+  private lastFxT = -1
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')!
@@ -58,6 +63,18 @@ export class TacticalPlot {
     if (this.followId === null) {
       const own = state.ships.find(s => s.side === 'player' && !s.destroyed)
       if (own) { this.followId = own.id; this.selectedId = own.id }
+    }
+    // z událostí snapshotu vytvoř krátkodobé efekty (záblesk/jiskra/výbuch)
+    if (state.t !== this.lastFxT) {
+      this.lastFxT = state.t
+      const now = performance.now()
+      for (const e of state.events) {
+        if (!e.pos) continue
+        if (e.kind === 'gunFire') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'muzzle' })
+        else if (e.kind === 'ballHit') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'hit' })
+        else if (e.kind === 'shipDestroyed') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'boom' })
+      }
+      if (this.fx.length > 200) this.fx.splice(0, this.fx.length - 200)
     }
   }
 
@@ -170,10 +187,62 @@ export class TacticalPlot {
     this.drawWind(st)
     this.drawGrid()
     for (const isl of st.islands) this.drawIsland(isl)
+    this.drawRanges(st)
     this.drawCourse(st)
     for (const b of st.balls) this.drawBall(b)
     for (const sh of st.ships) this.drawShip(st, sh)
+    this.drawFx()
     this.drawWindRose(st)
+  }
+
+  /** Kružnice dostřelu děl kolem vybrané vlastní lodi, cíle a pevností. */
+  private drawRanges(st: SimState): void {
+    const ctx = this.ctx
+    const ring = (p: Vec2, r: number, col: string): void => {
+      const s = this.w2s(p), rp = r * this.scale
+      if (rp < 12) return
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 1
+      ctx.setLineDash([4, 6])
+      ctx.beginPath(); ctx.arc(s.x, s.y, rp, 0, Math.PI * 2); ctx.stroke()
+      ctx.setLineDash([]); ctx.globalAlpha = 1
+    }
+    const sel = st.ships.find(s => s.id === this.selectedId && s.side === 'player' && !s.destroyed)
+    if (sel) { const d = SHIP_CLASSES[sel.classId]; if (d) ring(sel.pos, d.gunRange, CLR.own) }
+    const tgt = st.ships.find(s => s.id === this.targetId && !s.destroyed)
+    if (tgt) { const d = SHIP_CLASSES[tgt.classId]; if (d && d.gunRange > 0) ring(tgt.pos, d.gunRange, CLR.enemy) }
+    // pobřežní pevnosti — vždy (jejich dosah je pro hráče klíčový)
+    for (const sh of st.ships) {
+      if (sh.destroyed) continue
+      const d = SHIP_CLASSES[sh.classId]
+      if (d?.hullCode === 'FORT' && st.contacts.player.some(c => c.shipId === sh.id))
+        ring(sh.pos, d.gunRange, CLR.enemy)
+    }
+  }
+
+  /** Krátkodobé efekty: záblesk děl (kouř), jiskra zásahu, výbuch potopení. */
+  private drawFx(): void {
+    const ctx = this.ctx, now = performance.now()
+    this.fx = this.fx.filter(f => now - f.born < (f.kind === 'boom' ? 900 : 500))
+    for (const f of this.fx) {
+      const s = this.w2s(f), age = (now - f.born) / (f.kind === 'boom' ? 900 : 500)
+      const a = 1 - age
+      if (f.kind === 'muzzle') {
+        // kouřový obláček + záblesk (velikost roste s časem, mizí) — čitelné i z výšky jako salva
+        const r = (4 + age * 10) * Math.max(0.5, Math.min(2, this.scale * 20))
+        ctx.globalAlpha = a * 0.5; ctx.fillStyle = '#c8c0a8'
+        ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
+        ctx.globalAlpha = a; ctx.fillStyle = '#ffdf8a'
+        ctx.beginPath(); ctx.arc(s.x, s.y, 3, 0, Math.PI * 2); ctx.fill()
+      } else if (f.kind === 'hit') {
+        ctx.globalAlpha = a; ctx.fillStyle = '#ffb060'
+        ctx.beginPath(); ctx.arc(s.x, s.y, 2 + age * 5, 0, Math.PI * 2); ctx.fill()
+      } else {
+        const r = (6 + age * 26) * Math.max(0.7, Math.min(3, this.scale * 20))
+        ctx.globalAlpha = a * 0.8; ctx.fillStyle = age < 0.4 ? '#ffd070' : '#8a5030'
+        ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
+      }
+    }
+    ctx.globalAlpha = 1
   }
 
   private drawGrid(): void {
@@ -307,8 +376,17 @@ export class TacticalPlot {
   private drawBall(b: Ball): void {
     const ctx = this.ctx
     const s = this.w2s(b.pos)
-    ctx.fillStyle = b.shot === 'chain' ? '#c8d8e0' : b.shot === 'grape' ? '#e0a060' : CLR.ball
-    ctx.beginPath(); ctx.arc(s.x, s.y, 2, 0, Math.PI * 2); ctx.fill()
+    const col = b.shot === 'chain' ? '#c8d8e0' : b.shot === 'grape' ? '#e0a060' : CLR.ball
+    // tracer podél rychlosti — při přiblížení dlouhý (vidíš dráhu každé koule),
+    // z výšky splyne do drobné tečky (salva). y: svět nahoru → obrazovka dolů.
+    const tS = 0.09
+    const tx = s.x - b.vel.x * tS * this.scale
+    const ty = s.y + b.vel.y * tS * this.scale
+    ctx.strokeStyle = col; ctx.globalAlpha = 0.55; ctx.lineWidth = Math.max(1, this.scale * 1.4)
+    ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(s.x, s.y); ctx.stroke(); ctx.globalAlpha = 1
+    const r = Math.max(1.4, Math.min(5, this.scale * 3))
+    ctx.fillStyle = col
+    ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
   }
 
   private drawCourse(st: SimState): void {

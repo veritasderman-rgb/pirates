@@ -143,19 +143,28 @@ export class Panels {
   private renderBottom(state: SimState, ui: UiState): void {
     const sh = state.ships.find(s => s.id === ui.selectedId)
     if (!sh || sh.side !== 'player') { this.bottom.innerHTML = ''; return }
+    const shotTip: Record<ShotType, string> = {
+      round: 'Plné koule — trhají TRUP. Cesta k potopení nepřítele.',
+      chain: 'Řetězové — trhají PLACHTY a ráhnoví. Zpomalí kořist (dohnat / obrátit k boardingu).',
+      grape: 'Kartáč — kosí POSÁDKU. Láme morálku a připravuje na boarding.',
+    }
+    const shotDesc: Record<ShotType, string> = {
+      round: 'koule → trup (potopení)', chain: 'řetěz → plachty (zpomalí)', grape: 'kartáč → posádka (boarding)',
+    }
     const shotBtn = (s: ShotType, label: string): string =>
-      `<button data-act="shot-${s}" class="${ui.shot === s ? 'active' : ''}">${label}</button>`
+      `<button data-act="shot-${s}" class="${ui.shot === s ? 'active' : ''}" title="${esc(shotTip[s])}">${label}</button>`
     const auto = sh.fireControl.mode === 'auto'
     this.bottom.innerHTML =
-      `<div class="obg"><button data-act="toggle-sails" class="${sh.sailsUp ? 'active' : ''}">⛵ plachty</button>`
-      + `<button data-act="trim-down">trim −</button><button data-act="trim-up">trim +</button>`
-      + `<button data-act="toggle-oars" class="${sh.oaring ? 'active' : ''}" ${SHIP_CLASSES[sh.classId]?.canRow ? '' : 'disabled'}>🚣 vesla</button></div>`
-      + `<div class="obg">náboj: ${shotBtn('round', 'koule')}${shotBtn('chain', 'řetěz')}${shotBtn('grape', 'kartáč')}</div>`
-      + `<div class="obg"><button data-act="fire-port" ${sh.reloadPort > 0 ? 'disabled' : ''}>PAL levobok</button>`
-      + `<button data-act="fire-stbd" ${sh.reloadStbd > 0 ? 'disabled' : ''}>PAL pravobok</button>`
-      + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}">AUTO</button></div>`
-      + `<div class="obg"><button data-act="demand">výzva ke kapitulaci</button>`
-      + `<button data-act="board">boarding</button></div>`
+      `<div class="obg"><button data-act="toggle-sails" class="${sh.sailsUp ? 'active' : ''}" title="Vytáhnout/svinout plachty (bez nich loď nemá tah z větru)">⛵ plachty</button>`
+      + `<button data-act="trim-down" title="Ubrat plachet (pomaleji)">trim −</button><button data-act="trim-up" title="Přidat plachet (rychleji)">trim +</button>`
+      + `<button data-act="toggle-oars" class="${sh.oaring ? 'active' : ''}" ${SHIP_CLASSES[sh.classId]?.canRow ? '' : 'disabled'} title="Vesla — malý tah nezávislý na větru (i proti větru), ale unaví posádku. Jen některé lodě.">🚣 vesla</button></div>`
+      + `<div class="obg" title="Typ náboje pro salvu">náboj: ${shotBtn('round', 'koule')}${shotBtn('chain', 'řetěz')}${shotBtn('grape', 'kartáč')}`
+      + `<span class="shot-desc">${esc(shotDesc[ui.shot])}</span></div>`
+      + `<div class="obg"><button data-act="fire-port" ${sh.reloadPort > 0 ? 'disabled' : ''} title="Vypálit salvu z levoboku (cíl musí být v úhlu boku a dostřelu)">PAL levobok</button>`
+      + `<button data-act="fire-stbd" ${sh.reloadStbd > 0 ? 'disabled' : ''} title="Vypálit salvu z pravoboku">PAL pravobok</button>`
+      + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}" title="Automatická palba: loď sama pálí bok, který nese na nejzraněnějšího nepřítele v dostřelu">AUTO</button></div>`
+      + `<div class="obg"><button data-act="demand" title="Vyzvi zaměřený cíl ke kapitulaci. Šance roste s jeho poškozením, ztrátami posádky a tvou přesilou. Když spustí vlajku, můžeš ho obsadit.">výzva ke kapitulaci</button>`
+      + `<button data-act="board" title="Boarding: přilehni k zaměřenému cíli na ~60 m a obsaď ho výsadkem. Rozhoduje převaha posádky (kartáč předtím pomáhá). Vzdaná loď se skoro nebrání. Zajmutá loď = kořist (víc bodů než potopení).">boarding</button></div>`
   }
 
   private renderLog(state: SimState): void {
