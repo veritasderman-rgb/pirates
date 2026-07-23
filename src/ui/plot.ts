@@ -661,7 +661,8 @@ export class TacticalPlot {
         const cr = rPx * (0.09 + rnd(c, 4) * 0.05)
         for (let k = 0; k < blobs; k++) {
           const ba = rnd(c * 9 + k, 7) * 6.283, brad = rnd(c * 9 + k, 8) * cr * 1.6
-          const bx = gxc + Math.cos(ba) * brad, by = gyc + Math.sin(ba) * brad
+          const sway = Math.sin(t * 1.3 + c * 1.7 + k) * cr * 0.12  // jemné kývání ve větru
+          const bx = gxc + Math.cos(ba) * brad + sway, by = gyc + Math.sin(ba) * brad
           ctx.fillStyle = CLR.forest
           ctx.beginPath(); ctx.arc(bx, by, cr, 0, Math.PI * 2); ctx.fill()
           ctx.fillStyle = CLR.forestHi
@@ -691,6 +692,23 @@ export class TacticalPlot {
       ctx.globalAlpha = 0.85
       ctx.fillText(isl.name, cx - ctx.measureText(isl.name).width / 2, cy)
       ctx.globalAlpha = 1
+    }
+
+    // racci kroužící nad ostrovem (mávají křídly) — jen zblízka
+    if (this.scale > 0.035 && rPx > 34) {
+      ctx.strokeStyle = 'rgba(58,64,68,0.7)'; ctx.lineWidth = Math.max(0.8, rPx * 0.016)
+      for (let i = 0; i < 3; i++) {
+        const ang = t * (0.25 + i * 0.05) + i * 2.1
+        const rad = rPx * (0.52 + 0.1 * Math.sin(t * 0.7 + i))
+        const bx = cx + Math.cos(ang) * rad, by = cy + Math.sin(ang) * rad * 0.6
+        const flap = Math.sin(t * 6 + i * 1.3) * 0.5 + 0.5
+        const w = Math.max(2, rPx * 0.06) * (0.6 + flap * 0.5)
+        ctx.beginPath()
+        ctx.moveTo(bx - w, by - w * 0.4 * flap)
+        ctx.lineTo(bx, by)
+        ctx.lineTo(bx + w, by - w * 0.4 * flap)
+        ctx.stroke()
+      }
     }
   }
 
@@ -817,8 +835,10 @@ export class TacticalPlot {
     ctx.globalAlpha = surr ? 0.72 : 1
     // vodoryska (tmavší, o něco širší)
     ctx.fillStyle = shade(col, -0.45); this.hullPath(lenPx * 1.02, hb * 1.12); ctx.fill()
-    // hlavní trup
-    ctx.fillStyle = col; this.hullPath(lenPx, hb); ctx.fill()
+    // hlavní trup — gradient napříč bokem (tmavší okraje, světlý hřbet) = 3D oblina
+    const hg = ctx.createLinearGradient(0, -hb, 0, hb)
+    hg.addColorStop(0, shade(col, -0.32)); hg.addColorStop(0.5, shade(col, 0.18)); hg.addColorStop(1, shade(col, -0.32))
+    ctx.fillStyle = hg; this.hullPath(lenPx, hb); ctx.fill()
     // paluba (světlejší, užší)
     ctx.fillStyle = shade(col, 0.3); this.hullPath(lenPx * 0.78, hb * 0.5); ctx.fill()
     // dřevěná paluba: podélná prkna + záďová kajuta
