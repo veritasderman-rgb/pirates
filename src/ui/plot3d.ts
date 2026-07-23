@@ -430,26 +430,47 @@ export class Plot3D implements Renderer {
       new THREE.MeshStandardMaterial({ color: 0x8a6b45, roughness: 1 }))
     deck.position.y = B * 0.36; grp.add(deck)
 
-    // stěžně + plachty
+    // stěžně + plachty + ráhna
     const nMast = L >= 42 ? 3 : L >= 26 ? 2 : 1
     const mastMat = new THREE.MeshStandardMaterial({ color: 0x3a2a18, roughness: 1 })
-    const sailMat = new THREE.MeshStandardMaterial({ color: 0xf2f4ef, roughness: 0.9, side: THREE.DoubleSide })
+    const sailMat = new THREE.MeshStandardMaterial({ color: 0xf2f4ef, roughness: 0.9, side: THREE.DoubleSide, emissive: 0x3a3d38, emissiveIntensity: 0.6 })
     const sails: THREE.Mesh[] = []
     for (let m = 0; m < nMast; m++) {
       const mx = nMast === 1 ? L * 0.04 : L * 0.34 - (m / (nMast - 1)) * L * 0.72
       const mastH = L * (0.5 + 0.08 * (nMast - m))
       const mast = new THREE.Mesh(new THREE.CylinderGeometry(L * 0.02, L * 0.025, mastH, 6), mastMat)
       mast.position.set(mx, B * 0.36 + mastH / 2, 0); mast.castShadow = true; grp.add(mast)
-      // plachta — plane napříč bokem
-      const sail = new THREE.Mesh(new THREE.PlaneGeometry(mastH * 0.72, B * 1.7, 1, 4), sailMat)
+      const sailW = mastH * 0.72, sailY = B * 0.36 + mastH * 0.58
+      // ráhno (příčný spar) nad plachtou
+      const yard = new THREE.Mesh(new THREE.CylinderGeometry(L * 0.014, L * 0.014, sailW * 1.12, 6), mastMat)
+      yard.rotation.x = Math.PI / 2   // podél osy z (napříč bokem)
+      yard.position.set(mx, sailY + B * 0.85, 0); grp.add(yard)
+      // nafouklá plachta (billow do předozadního směru)
+      const sail = new THREE.Mesh(this.billowedSail(sailW, B * 1.7, B * 0.6), sailMat)
       sail.rotation.y = Math.PI / 2
-      sail.position.set(mx, B * 0.36 + mastH * 0.55, 0)
+      sail.position.set(mx, sailY, 0)
       sail.userData.sail = true; sail.castShadow = true
       grp.add(sail); sails.push(sail)
     }
+    // čnělka (bowsprit)
+    const bs = new THREE.Mesh(new THREE.CylinderGeometry(L * 0.016, L * 0.022, L * 0.35, 6), mastMat)
+    bs.position.set(L * 0.6, B * 0.5, 0); bs.rotation.z = Math.PI * 0.42; grp.add(bs)
     grp.userData.sails = sails
     grp.add(this.flag(col, -L * 0.44, B * 0.36 + L * 0.2))
     return grp
+  }
+
+  /** Plane geometrie s nafouklou (billow) plachtou — vybočí do lokální osy z. */
+  private billowedSail(w: number, h: number, amp: number): THREE.PlaneGeometry {
+    const g = new THREE.PlaneGeometry(w, h, 8, 2)
+    const pos = g.attributes.position
+    for (let i = 0; i < pos.count; i++) {
+      const u = pos.getX(i) / w  // -0.5..0.5
+      pos.setZ(i, amp * (1 - 4 * u * u))
+    }
+    pos.needsUpdate = true
+    g.computeVertexNormals()
+    return g
   }
 
   private flag(col: number, x: number, y: number): THREE.Mesh {
