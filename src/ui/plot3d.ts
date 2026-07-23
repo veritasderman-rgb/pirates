@@ -50,6 +50,7 @@ export class Plot3D implements Renderer {
   private ships = new Map<number, THREE.Group>()
   private balls = new Map<number, THREE.Mesh>()
   private parts: Part[] = []
+  private wakeAt = new Map<number, number>()
   private discTex!: THREE.Texture
   private ballGeo = new THREE.SphereGeometry(1, 8, 8)
   private islandsBuilt = false
@@ -69,12 +70,17 @@ export class Plot3D implements Renderer {
     this.renderer.shadowMap.enabled = true
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
-    this.scene.background = new THREE.Color(0x8fbdcf)
-    this.scene.fog = new THREE.Fog(0x8fbdcf, 1800, 7200)
+    // obloha jako gradient + odrazová mapa (envmap) pro realistickou vodu
+    const sky = this.makeSky()
+    this.scene.background = sky
+    this.scene.fog = new THREE.Fog(0x9fc6d6, 2000, 7600)
+    const pmrem = new THREE.PMREMGenerator(this.renderer)
+    this.scene.environment = pmrem.fromEquirectangular(sky).texture
+    pmrem.dispose()
 
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 9000)
 
-    this.sun = new THREE.DirectionalLight(0xfff2d6, 1.7)
+    this.sun = new THREE.DirectionalLight(0xfff2d6, 1.25)
     this.sun.castShadow = true
     this.sun.shadow.mapSize.set(2048, 2048)
     const sc = this.sun.shadow.camera
@@ -96,6 +102,17 @@ export class Plot3D implements Renderer {
     this.resize()
     window.addEventListener('resize', () => this.resize())
     this.bindInput()
+  }
+
+  private makeSky(): THREE.Texture {
+    const c = document.createElement('canvas'); c.width = 8; c.height = 256
+    const ctx = c.getContext('2d')!
+    const g = ctx.createLinearGradient(0, 0, 0, 256)
+    g.addColorStop(0, '#5f95c8'); g.addColorStop(0.45, '#9fc6de'); g.addColorStop(0.6, '#cfe6ee'); g.addColorStop(1, '#e6f2f4')
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 8, 256)
+    const t = new THREE.CanvasTexture(c)
+    t.mapping = THREE.EquirectangularReflectionMapping
+    return t
   }
 
   private makeDiscTex(): THREE.Texture {
@@ -149,6 +166,19 @@ export class Plot3D implements Renderer {
     for (let i = 0; i < 8; i++) this.spawn(pos.x, 8, -pos.y, wx * 0.4 + (Math.random() - 0.5) * 5, 10 + Math.random() * 6, -wy * 0.4 + (Math.random() - 0.5) * 5, 2000, 8, 48, 0x8a8478, 0.55, now)
   }
 
+  private emitWakes3(st: SimState, now: number): void {
+    for (const sh of st.ships) {
+      if (sh.destroyed || sh.surrendered) continue
+      if (sh.side !== 'player' && !st.contacts.player.some(c => c.shipId === sh.id && !c.memory)) continue
+      if (Math.hypot(sh.vel.x, sh.vel.y) < 1.5) continue
+      if (now - (this.wakeAt.get(sh.id) ?? 0) < 110) continue
+      this.wakeAt.set(sh.id, now)
+      const p = this.rpos(sh), bx = Math.cos(sh.heading), by = Math.sin(sh.heading), hr = hitRadius(sh)
+      const sx = p.x - bx * hr * 0.7, sy = p.y - by * hr * 0.7
+      this.spawn(sx, 1.5, -sy, -bx * 1.5, 0, by * 1.5, 2200, hr * 0.4, hr * 1.3, 0xdff2f2, 0.42, now)
+    }
+  }
+
   private updateParticles(now: number): void {
     this.parts = this.parts.filter(pt => {
       const age = (now - pt.born) / pt.life
@@ -186,11 +216,16 @@ export class Plot3D implements Renderer {
   }
 
   private buildWater(): void {
-    this.waterGeo = new THREE.PlaneGeometry(9000, 9000, 96, 96)
+    this.waterGeo = new THREE.PlaneGeometry(9000, 9000, 110, 110)
     this.waterGeo.rotateX(-Math.PI / 2)
     this.waterBase = (this.waterGeo.attributes.position.array as Float32Array).slice()
+    // per-vertex barva pro pěnu na hřebenech (jinak barva vody)
+    const vc = new Float32Array(this.waterGeo.attributes.position.count * 3)
+    for (let i = 0; i < vc.length; i += 3) { vc[i] = 0.086; vc[i + 1] = 0.396; vc[i + 2] = 0.478 }
+    this.waterGeo.setAttribute('color', new THREE.BufferAttribute(vc, 3))
     const mat = new THREE.MeshStandardMaterial({
-      color: 0x16657a, metalness: 0.25, roughness: 0.32, flatShading: true,
+      color: 0xffffff, vertexColors: true, metalness: 0.15, roughness: 0.52,
+      envMapIntensity: 0.55,
     })
     const water = new THREE.Mesh(this.waterGeo, mat)
     water.renderOrder = -1
@@ -436,6 +471,7 @@ export class Plot3D implements Renderer {
     this.animateWater(t)
     this.syncShips(st)
     this.syncBalls(st)
+    this.emitWakes3(st, now)
     this.updateParticles(now)
     this.updateRings(st)
     this.updateCamera(st)
@@ -444,14 +480,22 @@ export class Plot3D implements Renderer {
 
   private animateWater(t: number): void {
     const pos = this.waterGeo.attributes.position
+    const colAttr = this.waterGeo.attributes.color
     const base = this.waterBase
     const arr = pos.array as Float32Array
+    const col = colAttr.array as Float32Array
     for (let i = 0; i < arr.length; i += 3) {
       const x = base[i], z = base[i + 2]
-      arr[i + 1] = Math.sin(x * 0.012 + t * 1.1) * 2.2 + Math.sin(z * 0.017 - t * 0.9) * 1.8
+      const h = Math.sin(x * 0.012 + t * 1.1) * 2.2 + Math.sin(z * 0.017 - t * 0.9) * 1.8
         + Math.sin((x + z) * 0.03 + t * 1.6) * 0.8
+      arr[i + 1] = h
+      // pěna na nejvyšších hřebenech
+      const foam = Math.max(0, (h - 3.4) / 1.4)
+      const ci = i
+      col[ci] = 0.086 + foam * 0.8; col[ci + 1] = 0.396 + foam * 0.5; col[ci + 2] = 0.478 + foam * 0.42
     }
     pos.needsUpdate = true
+    colAttr.needsUpdate = true
     this.waterGeo.computeVertexNormals()
   }
 
