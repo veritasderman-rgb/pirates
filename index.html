@@ -72,6 +72,15 @@
     .obj { padding: 1px 0; }
     .obj.done { color: #6fd06a; }
     .obj.failed { color: #e0603a; }
+    .hintline { margin: 3px 0; padding: 2px 4px; border-left: 2px solid #d8c24f; color: #d8c24f; font-size: 10px; }
+    .hintline.ok { border-color: #6fd06a; color: #9ff0a0; }
+    /* předpověď počasí */
+    .fc .fc-row { display: grid; grid-template-columns: 54px 20px 48px 1fr; align-items: center; gap: 4px; padding: 1px 0; }
+    .fc .fc-a { font-size: 15px; color: #7fd0e0; text-align: center; }
+    .fc .fc-t { color: #9fb8bf; }
+    .fc .ok { color: #6fd06a; }
+    .fc .bad { color: #e0805a; }
+    .fc-hint { font-size: 9px; color: #6a8a90; margin-top: 3px; line-height: 1.3; }
 
     #hud-bottom .obg { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center;
       padding: 4px 6px; border: 1px solid #1c4a55; background: #07222bd0; margin-right: 6px; }

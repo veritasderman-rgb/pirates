@@ -123,6 +123,8 @@ export const sim: SimApi = {
       rng: { s: scenario.seed >>> 0 },
       nextId: 1,
       wind: globalWind(scenario.wind, scenario.seed, 0),
+      windCfg: scenario.wind,
+      seed: scenario.seed,
       islands: (scenario.islands ?? []).map(i => ({ ...i, poly: i.poly.map(p => ({ ...p })) })),
       ships: [],
       balls: [],
