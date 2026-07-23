@@ -75,8 +75,8 @@ export const mission02: Scenario = {
   ],
 
   objectives: [
-    { id: 'obj-convoy', text: 'Doveď aspoň jednoho kupce k východnímu vjezdu', state: 'open' },
-    { id: 'obj-pirates', text: 'Vyřiď pirátskou smečku', state: 'open' },
+    { id: 'obj-convoy', text: 'Ochraň konvoj — aspoň jeden kupec musí přežít', state: 'open' },
+    { id: 'obj-pirates', text: 'Vyřiď pirátskou smečku (potop nebo přinuť ke kapitulaci)', state: 'open' },
   ],
 
   triggers: [
