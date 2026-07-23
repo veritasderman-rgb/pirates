@@ -43,40 +43,51 @@ export class Plot3D implements Renderer {
   private islandsBuilt = false
   private waterGeo!: THREE.PlaneGeometry
   private waterBase!: Float32Array
+  private waterMesh!: THREE.Mesh
+  private sun!: THREE.DirectionalLight
   private selRing: THREE.Mesh
   private tgtRing: THREE.Mesh
+  private selRange: THREE.Mesh
+  private tgtRange: THREE.Mesh
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
     this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1))
     this.renderer.setClearColor(0x0a2630, 1)
+    this.renderer.shadowMap.enabled = true
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
 
     this.scene.background = new THREE.Color(0x8fbdcf)
     this.scene.fog = new THREE.Fog(0x8fbdcf, 1800, 7200)
 
     this.camera = new THREE.PerspectiveCamera(45, 1, 1, 9000)
 
-    const sun = new THREE.DirectionalLight(0xfff2d6, 1.6)
-    sun.position.copy(SUN_DIR).multiplyScalar(800)
-    this.scene.add(sun)
-    this.scene.add(new THREE.HemisphereLight(0xd6f0fb, 0x1f4a60, 0.75))
+    this.sun = new THREE.DirectionalLight(0xfff2d6, 1.7)
+    this.sun.castShadow = true
+    this.sun.shadow.mapSize.set(2048, 2048)
+    const sc = this.sun.shadow.camera
+    sc.left = -500; sc.right = 500; sc.top = 500; sc.bottom = -500; sc.near = 1; sc.far = 2000
+    this.scene.add(this.sun)
+    this.scene.add(this.sun.target)
+    this.scene.add(new THREE.HemisphereLight(0xd6f0fb, 0x1f4a60, 0.7))
 
     this.buildWater()
 
-    // výběrový / cílový prstenec na hladině
+    // výběrový / cílový prstenec + kružnice dostřelu na hladině
     this.selRing = this.makeRing(0x4fd0e0)
     this.tgtRing = this.makeRing(0xe06a44)
-    this.selRing.visible = false; this.tgtRing.visible = false
-    this.scene.add(this.selRing); this.scene.add(this.tgtRing)
+    this.selRange = this.makeRing(0x4fd0e0, 0.985, 0.3)
+    this.tgtRange = this.makeRing(0xe06a44, 0.985, 0.3)
+    for (const r of [this.selRing, this.tgtRing, this.selRange, this.tgtRange]) { r.visible = false; this.scene.add(r) }
 
     this.resize()
     window.addEventListener('resize', () => this.resize())
     this.bindInput()
   }
 
-  private makeRing(col: number): THREE.Mesh {
-    const g = new THREE.RingGeometry(1, 1.12, 48)
-    const m = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.8, side: THREE.DoubleSide })
+  private makeRing(col: number, inner = 1, opacity = 0.8): THREE.Mesh {
+    const g = new THREE.RingGeometry(inner, 1.12, 64)
+    const m = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false })
     const mesh = new THREE.Mesh(g, m)
     mesh.rotation.x = -Math.PI / 2
     return mesh
@@ -91,6 +102,8 @@ export class Plot3D implements Renderer {
     })
     const water = new THREE.Mesh(this.waterGeo, mat)
     water.renderOrder = -1
+    water.receiveShadow = true
+    this.waterMesh = water
     this.scene.add(water)
   }
 
@@ -201,7 +214,8 @@ export class Plot3D implements Renderer {
         new THREE.SphereGeometry(r * 0.72, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
         new THREE.MeshStandardMaterial({ color: 0x5f8a42, roughness: 1, flatShading: true }))
       hill.scale.y = (r * 0.42) / (r * 0.72)
-      hill.position.set(cx, 0.6, -cy); grp.add(hill)
+      hill.position.set(cx, 0.6, -cy); hill.castShadow = true; hill.receiveShadow = true; grp.add(hill)
+      grass.receiveShadow = true; beach.receiveShadow = true
       // stromy (kužely)
       const nT = Math.min(60, Math.max(6, Math.floor(r * 0.5)))
       const trunkMat = new THREE.MeshStandardMaterial({ color: 0x274b22, roughness: 1, flatShading: true })
@@ -270,6 +284,7 @@ export class Plot3D implements Renderer {
     hullGeo.translate(0, -B * 0.2, 0)
     const hull = new THREE.Mesh(hullGeo, new THREE.MeshStandardMaterial({ color: col, roughness: 0.7, metalness: 0.05, flatShading: true }))
     hull.userData.shipId = sh.id
+    hull.castShadow = true
     grp.add(hull)
     // paluba (světlejší, nahoře)
     const deck = new THREE.Mesh(
@@ -286,12 +301,12 @@ export class Plot3D implements Renderer {
       const mx = nMast === 1 ? L * 0.04 : L * 0.34 - (m / (nMast - 1)) * L * 0.72
       const mastH = L * (0.5 + 0.08 * (nMast - m))
       const mast = new THREE.Mesh(new THREE.CylinderGeometry(L * 0.02, L * 0.025, mastH, 6), mastMat)
-      mast.position.set(mx, B * 0.36 + mastH / 2, 0); grp.add(mast)
+      mast.position.set(mx, B * 0.36 + mastH / 2, 0); mast.castShadow = true; grp.add(mast)
       // plachta — plane napříč bokem
       const sail = new THREE.Mesh(new THREE.PlaneGeometry(mastH * 0.72, B * 1.7, 1, 4), sailMat)
       sail.rotation.y = Math.PI / 2
       sail.position.set(mx, B * 0.36 + mastH * 0.55, 0)
-      sail.userData.sail = true
+      sail.userData.sail = true; sail.castShadow = true
       grp.add(sail); sails.push(sail)
     }
     grp.userData.sails = sails
@@ -375,6 +390,26 @@ export class Plot3D implements Renderer {
     }
     place(this.selRing, this.selectedId)
     place(this.tgtRing, this.targetId)
+
+    // kružnice dostřelu (na hladině): vlastní vybraná loď a zaměřený cíl
+    const range = (ring: THREE.Mesh, id: number | null, own: boolean): void => {
+      ring.visible = false
+      if (id == null) return
+      const sh = st.ships.find(s => s.id === id && !s.destroyed)
+      if (!sh) return
+      let cls = sh.classId
+      if (!own && sh.side !== 'player') {
+        const con = st.contacts.player.find(c => c.shipId === id)
+        if (!con || con.idQuality < 1) return
+        cls = con.classGuess ?? sh.classId
+      }
+      const gr = SHIP_CLASSES[cls]?.gunRange ?? 0
+      if (gr <= 0) return
+      const p = this.w3(sh.side === 'player' ? this.rpos(sh) : (st.contacts.player.find(c => c.shipId === id)?.memory ? (st.contacts.player.find(c => c.shipId === id)!.pos) : this.rpos(sh)))
+      ring.position.set(p.x, 0.8, p.z); ring.scale.set(gr, gr, gr); ring.visible = true
+    }
+    range(this.selRange, this.selectedId, true)
+    range(this.tgtRange, this.targetId, false)
   }
 
   private updateCamera(st: SimState): void {
@@ -394,6 +429,10 @@ export class Plot3D implements Renderer {
     const cy = Math.sin(pitch) * this.dist
     this.camera.position.set(cx, cy, cz)
     this.camera.lookAt(this.camTarget)
+    // slunce (a jeho stínová kamera) sleduje střed dění
+    this.sun.position.set(this.camTarget.x + SUN_DIR.x * 700, SUN_DIR.y * 700, this.camTarget.z + SUN_DIR.z * 700)
+    this.sun.target.position.copy(this.camTarget)
+    this.sun.target.updateMatrixWorld()
   }
 
   private bindInput(): void {
