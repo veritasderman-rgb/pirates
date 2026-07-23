@@ -93,6 +93,7 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
   const adv = Math.max(0.05, atk - def * 0.5)
   const m = progressMap(state)
   m[target.id] = (m[target.id] ?? 0) + BOARD_RATE * adv
+  target.boardingProgress = Math.min(1, m[target.id])
   if (m[target.id] >= 1) {
     target.boarded = true
     target.surrendered = true

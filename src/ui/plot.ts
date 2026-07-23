@@ -42,7 +42,6 @@ export class TacticalPlot {
   selectedId: number | null = null
   targetId: number | null = null
   private fx: Fx[] = []
-  private lastFxT = -1
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')!
@@ -64,18 +63,17 @@ export class TacticalPlot {
       const own = state.ships.find(s => s.side === 'player' && !s.destroyed)
       if (own) { this.followId = own.id; this.selectedId = own.id }
     }
-    // z událostí snapshotu vytvoř krátkodobé efekty (záblesk/jiskra/výbuch)
-    if (state.t !== this.lastFxT) {
-      this.lastFxT = state.t
-      const now = performance.now()
-      for (const e of state.events) {
-        if (!e.pos) continue
-        if (e.kind === 'gunFire') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'muzzle' })
-        else if (e.kind === 'ballHit') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'hit' })
-        else if (e.kind === 'shipDestroyed') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'boom' })
-      }
-      if (this.fx.length > 200) this.fx.splice(0, this.fx.length - 200)
+    // z událostí snapshotu vytvoř krátkodobé efekty (záblesk/jiskra/výbuch).
+    // Každý snapshot nese ČERSTVOU dávku (worker události po odeslání maže),
+    // takže zpracuj vždy — i když se sim čas nezměnil (pauza, ruční palba).
+    const now = performance.now()
+    for (const e of state.events) {
+      if (!e.pos) continue
+      if (e.kind === 'gunFire') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'muzzle' })
+      else if (e.kind === 'ballHit') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'hit' })
+      else if (e.kind === 'shipDestroyed') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'boom' })
     }
+    if (this.fx.length > 200) this.fx.splice(0, this.fx.length - 200)
   }
 
   start(): void {
@@ -206,16 +204,27 @@ export class TacticalPlot {
       ctx.beginPath(); ctx.arc(s.x, s.y, rp, 0, Math.PI * 2); ctx.stroke()
       ctx.setLineDash([]); ctx.globalAlpha = 1
     }
+    // vlastní vybraná loď — skutečná třída a pozice (bez maskování)
     const sel = st.ships.find(s => s.id === this.selectedId && s.side === 'player' && !s.destroyed)
     if (sel) { const d = SHIP_CLASSES[sel.classId]; if (d) ring(sel.pos, d.gunRange, CLR.own) }
-    const tgt = st.ships.find(s => s.id === this.targetId && !s.destroyed)
-    if (tgt) { const d = SHIP_CLASSES[tgt.classId]; if (d && d.gunRange > 0) ring(tgt.pos, d.gunRange, CLR.enemy) }
-    // pobřežní pevnosti — vždy (jejich dosah je pro hráče klíčový)
+
+    // cizí loď — přes senzorový kontakt: respektuj masku (classGuess), paměť
+    // (poslední známá pos) a jen když je třída aspoň částečně identifikovaná
+    const enemyRing = (id: number): void => {
+      const sh = st.ships.find(s => s.id === id && !s.destroyed)
+      if (!sh) return
+      if (sh.side === 'player') { const d = SHIP_CLASSES[sh.classId]; if (d) ring(sh.pos, d.gunRange, CLR.own); return }
+      const con = st.contacts.player.find(c => c.shipId === id)
+      if (!con || con.idQuality < 1) return
+      const d = SHIP_CLASSES[con.classGuess ?? sh.classId]
+      if (!d || d.gunRange <= 0) return
+      ring(con.memory ? con.pos : sh.pos, d.gunRange, CLR.enemy)
+    }
+    if (this.targetId !== null) enemyRing(this.targetId)
+    // pobřežní pevnosti — dosah je pro hráče klíčový (jen identifikované)
     for (const sh of st.ships) {
-      if (sh.destroyed) continue
-      const d = SHIP_CLASSES[sh.classId]
-      if (d?.hullCode === 'FORT' && st.contacts.player.some(c => c.shipId === sh.id))
-        ring(sh.pos, d.gunRange, CLR.enemy)
+      if (sh.destroyed || sh.id === this.targetId) continue
+      if (SHIP_CLASSES[sh.classId]?.hullCode === 'FORT') enemyRing(sh.id)
     }
   }
 

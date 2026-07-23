@@ -126,6 +126,8 @@ export interface ShipState {
   surrendered: boolean
   /** loď byla obsazena výsadkem (kořist zajištěna) */
   boarded: boolean
+  /** postup obsazování výsadkem 0–1 (roste, když poblíž běží boarding) */
+  boardingProgress?: number
   /** AI doktrína ('player' = ovládá hráč, 'surrendered' = spustila vlajku) */
   doctrine: string
   fireControl: FireControl
@@ -319,6 +321,9 @@ export interface SimState {
   rng: RngState
   nextId: number
   wind: Wind
+  /** konfigurace větru a seed scénáře — pro deterministickou předpověď počasí */
+  windCfg: WindConfig
+  seed: number
   islands: Island[]
   ships: ShipState[]
   balls: Ball[]

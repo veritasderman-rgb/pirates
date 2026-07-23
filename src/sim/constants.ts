@@ -89,6 +89,14 @@ export const RAKE_CONE = 0.6
 
 // ---------- poškození ----------
 
+/**
+ * Globální násobič veškerého poškození (ladicí páka tempa bitvy). < 1 =
+ * lodě umírají POMALEJI — víc salv, čas sledovat degradaci subsystémů,
+ * kapitální lodě nemažou malé jednou salvou. Škáluje trup i subsystémy
+ * úměrně, takže „umírání po částech" zůstává, jen pozvolnější.
+ */
+export const DAMAGE_SCALE = 0.8
+
 /** podíl poškození, který jde do náhodného subsystému místo trupu */
 export const SUBSYSTEM_SHARE = 0.45
 
@@ -124,6 +132,9 @@ export const BOARD_RATE = 0.08
 export const AGROUND_DAMAGE = 0.6
 /** odpuzující rychlost při nárazu na břeh (m/s) — loď se zastaví a odrazí */
 export const AGROUND_PUSH = 3
+
+/** globální zpomalení rotace větru — pozvolné změny počasí (čitelná předpověď) */
+export const WIND_ROTATION_SCALE = 0.5
 
 // ---------- vítr: závětří ----------
 

@@ -6,6 +6,13 @@
 import type { ShipState, SimState, SimEvent, ShotType } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
 import { offWindAngle, sailEfficiency, inNoGo } from '../sim/sail'
+import { forecastWind } from '../sim/wind'
+
+/** Šipka směru větru (kam vane) — 8 světových stran. */
+const windArrow = (dir: number): string => {
+  const deg = (((dir * 180) / Math.PI) % 360 + 360) % 360
+  return ['→', '↗', '↑', '↖', '←', '↙', '↓', '↘'][Math.round(deg / 45) % 8]
+}
 
 export type PanelAction =
   | 'toggle-sails' | 'trim-up' | 'trim-down' | 'toggle-oars'
@@ -83,6 +90,9 @@ export class Panels {
     const eff = sailEfficiency(offWindAngle(sh.heading, state.wind))
     const spd = Math.round(Math.hypot(sh.vel.x, sh.vel.y) * 1.94)
     const ss = sh.subsystems
+    const gpb = def?.gunsPerBroadside ?? 0
+    const gunsL = Math.round(gpb * ss.gunsPort)
+    const gunsR = Math.round(gpb * ss.gunsStbd)
     this.left.innerHTML =
       `<div class="panel"><h3>${esc(sh.name)}</h3>`
       + `<img class="ship-img" src="img/ship-${esc(sh.classId)}.png" alt="" onerror="this.style.display='none'">`
@@ -99,9 +109,33 @@ export class Panels {
       + `<div class="row2"><span>vesla: <b>${def?.canRow ? (sh.oaring ? 'ANO' : 'ne') : '—'}</b></span>`
       + `<span>stamina: ${bar(sh.oarStamina, '#8ad0a0')}</span></div>`
       + `<div class="row2"><span>rychlost: <b>${spd} kn</b></span><span>munice: <b>${sh.ammo}</b></span></div>`
+      + `<div class="row2"><span>děla připravená: <b>L ${gunsL} · P ${gunsR}</b> z ${gpb}</span></div>`
       + `<div class="pos ${inNoGo(offWindAngle(sh.heading, state.wind)) ? 'nogo' : eff > 0.85 ? 'good' : ''}">`
       + `bod plavby: ${POS_NAME(off)} (${Math.round(eff * 100)}%)</div>`
       + `</div>`
+      + this.forecastHtml(state, sh)
+  }
+
+  /** Předpověď počasí: nyní / +5 / +10 / +15 min + trend pro vybranou loď. */
+  private forecastHtml(state: SimState, sh: ShipState | undefined): string {
+    const nowEff = sh ? sailEfficiency(offWindAngle(sh.heading, state.wind)) : 0
+    const steps: [string, number][] = [['nyní', 0], ['+5 min', 300], ['+10 min', 600], ['+15 min', 900]]
+    const rows = steps.map(([label, dt]) => {
+      const w = dt === 0 ? state.wind : forecastWind(state, dt)
+      const kn = Math.round(w.speed * 1.94)
+      let trend = '<span class="dim">—</span>'
+      if (sh) {
+        const eff = sailEfficiency(offWindAngle(sh.heading, w))
+        const d = eff - nowEff
+        trend = Math.abs(d) < 0.06 ? '<span class="dim">=</span>'
+          : d > 0 ? '<span class="ok">▲ lepší</span>' : '<span class="bad">▼ horší</span>'
+      }
+      return `<div class="fc-row"><span class="fc-t">${label}</span>`
+        + `<span class="fc-a">${windArrow(w.dir)}</span><span class="fc-k">${kn} kn</span>`
+        + `<span class="fc-tr">${trend}</span></div>`
+    }).join('')
+    return `<div class="panel fc"><h3>Počasí — předpověď</h3>${rows}`
+      + `<div class="fc-hint">šipka = kam vane · ▲/▼ = tvůj bod plavby při stálém kurzu se zlepší/zhorší</div></div>`
   }
 
   private renderRight(state: SimState, ui: UiState): void {
@@ -116,10 +150,17 @@ export class Panels {
       const hp = SHIP_CLASSES[tgt.classId]?.hullPoints ?? 100
       const known = con && con.idQuality >= 1
       const cls = known ? esc(def?.name ?? shownClass) : 'neznámá třída'
-      tHtml = `<div class="row"><b>${esc(tgt.name)}</b> ${tgt.surrendered ? '⚑' : ''}</div>`
+      const nearSurr = !tgt.surrendered && !tgt.boarded && tgt.morale < 0.35 && tgt.side !== 'player'
+      tHtml = `<div class="row"><b>${esc(tgt.name)}</b> ${tgt.boarded ? '⚓' : tgt.surrendered ? '⚑' : ''}</div>`
         + (known ? `<img class="ship-img" src="img/ship-${esc(shownClass)}.png" alt="" onerror="this.style.display='none'">` : '')
         + `<div class="row"><span>${cls}</span></div>`
         + `<div class="row"><span>trup</span>${bar(tgt.hull / hp, '#e0603a')}</div>`
+        + `<div class="row"><span>morálka</span>${bar(tgt.morale, '#d8c24f')}</div>`
+        + (tgt.boarded ? `<div class="hintline ok">⚓ obsazena — kořist zajištěna</div>`
+          : tgt.surrendered ? `<div class="hintline ok">⚑ vzdal se — připluj na ~60 m a dej „boarding"</div>`
+          : nearSurr ? `<div class="hintline">nalomená morálka — zkus „výzvu ke kapitulaci"</div>` : '')
+        + (tgt.boardingProgress && tgt.boardingProgress < 1 && !tgt.boarded
+          ? `<div class="row"><span>boarding</span>${bar(tgt.boardingProgress, '#8ad0a0')}</div>` : '')
     }
     // kontakty
     const contacts = state.contacts.player.map(c => {

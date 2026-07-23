@@ -7,6 +7,7 @@ import {
   BALL_SPEED, RELOAD_TIME, GUN_SPREAD_PER_M, ACCURACY_BASE,
   CHAIN_HULL_FACTOR, CHAIN_RIG_FACTOR, GRAPE_HULL_FACTOR, GRAPE_CREW_FACTOR,
   RAKE_BONUS, RAKE_CONE, SUBSYSTEM_SHARE, MORALE_HULL_WEIGHT, MORALE_CREW_WEIGHT,
+  DAMAGE_SCALE,
 } from './constants'
 import { add, angleDiff, angleOf, dist, fromAngle, len, norm, scale, sub, dot } from './vec'
 import { SHIP_CLASSES } from '../data/defs'
@@ -171,7 +172,7 @@ function segCircleT(a: Vec2, b: Vec2, c: Vec2, r: number): number | null {
 
 /** Aplikuj zásah koulí na loď: typ střeliva → subsystém, raking bonus, morálka. */
 export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec2): void {
-  let dmg = ball.damage
+  let dmg = ball.damage * DAMAGE_SCALE
 
   // raking: koule přiletěla podél podélné osy lodi (do přídě/zádě)?
   const incoming = angleOf(sub(ship.pos, from))

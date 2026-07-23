@@ -6,11 +6,11 @@ import type { SimState, Vec2, Wind, WindConfig } from './types'
 import { fromAngle } from './vec'
 import { hashNoise } from './rng'
 import { leeFactor } from './terrain'
-import { LEE_DEPTH, LEE_MIN_FACTOR } from './constants'
+import { LEE_DEPTH, LEE_MIN_FACTOR, WIND_ROTATION_SCALE } from './constants'
 
 /** Globální vítr v čase t z konfigurace (bez lokálních poryvů). */
 export function globalWind(cfg: WindConfig, seed: number, t: number): Wind {
-  const rot = (cfg.rotationRate ?? 0) * t
+  const rot = (cfg.rotationRate ?? 0) * WIND_ROTATION_SCALE * t
   // pomalé kolísání směru i síly z hash-šumu (perioda ~stovky s)
   const gust = cfg.gustiness ?? 0
   const dirWobble = (hashNoise(seed * 0.001, t * 0.01, 7) - 0.5) * gust * 0.6
@@ -24,6 +24,14 @@ export function globalWind(cfg: WindConfig, seed: number, t: number): Wind {
 /** Aktualizuje state.wind (voláno enginem každý tick). */
 export function updateWind(state: SimState, cfg: WindConfig, seed: number): void {
   state.wind = globalWind(cfg, seed, state.t)
+}
+
+/**
+ * Předpověď globálního větru za `dtSeconds` sim-času (deterministická).
+ * Bez lokálních poryvů/závětří — čistý trend, na který se hráč připraví.
+ */
+export function forecastWind(state: SimState, dtSeconds: number): Wind {
+  return globalWind(state.windCfg, state.seed, state.t + dtSeconds)
 }
 
 /**
