@@ -14,7 +14,7 @@ import { hashNoise } from '../sim/rng'
 import { SCENARIOS } from '../data/missions'
 
 const ZOOM_MIN = 0.008 // px/m (hodně oddálené)
-const ZOOM_MAX = 4.0   // px/m (těsně u lodí — jednotlivé koule a detaily)
+const ZOOM_MAX = 5.5   // px/m (těsně u lodí — jednotlivé koule a detaily)
 const PICK_PX = 18
 
 /** částice krátkodobého efektu ve světě (kouř, záblesk, šplouchnutí, tříska…) */
@@ -72,6 +72,8 @@ export class TacticalPlot {
   selectedId: number | null = null
   targetId: number | null = null
   private parts: Particle[] = []
+  private wakes: Particle[] = []              // pěnová brázda (kreslí se pod loděmi)
+  private wakeAt = new Map<number, number>()  // shipId → čas poslední pěny brázdy
   private shake = 0        // síla otřesu kamery (px), tlumí se
   private snapT = 0        // performance.now() posledního snapshotu
   private exSim = 0        // extrapolovaný sim-čas (s) od posledního snapshotu
@@ -294,6 +296,8 @@ export class TacticalPlot {
     for (const isl of st.islands) this.drawIsland(isl, t)
     this.drawRanges(st)
     this.drawCourse(st)
+    this.emitWakes(st, now)
+    this.drawWakes()
     for (const b of st.balls) this.drawBall(b)
     for (const sh of st.ships) this.drawShip(st, sh)
     this.drawFx()
@@ -470,6 +474,45 @@ export class TacticalPlot {
           ctx.globalAlpha = a * 0.7; ctx.strokeStyle = p.col; ctx.lineWidth = Math.max(1, 2.5 * a)
           ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.stroke(); break
       }
+    }
+    ctx.globalAlpha = 1
+  }
+
+  /** Průběžné dropování pěny do brázdy za pohybujícími se (viditelnými) loděmi. */
+  private emitWakes(st: SimState, now: number): void {
+    if (this.scale < 0.03) return
+    for (const sh of st.ships) {
+      if (sh.destroyed || sh.surrendered) continue
+      if (sh.side !== 'player' && !st.contacts.player.some(c => c.shipId === sh.id && !c.memory)) continue
+      const spd = Math.hypot(sh.vel.x, sh.vel.y)
+      if (spd < 1.5) continue
+      if (now - (this.wakeAt.get(sh.id) ?? 0) < 95) continue
+      this.wakeAt.set(sh.id, now)
+      const p = this.rpos(sh), back = fromAngle(sh.heading)
+      const perp = { x: -back.y, y: back.x }, hr = hitRadius(sh), beam = hr * 0.35
+      for (const sgn of [-1, 1]) {
+        this.wakes.push({
+          x: p.x - back.x * hr * 0.7 + perp.x * sgn * beam,
+          y: p.y - back.y * hr * 0.7 + perp.y * sgn * beam,
+          vx: -back.x * 0.5 + perp.x * sgn * 0.6, vy: -back.y * 0.5 + perp.y * sgn * 0.6,
+          born: now, life: 2200, kind: 'smoke', r0: hr * 0.18, r1: hr * 0.6, col: '#dff2f2',
+        })
+      }
+    }
+    if (this.wakes.length > 400) this.wakes.splice(0, this.wakes.length - 400)
+  }
+
+  /** Vykreslení pěnové brázdy (pod loděmi) — měkké bílé stopy, které slábnou. */
+  private drawWakes(): void {
+    const ctx = this.ctx, now = performance.now()
+    this.wakes = this.wakes.filter(p => now - p.born < p.life)
+    for (const p of this.wakes) {
+      const age = (now - p.born) / p.life, ageS = (now - p.born) / 1000
+      const s = this.w2s({ x: p.x + p.vx * ageS, y: p.y + p.vy * ageS })
+      const r = Math.max(0.8, (p.r0 + (p.r1 - p.r0) * age) * this.scale)
+      ctx.globalAlpha = (1 - age) * 0.33
+      ctx.fillStyle = p.col
+      ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
     }
     ctx.globalAlpha = 1
   }
@@ -680,7 +723,7 @@ export class TacticalPlot {
     }
     const s = this.w2s(this.rpos(sh))
     const r = hitRadius(sh)
-    const lenPx = Math.max(7, r * this.scale * 1.95)
+    const lenPx = Math.max(7, r * this.scale * 2.2)
     const wPx = Math.max(3, lenPx * 0.42)
     const col = this.colorFor(sh.side, sh.destroyed || sh.surrendered)
     const t = performance.now() / 1000
