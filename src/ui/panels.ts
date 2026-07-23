@@ -149,17 +149,21 @@ export class Panels {
       const def = SHIP_CLASSES[shownClass]
       const hp = SHIP_CLASSES[tgt.classId]?.hullPoints ?? 100
       const known = con && con.idQuality >= 1
+      // živá taktická data (morálka, boarding) jen u aktuálně viditelného a
+      // identifikovaného cíle — u ztraceného (memory) kontaktu senzory drží jen
+      // poslední známou polohu, ne aktuální stav, tak ho nesmíme prozrazovat
+      const liveId = !!(con && con.idQuality >= 1 && !con.memory)
       const cls = known ? esc(def?.name ?? shownClass) : 'neznámá třída'
-      const nearSurr = !tgt.surrendered && !tgt.boarded && tgt.morale < 0.35 && tgt.side !== 'player'
+      const nearSurr = liveId && !tgt.surrendered && !tgt.boarded && tgt.morale < 0.35 && tgt.side !== 'player'
       tHtml = `<div class="row"><b>${esc(tgt.name)}</b> ${tgt.boarded ? '⚓' : tgt.surrendered ? '⚑' : ''}</div>`
         + (known ? `<img class="ship-img" src="img/ship-${esc(shownClass)}.png" alt="" onerror="this.style.display='none'">` : '')
         + `<div class="row"><span>${cls}</span></div>`
         + `<div class="row"><span>trup</span>${bar(tgt.hull / hp, '#e0603a')}</div>`
-        + `<div class="row"><span>morálka</span>${bar(tgt.morale, '#d8c24f')}</div>`
+        + (liveId ? `<div class="row"><span>morálka</span>${bar(tgt.morale, '#d8c24f')}</div>` : '')
         + (tgt.boarded ? `<div class="hintline ok">⚓ obsazena — kořist zajištěna</div>`
           : tgt.surrendered ? `<div class="hintline ok">⚑ vzdal se — připluj na ~60 m a dej „boarding"</div>`
           : nearSurr ? `<div class="hintline">nalomená morálka — zkus „výzvu ke kapitulaci"</div>` : '')
-        + (tgt.boardingProgress && tgt.boardingProgress < 1 && !tgt.boarded
+        + (liveId && tgt.boardingProgress && tgt.boardingProgress < 1 && !tgt.boarded
           ? `<div class="row"><span>boarding</span>${bar(tgt.boardingProgress, '#8ad0a0')}</div>` : '')
     }
     // kontakty
