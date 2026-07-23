@@ -141,8 +141,9 @@ export class Panels {
   private renderRight(state: SimState, ui: UiState): void {
     // cíl
     let tHtml = '<div class="dim">— žádný cíl —</div>'
-      + '<div class="fc-hint">Klikni na nepřítele na mapě = zaměřit. '
-      + 'Prázdná voda = kurz vybrané lodi. Pak PAL levobok/pravobok (Q/R) nebo AUTO.</div>'
+      + '<div class="fc-hint">Klikni na nepřítele na mapě = zaměřit (pro ruční PAL levobok/pravobok Q/R, '
+      + 'výzvu ke kapitulaci a boarding). Prázdná voda = kurz vybrané lodi. '
+      + 'AUTO pálí samo na nejzraněnějšího nepřítele v dostřelu — zaměřený cíl neřeší.</div>'
     const tgt = state.ships.find(s => s.id === ui.targetId)
     if (tgt) {
       const con = state.contacts.player.find(c => c.shipId === tgt.id)
