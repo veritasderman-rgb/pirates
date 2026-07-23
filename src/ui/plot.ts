@@ -3,13 +3,14 @@
  * Obrazovka: px, y dolů. Kamera sleduje vybranou loď + pan tažením, zoom
  * kolečkem. Kreslí vodu, vítr (proudnice + růžice), ostrovy, lodě, koule.
  */
-import type { Ball, Contact, Island, ShipState, SimState, Vec2 } from '../sim/types'
+import type { Ball, Contact, Island, ShipClassDef, ShipState, SimState, Vec2 } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
 import { windAt } from '../sim/wind'
 import { offWindAngle, sailEfficiency } from '../sim/sail'
 import { NO_GO_DEG } from '../sim/constants'
 import { fromAngle } from '../sim/vec'
 import { hitRadius } from '../sim/weapons'
+import { hashNoise } from '../sim/rng'
 
 const ZOOM_MIN = 0.008 // px/m (hodně oddálené)
 const ZOOM_MAX = 4.0   // px/m (těsně u lodí — jednotlivé koule a detaily)
@@ -25,6 +26,26 @@ const CLR = {
   land: '#3a3222', landEdge: '#5a4d33',
   reef: '#1c4a55', port: '#6a5a3a',
   ball: '#ffe08a', wind: '#3f7d8a', text: '#cfeef2',
+  // moře — jasnější, sytější (ANNO): hloubka → tyrkys u břehu
+  seaHi: '#34a0af', seaLo: '#175a6c',
+  crest: '#a6ecec', sparkle: '#eafcff',
+  shallow: '#3fb6b0', shallowIn: '#7fd8c8', foam: '#f2fbfb',
+  sand: '#d8c48e',
+  // pevnina — bujná zeleň, les, pole, skála
+  grassHi: '#7a9850', grassLo: '#3c5526', forest: '#274b22', forestHi: '#3a6630',
+  field: '#c2a850', rock: '#8f8778', rockHi: '#a9a294',
+}
+
+/** světový směr slunce (odkud svítí) pro konzistentní nasvícení scény */
+const SUN = { x: -0.55, y: 0.83 } // od SZ (svět: y nahoru)
+
+/** posun barvy: amt>0 zesvětlí k bílé, amt<0 ztmaví k černé */
+function shade(hex: string, amt: number): string {
+  const n = parseInt(hex.slice(1), 16)
+  let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255
+  if (amt >= 0) { r += (255 - r) * amt; g += (255 - g) * amt; b += (255 - b) * amt }
+  else { r *= 1 + amt; g *= 1 + amt; b *= 1 + amt }
+  return `rgb(${r | 0},${g | 0},${b | 0})`
 }
 
 export class TacticalPlot {
@@ -178,19 +199,94 @@ export class TacticalPlot {
       if (f) this.cam = { ...f.pos }
     }
 
-    ctx.fillStyle = st.wind ? '#0b2a33' : '#0b2a33'
-    ctx.fillStyle = '#0a2630'
-    ctx.fillRect(0, 0, cw, ch)
-
+    const t = now / 1000
+    this.drawSea(st, t)
     this.drawWind(st)
     this.drawGrid()
-    for (const isl of st.islands) this.drawIsland(isl)
+    for (const isl of st.islands) this.drawIsland(isl, t)
     this.drawRanges(st)
     this.drawCourse(st)
     for (const b of st.balls) this.drawBall(b)
     for (const sh of st.ships) this.drawShip(st, sh)
     this.drawFx()
+    this.drawVignette()
     this.drawWindRose(st)
+  }
+
+  /**
+   * Animované moře: hloubkový gradient + rozvlněný třpyt driftující po větru.
+   * Čistě kosmetické (performance.now()), nezasahuje do deterministické simulace.
+   * Vzorkuje se v obrazovkové mřížce, fáze vlny je ukotvená ve světě (správný
+   * parallax při posunu mapy). Při velkém oddálení jen jemný třpyt.
+   */
+  private drawSea(st: SimState, t: number): void {
+    const ctx = this.ctx, cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
+    // hloubkový gradient (diagonální podle slunce)
+    const g = ctx.createLinearGradient(0, 0, cw * 0.4, ch)
+    g.addColorStop(0, CLR.seaHi); g.addColorStop(1, CLR.seaLo)
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, cw, ch)
+    // měkký sluneční třpyt (rozjasní hladinu, rozbije plochý gradient)
+    const sg = ctx.createRadialGradient(cw * 0.32, ch * 0.26, 0, cw * 0.32, ch * 0.26, Math.max(cw, ch) * 0.6)
+    sg.addColorStop(0, 'rgba(150,225,225,0.16)'); sg.addColorStop(1, 'rgba(150,225,225,0)')
+    ctx.fillStyle = sg
+    ctx.fillRect(0, 0, cw, ch)
+
+    if (this.scale < 0.014) return // hodně oddálené → jen hladká voda
+    const wd = fromAngle(st.wind.dir)
+    // směr hřebene vlny na obrazovce (kolmo na vítr; svět y nahoru → obraz dolů)
+    const winS = { x: wd.x, y: -wd.y }
+    const crest = { x: -winS.y, y: winS.x }
+    const freq = 0.028               // 1/m — vlnová délka ~220 m
+    const speed = 1.7                // drift hřebenů po větru
+    const detail = this.scale > 0.03 // blíž = víc detailu
+    const step = detail ? 32 : 48
+    const L = Math.max(3.5, Math.min(8, this.scale * 90)) // délka čeřiny (px)
+    ctx.lineCap = 'round'
+    for (let sx = (step / 2); sx < cw; sx += step) {
+      for (let sy = (step / 2); sy < ch; sy += step) {
+        const w = this.s2w(sx, sy)
+        const proj = w.x * wd.x + w.y * wd.y
+        const ph = hashNoise(Math.floor(w.x / 180), Math.floor(w.y / 180), 3) * 6.283
+        const amp = Math.sin(proj * freq - t * speed + ph)
+        if (amp <= 0.2) continue
+        const b = (amp - 0.2) / 0.8
+        ctx.globalAlpha = 0.06 + b * 0.17
+        ctx.strokeStyle = CLR.crest
+        ctx.lineWidth = 1 + b * 1.3
+        ctx.beginPath()
+        ctx.moveTo(sx - crest.x * L, sy - crest.y * L)
+        ctx.lineTo(sx + crest.x * L, sy + crest.y * L)
+        ctx.stroke()
+      }
+    }
+    // třpytivé odlesky (rychlejší, řidší)
+    if (detail) {
+      const s2 = 66
+      for (let sx = 22; sx < cw; sx += s2) {
+        for (let sy = 40; sy < ch; sy += s2) {
+          const w = this.s2w(sx, sy)
+          const tw = hashNoise(Math.floor(w.x / 90), Math.floor(w.y / 90), 9)
+          const amp = Math.sin(t * 2.3 + tw * 6.283)
+          if (amp < 0.86) continue
+          ctx.globalAlpha = (amp - 0.86) / 0.14 * 0.5
+          ctx.fillStyle = CLR.sparkle
+          ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fill()
+        }
+      }
+    }
+    ctx.globalAlpha = 1
+  }
+
+  /** Jemná viněta — ztmavené rohy pro atmosféru a fokus na střed dění. */
+  private drawVignette(): void {
+    const ctx = this.ctx, cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
+    const g = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * 0.42,
+      cw / 2, ch / 2, Math.max(cw, ch) * 0.72)
+    g.addColorStop(0, 'rgba(4,14,20,0)')
+    g.addColorStop(1, 'rgba(4,14,20,0.4)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, cw, ch)
   }
 
   /** Kružnice dostřelu děl kolem vybrané vlastní lodi, cíle a pevností. */
@@ -255,25 +351,30 @@ export class TacticalPlot {
   }
 
   private drawGrid(): void {
+    // mřížka jen v taktickém odstupu; při přiblížení čistá „ANNO" hladina
+    if (this.scale > 0.05) return
     const ctx = this.ctx, cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
     const stepM = 500
     const s = stepM * this.scale
     if (s < 24) return
-    ctx.strokeStyle = '#0f3540'; ctx.lineWidth = 1
+    ctx.strokeStyle = '#14485a'; ctx.globalAlpha = 0.5; ctx.lineWidth = 1
     const tl = this.s2w(0, 0), br = this.s2w(cw, ch)
     const x0 = Math.floor(tl.x / stepM) * stepM, x1 = Math.ceil(br.x / stepM) * stepM
     const y0 = Math.floor(br.y / stepM) * stepM, y1 = Math.ceil(tl.y / stepM) * stepM
     ctx.beginPath()
     for (let x = x0; x <= x1; x += stepM) { const a = this.w2s({ x, y: y0 }), b = this.w2s({ x, y: y1 }); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y) }
     for (let y = y0; y <= y1; y += stepM) { const a = this.w2s({ x: x0, y }), b = this.w2s({ x: x1, y }); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y) }
-    ctx.stroke()
+    ctx.stroke(); ctx.globalAlpha = 1
   }
 
   private drawWind(st: SimState): void {
+    // proudnice větru jen v taktickém odstupu; při přiblížení je voda čistá
+    // (směr větru pořád ukazuje růžice nahoře) — kinematičtější „ANNO" pohled
+    if (this.scale > 0.05) return
     const ctx = this.ctx, cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
     const spacing = 90
     ctx.strokeStyle = CLR.wind; ctx.fillStyle = CLR.wind; ctx.lineWidth = 1.5
-    ctx.globalAlpha = 0.5
+    ctx.globalAlpha = 0.28
     for (let sx = spacing / 2; sx < cw; sx += spacing) {
       for (let sy = spacing / 2; sy < ch; sy += spacing) {
         const w = windAt(st, this.s2w(sx, sy))
@@ -289,23 +390,140 @@ export class TacticalPlot {
     ctx.globalAlpha = 1
   }
 
-  private drawIsland(isl: Island): void {
+  private drawIsland(isl: Island, t: number): void {
     const ctx = this.ctx
     if (isl.poly.length < 3) return
-    ctx.beginPath()
-    isl.poly.forEach((p, i) => { const s = this.w2s(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y) })
-    ctx.closePath()
-    if (isl.kind === 'reef') {
-      ctx.fillStyle = CLR.reef; ctx.globalAlpha = 0.4; ctx.fill(); ctx.globalAlpha = 1
-      ctx.strokeStyle = '#2f6b78'; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([])
-    } else {
-      ctx.fillStyle = isl.kind === 'port' ? CLR.port : CLR.land; ctx.fill()
-      ctx.strokeStyle = CLR.landEdge; ctx.lineWidth = 2; ctx.stroke()
+    const path = (): void => {
+      ctx.beginPath()
+      isl.poly.forEach((p, i) => { const s = this.w2s(p); i ? ctx.lineTo(s.x, s.y) : ctx.moveTo(s.x, s.y) })
+      ctx.closePath()
     }
+    // těžiště + průměrný poloměr (px) pro adaptivní efekty
+    let cx = 0, cy = 0
+    for (const p of isl.poly) { const s = this.w2s(p); cx += s.x; cy += s.y }
+    cx /= isl.poly.length; cy /= isl.poly.length
+    let rPx = 0
+    for (const p of isl.poly) { const s = this.w2s(p); rPx += Math.hypot(s.x - cx, s.y - cy) }
+    rPx /= isl.poly.length
+
+    if (isl.kind === 'reef') {
+      // mělčina/útes — prosvítající světlá voda + animovaná pěna na hřebeni
+      path()
+      ctx.fillStyle = CLR.reef; ctx.globalAlpha = 0.35; ctx.fill(); ctx.globalAlpha = 1
+      const pulse = 0.45 + 0.3 * Math.sin(t * 1.6 + isl.poly.length)
+      ctx.strokeStyle = CLR.foam; ctx.globalAlpha = pulse; ctx.lineWidth = 1.4
+      ctx.setLineDash([5, 5]); ctx.lineDashOffset = -t * 12; path(); ctx.stroke()
+      ctx.setLineDash([]); ctx.lineDashOffset = 0; ctx.globalAlpha = 1
+      return
+    }
+
+    // inset polygon helper (zmenšený obrys k těžišti)
+    const inset = (k: number): void => {
+      ctx.beginPath()
+      isl.poly.forEach((p, i) => {
+        const s = this.w2s(p)
+        const px = cx + (s.x - cx) * k, py = cy + (s.y - cy) * k
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)
+      })
+      ctx.closePath()
+    }
+    const rnd = (a: number, b: number): number => hashNoise(isl.poly.length + a, b, a * 3 + 1)
+
+    // mělčina: dvoubarevný tyrkysový prstenec hugující pobřeží (tmavší venku,
+    // světlejší u břehu) — jako v ANNO
+    const rw = Math.max(3, Math.min(22, rPx * 0.34))
+    ctx.lineJoin = 'round'
+    for (const [wMul, a, c] of [[2.2, 0.05, CLR.shallow], [1.3, 0.09, CLR.shallow],
+      [0.6, 0.16, CLR.shallowIn]] as [number, number, string][]) {
+      ctx.strokeStyle = c; ctx.globalAlpha = a; ctx.lineWidth = rw * wMul; path(); ctx.stroke()
+    }
+    ctx.globalAlpha = 1
+
+    // příbojová pěna na břehu (animovaná, driftuje)
+    const foamPulse = 0.6 + 0.3 * Math.sin(t * 1.3 + isl.poly.length * 1.7)
+    ctx.strokeStyle = CLR.foam; ctx.globalAlpha = foamPulse
+    ctx.lineWidth = Math.max(1.6, Math.min(5, rPx * 0.06))
+    ctx.setLineDash([7, 5]); ctx.lineDashOffset = -t * 9; path(); ctx.stroke()
+    ctx.setLineDash([]); ctx.lineDashOffset = 0; ctx.globalAlpha = 1
+
+    // pláž (písečný lem)
+    ctx.fillStyle = CLR.sand; path(); ctx.fill()
+
+    // ---- pevnina (clip na inset, aby pláž zůstala po obvodu) ----
+    ctx.save(); inset(0.86); ctx.clip()
+    const detail = this.scale > 0.02 && rPx > 24
+    if (isl.kind === 'port') {
+      // přístavní ostrov — travnatý s městskou zástavbou
+      ctx.fillStyle = CLR.grassLo; inset(0.86); ctx.fill()
+    } else {
+      // travnatý gradient nasvícený sluncem
+      const sunS = { x: SUN.x, y: -SUN.y }
+      const gr = ctx.createLinearGradient(cx - sunS.x * rPx, cy - sunS.y * rPx, cx + sunS.x * rPx, cy + sunS.y * rPx)
+      gr.addColorStop(0, CLR.grassHi); gr.addColorStop(1, CLR.grassLo)
+      ctx.fillStyle = gr; inset(0.86); ctx.fill()
+    }
+
+    if (detail) {
+      // kopcové nasvícení — světlejší travnatý vrchol posunutý ke slunci (relief)
+      const sunS = { x: SUN.x, y: -SUN.y }
+      const hx = cx - sunS.x * rPx * 0.3, hy = cy - sunS.y * rPx * 0.3
+      const hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, rPx * 0.9)
+      hg.addColorStop(0, 'rgba(170,200,120,0.45)'); hg.addColorStop(1, 'rgba(170,200,120,0)')
+      ctx.fillStyle = hg; inset(0.86); ctx.fill()
+      // pole (zlaté záhony) — pár plátů na sluneční straně
+      const nF = rPx > 46 ? 2 : rPx > 30 ? 1 : 0
+      for (let f = 0; f < nF; f++) {
+        const ang = rnd(f + 7, 2) * 6.283
+        const rad = (0.15 + rnd(f + 7, 3) * 0.3) * rPx
+        const fx = cx + Math.cos(ang) * rad, fy = cy + Math.sin(ang) * rad
+        const fw = rPx * (0.24 + rnd(f, 4) * 0.14), fh = rPx * (0.16 + rnd(f, 5) * 0.1)
+        ctx.save(); ctx.translate(fx, fy); ctx.rotate(rnd(f, 6) * 3.14)
+        ctx.fillStyle = CLR.field
+        ctx.beginPath(); ctx.ellipse(0, 0, fw, fh, 0, 0, Math.PI * 2); ctx.fill()
+        ctx.strokeStyle = 'rgba(150,120,50,0.4)'; ctx.lineWidth = 1
+        for (let l = -2; l <= 2; l++) { ctx.beginPath(); ctx.moveTo(-fw, l * fh * 0.3); ctx.lineTo(fw, l * fh * 0.3); ctx.stroke() }
+        ctx.restore()
+      }
+      // lesy (shluky korun) — nepravidelné tmavě zelené chuchvalce se světlem
+      const nC = Math.max(2, Math.min(7, Math.floor(rPx / 20)))
+      for (let c = 0; c < nC; c++) {
+        const ang = rnd(c, 1) * 6.283
+        const rad = Math.sqrt(rnd(c, 2)) * rPx * 0.62
+        const gxc = cx + Math.cos(ang) * rad, gyc = cy + Math.sin(ang) * rad
+        const blobs = 5 + Math.floor(rnd(c, 3) * 5)
+        const cr = rPx * (0.09 + rnd(c, 4) * 0.05)
+        for (let k = 0; k < blobs; k++) {
+          const ba = rnd(c * 9 + k, 7) * 6.283, brad = rnd(c * 9 + k, 8) * cr * 1.6
+          const bx = gxc + Math.cos(ba) * brad, by = gyc + Math.sin(ba) * brad
+          ctx.fillStyle = CLR.forest
+          ctx.beginPath(); ctx.arc(bx, by, cr, 0, Math.PI * 2); ctx.fill()
+          ctx.fillStyle = CLR.forestHi
+          ctx.beginPath(); ctx.arc(bx - cr * 0.3, by - cr * 0.3, cr * 0.5, 0, Math.PI * 2); ctx.fill()
+        }
+      }
+      // skalnaté pobřeží — kamenný lem po obvodu + kameny na sluneční straně
+      ctx.strokeStyle = CLR.rock; ctx.globalAlpha = 0.55
+      ctx.lineWidth = Math.max(1.5, rPx * 0.07); inset(0.9); ctx.stroke(); ctx.globalAlpha = 1
+      const nR = Math.min(20, Math.floor(rPx * 0.4))
+      for (let i = 0; i < nR; i++) {
+        const ang = rnd(i + 3, 9) * 6.283
+        const px = cx + Math.cos(ang) * rPx * 0.88, py = cy + Math.sin(ang) * rPx * 0.88
+        ctx.fillStyle = i % 2 ? CLR.rockHi : CLR.rock
+        ctx.globalAlpha = 0.6
+        ctx.beginPath(); ctx.arc(px, py, Math.max(0.8, rPx * 0.04), 0, Math.PI * 2); ctx.fill()
+      }
+      ctx.globalAlpha = 1
+    }
+    ctx.restore()
+
+    // obrys pobřeží
+    ctx.strokeStyle = '#2a3a20'; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.6; path(); ctx.stroke(); ctx.globalAlpha = 1
+
     if (isl.name && this.scale > 0.02) {
-      const c = this.w2s(isl.poly[0])
-      ctx.fillStyle = '#8a7f5a'; ctx.font = '11px monospace'
-      ctx.fillText(isl.name, c.x + 4, c.y)
+      ctx.fillStyle = '#d8c9a0'; ctx.font = '11px monospace'
+      ctx.globalAlpha = 0.85
+      ctx.fillText(isl.name, cx - ctx.measureText(isl.name).width / 2, cy)
+      ctx.globalAlpha = 1
     }
   }
 
@@ -338,38 +556,21 @@ export class TacticalPlot {
     }
     const s = this.w2s(sh.pos)
     const r = hitRadius(sh)
-    const lenPx = Math.max(7, r * this.scale * 1.6)
+    const lenPx = Math.max(7, r * this.scale * 1.95)
     const wPx = Math.max(3, lenPx * 0.42)
     const col = this.colorFor(sh.side, sh.destroyed || sh.surrendered)
+    const t = performance.now() / 1000
 
-    ctx.save()
-    ctx.translate(s.x, s.y)
-    ctx.rotate(-sh.heading) // svět y nahoru → obrazovka y dolů
-    // trup: špičatá příď
-    ctx.beginPath()
-    ctx.moveTo(lenPx, 0)
-    ctx.lineTo(lenPx * 0.1, wPx / 2)
-    ctx.lineTo(-lenPx * 0.7, wPx / 2)
-    ctx.lineTo(-lenPx * 0.7, -wPx / 2)
-    ctx.lineTo(lenPx * 0.1, -wPx / 2)
-    ctx.closePath()
-    ctx.fillStyle = sh.destroyed ? '#333' : col
-    ctx.globalAlpha = sh.surrendered ? 0.6 : 1
-    ctx.fill()
-    ctx.globalAlpha = 1
-    // plachta (čárka napříč, jen když napnuté a živé)
-    if (sh.sailsUp && !sh.destroyed && !sh.surrendered) {
-      ctx.strokeStyle = '#eaf6f8'; ctx.lineWidth = 1.5
-      ctx.beginPath(); ctx.moveTo(0, -wPx * 0.9); ctx.lineTo(0, wPx * 0.9); ctx.stroke()
-    }
-    ctx.restore()
+    if (def?.hullCode === 'FORT') this.drawFort(s, lenPx, col, sh, t)
+    else if (sh.destroyed) this.drawWreck(s, lenPx, t)
+    else this.drawVessel(st, sh, def, s, lenPx, wPx, col, t)
 
     // výběrový/cílový prstenec
-    if (sh.id === this.selectedId) { ctx.strokeStyle = CLR.own; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(s.x, s.y, lenPx + 6, 0, Math.PI * 2); ctx.stroke() }
-    if (sh.id === this.targetId) { ctx.strokeStyle = CLR.enemy; ctx.lineWidth = 2; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(s.x, s.y, lenPx + 9, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]) }
+    if (!sh.destroyed && sh.id === this.selectedId) { ctx.strokeStyle = CLR.own; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(s.x, s.y, lenPx + 6, 0, Math.PI * 2); ctx.stroke() }
+    if (!sh.destroyed && sh.id === this.targetId) { ctx.strokeStyle = CLR.enemy; ctx.lineWidth = 2; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.arc(s.x, s.y, lenPx + 9, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]) }
 
     // jméno (u vlastních vždy, u ostatních dle identifikace)
-    const showName = sh.side === 'player' || (con && con.idQuality >= 1) || sh.side === 'neutral'
+    const showName = !sh.destroyed && (sh.side === 'player' || (con && con.idQuality >= 1) || sh.side === 'neutral')
     if (showName && this.scale > 0.015) {
       ctx.fillStyle = this.colorFor(sh.side)
       ctx.font = '11px monospace'
@@ -380,6 +581,214 @@ export class TacticalPlot {
         ctx.fillText(def.name, s.x + lenPx + 8, s.y + 8)
       }
     }
+  }
+
+  /** Obrys trupu (příď +x, záď -x) v lokálním rámci; len a poloviční šířka hb. */
+  private hullPath(len: number, hb: number): void {
+    const ctx = this.ctx
+    ctx.beginPath()
+    ctx.moveTo(len * 0.95, 0)
+    ctx.quadraticCurveTo(len * 0.62, hb, len * 0.12, hb)
+    ctx.lineTo(-len * 0.55, hb * 0.9)
+    ctx.quadraticCurveTo(-len * 0.72, hb * 0.5, -len * 0.72, 0)
+    ctx.quadraticCurveTo(-len * 0.72, -hb * 0.5, -len * 0.55, -hb * 0.9)
+    ctx.lineTo(len * 0.12, -hb)
+    ctx.quadraticCurveTo(len * 0.62, -hb, len * 0.95, 0)
+    ctx.closePath()
+  }
+
+  /** Procedurální 2.5D loď: stín, brázda, stínovaný trup, nafouklé plachty, vlajka. */
+  private drawVessel(st: SimState, sh: ShipState, def: ShipClassDef | undefined,
+    s: Vec2, lenPx: number, wPx: number, col: string, t: number): void {
+    const ctx = this.ctx
+    const ph = sh.id * 1.7
+    const hb = wPx * 0.5
+    const spd = Math.hypot(sh.vel.x, sh.vel.y)
+    const surr = sh.surrendered
+    const moving = spd > 0.4 && !surr
+
+    // vržený stín na hladinu (obrazovkový rámec) — dodá výšku
+    ctx.save()
+    ctx.globalAlpha = 0.26; ctx.fillStyle = '#03121a'
+    ctx.beginPath()
+    ctx.ellipse(s.x + lenPx * 0.14, s.y + lenPx * 0.2, lenPx * 0.82, hb * 1.7, -sh.heading, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.restore()
+
+    ctx.save()
+    ctx.translate(s.x, s.y)
+    ctx.rotate(-sh.heading)
+
+    // brázda za lodí (kýlová voda) — v lokálním rámci, míří na záď (-x)
+    if (moving && lenPx > 9) {
+      const wl = lenPx * (1.3 + Math.min(2.4, spd * 0.3))
+      const g = ctx.createLinearGradient(-lenPx * 0.7, 0, -lenPx * 0.7 - wl, 0)
+      g.addColorStop(0, 'rgba(228,244,246,0.42)'); g.addColorStop(1, 'rgba(228,244,246,0)')
+      ctx.fillStyle = g
+      ctx.beginPath()
+      ctx.moveTo(-lenPx * 0.6, -hb * 0.9)
+      ctx.lineTo(-lenPx * 0.7 - wl, -hb * 3)
+      ctx.lineTo(-lenPx * 0.7 - wl, hb * 3)
+      ctx.lineTo(-lenPx * 0.6, hb * 0.9)
+      ctx.closePath(); ctx.fill()
+    }
+
+    // houpání (roll) — jemné zúžení boku podle času
+    const roll = 1 + 0.07 * Math.sin(t * 2.2 + ph)
+    ctx.scale(1, roll)
+
+    // příďová pěna
+    if (moving && lenPx > 9) {
+      ctx.strokeStyle = 'rgba(233,247,248,0.7)'; ctx.lineWidth = Math.max(1, lenPx * 0.07)
+      ctx.beginPath(); ctx.arc(lenPx * 0.85, 0, hb * 1.5, Math.PI * 0.62, Math.PI * 1.38); ctx.stroke()
+    }
+
+    ctx.globalAlpha = surr ? 0.72 : 1
+    // vodoryska (tmavší, o něco širší)
+    ctx.fillStyle = shade(col, -0.45); this.hullPath(lenPx * 1.02, hb * 1.12); ctx.fill()
+    // hlavní trup
+    ctx.fillStyle = col; this.hullPath(lenPx, hb); ctx.fill()
+    // paluba (světlejší, užší)
+    ctx.fillStyle = shade(col, 0.3); this.hullPath(lenPx * 0.78, hb * 0.5); ctx.fill()
+    // středový prkenný pás
+    ctx.strokeStyle = shade(col, -0.3); ctx.lineWidth = Math.max(0.6, lenPx * 0.04)
+    ctx.beginPath(); ctx.moveTo(lenPx * 0.82, 0); ctx.lineTo(-lenPx * 0.66, 0); ctx.stroke()
+    // dělové porty
+    if (lenPx > 16 && def && def.gunsPerBroadside) {
+      const gpb = Math.min(6, def.gunsPerBroadside)
+      ctx.fillStyle = shade(col, -0.55)
+      for (let i = 0; i < gpb; i++) {
+        const gx = lenPx * 0.42 - (gpb === 1 ? 0 : (i / (gpb - 1)) * lenPx * 0.95)
+        for (const sgn of [-1, 1]) {
+          ctx.beginPath(); ctx.arc(gx, sgn * hb * 0.95, Math.max(0.7, lenPx * 0.045), 0, Math.PI * 2); ctx.fill()
+        }
+      }
+    }
+    // obrys trupu
+    ctx.strokeStyle = shade(col, -0.5); ctx.lineWidth = Math.max(0.7, lenPx * 0.05)
+    this.hullPath(lenPx, hb); ctx.stroke()
+
+    // stěžně + plachty
+    const delta = st.wind.dir - sh.heading
+    const eff = sailEfficiency(offWindAngle(sh.heading, st.wind))
+    const nMast = lenPx >= 26 ? 3 : lenPx >= 15 ? 2 : 1
+    const sailUp = sh.sailsUp && !surr
+    const full = (0.3 + 0.7 * eff) * (0.35 + 0.65 * sh.trim)
+    const bl = hb * (1.1 + 2.2 * full)
+    const belly = { x: Math.cos(delta) * bl, y: -Math.sin(delta) * bl }
+    const yh = hb * 1.7
+    for (let m = 0; m < nMast; m++) {
+      const mx = nMast === 1 ? lenPx * 0.05 : lenPx * 0.45 - (m / (nMast - 1)) * lenPx * 0.95
+      if (!sailUp || lenPx < 9) {
+        ctx.strokeStyle = '#d9c9a6'; ctx.lineWidth = Math.max(0.8, lenPx * 0.06)
+        ctx.beginPath(); ctx.moveTo(mx, -yh * 0.8); ctx.lineTo(mx, yh * 0.8); ctx.stroke()
+      } else {
+        // plachta jako nafouklá čočka bulící po větru (k závětří)
+        ctx.beginPath()
+        ctx.moveTo(mx, -yh)
+        ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh)
+        ctx.quadraticCurveTo(mx + belly.x * 0.12, belly.y * 0.12, mx, -yh)
+        ctx.closePath()
+        ctx.fillStyle = 'rgba(244,247,244,0.96)'; ctx.fill()
+        ctx.fillStyle = 'rgba(84,104,116,0.22)'
+        ctx.beginPath()
+        ctx.moveTo(mx, -yh)
+        ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh)
+        ctx.quadraticCurveTo(mx + belly.x * 0.55, belly.y * 0.55, mx, -yh)
+        ctx.closePath(); ctx.fill()
+        ctx.strokeStyle = 'rgba(150,165,165,0.9)'; ctx.lineWidth = Math.max(0.5, lenPx * 0.028)
+        ctx.beginPath(); ctx.moveTo(mx, -yh); ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh); ctx.stroke()
+      }
+      // stěžeň
+      ctx.fillStyle = '#2a1f14'; ctx.beginPath(); ctx.arc(mx, 0, Math.max(0.8, lenPx * 0.055), 0, Math.PI * 2); ctx.fill()
+    }
+
+    // záďová vlajka (vlaje časem, barva strany)
+    if (lenPx > 10) {
+      const fx = -lenPx * 0.62, wv = Math.sin(t * 7 + ph)
+      ctx.fillStyle = surr ? '#eef4f4' : col
+      ctx.beginPath()
+      ctx.moveTo(fx, 0)
+      ctx.lineTo(fx, -hb * 1.3)
+      ctx.lineTo(fx - lenPx * 0.32, -hb * 1.3 + wv * hb * 0.5)
+      ctx.closePath(); ctx.fill()
+    }
+    ctx.globalAlpha = 1
+    ctx.restore()
+
+    // kouř z poškození (obrazovkový rámec, unáší po větru) — jen zblízka
+    const hp = def?.hullPoints ?? 100
+    const frac = sh.hull / hp
+    if (frac < 0.55 && lenPx > 9) {
+      const wd = fromAngle(st.wind.dir)
+      const n = frac < 0.28 ? 3 : 1
+      for (let i = 0; i < n; i++) {
+        const drift = ((t * 0.5 + i * 0.33 + ph) % 1)
+        const px = s.x + wd.x * drift * lenPx * 2.4
+        const py = s.y - wd.y * drift * lenPx * 2.4 - drift * lenPx * 0.6
+        ctx.globalAlpha = (1 - drift) * 0.32
+        ctx.fillStyle = '#5a5550'
+        ctx.beginPath(); ctx.arc(px, py, lenPx * (0.25 + drift * 0.5), 0, Math.PI * 2); ctx.fill()
+      }
+      ctx.globalAlpha = 1
+    }
+  }
+
+  /** Pobřežní pevnost/baštu — kamenný bastion s cimbuřím a vlajkou. */
+  private drawFort(s: Vec2, lenPx: number, col: string, sh: ShipState, t: number): void {
+    const ctx = this.ctx
+    const R = Math.max(9, lenPx * 0.7)
+    const hexPath = (rad: number): void => {
+      ctx.beginPath()
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2 + Math.PI / 6
+        const px = s.x + Math.cos(a) * rad, py = s.y + Math.sin(a) * rad
+        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)
+      }
+      ctx.closePath()
+    }
+    // stín
+    ctx.globalAlpha = 0.3; ctx.fillStyle = '#03121a'
+    ctx.beginPath(); ctx.ellipse(s.x + R * 0.2, s.y + R * 0.24, R, R * 0.9, 0, 0, Math.PI * 2); ctx.fill()
+    ctx.globalAlpha = 1
+    // kamenná zeď
+    ctx.fillStyle = '#6f6a62'; hexPath(R); ctx.fill()
+    ctx.strokeStyle = '#43403a'; ctx.lineWidth = 2; hexPath(R); ctx.stroke()
+    // nasvícené nádvoří
+    ctx.fillStyle = '#89837a'; hexPath(R * 0.62); ctx.fill()
+    // cimbuří — kostky po obvodu
+    ctx.fillStyle = '#5a564f'
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2 + Math.PI / 6
+      const px = s.x + Math.cos(a) * R, py = s.y + Math.sin(a) * R
+      ctx.fillRect(px - R * 0.1, py - R * 0.1, R * 0.2, R * 0.2)
+    }
+    // vlajka strany uprostřed
+    const wv = Math.sin(t * 6 + sh.id)
+    ctx.strokeStyle = '#2a1f14'; ctx.lineWidth = Math.max(1, R * 0.08)
+    ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(s.x, s.y - R * 0.8); ctx.stroke()
+    ctx.fillStyle = col
+    ctx.beginPath()
+    ctx.moveTo(s.x, s.y - R * 0.8)
+    ctx.lineTo(s.x + R * 0.5, s.y - R * 0.66 + wv * R * 0.08)
+    ctx.lineTo(s.x, s.y - R * 0.5)
+    ctx.closePath(); ctx.fill()
+  }
+
+  /** Vrak potopené lodi — tmavé trosky, mizí (boom efekt řeší výbuch zvlášť). */
+  private drawWreck(s: Vec2, lenPx: number, t: number): void {
+    const ctx = this.ctx
+    ctx.globalAlpha = 0.5
+    ctx.fillStyle = '#2a2620'
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + t * 0.2
+      const px = s.x + Math.cos(a) * lenPx * 0.5, py = s.y + Math.sin(a) * lenPx * 0.35
+      ctx.beginPath(); ctx.arc(px, py, Math.max(1.2, lenPx * 0.12), 0, Math.PI * 2); ctx.fill()
+    }
+    // rozlévající se skvrna
+    ctx.globalAlpha = 0.18; ctx.fillStyle = '#1a1712'
+    ctx.beginPath(); ctx.arc(s.x, s.y, lenPx * 0.7, 0, Math.PI * 2); ctx.fill()
+    ctx.globalAlpha = 1
   }
 
   private drawBall(b: Ball): void {
