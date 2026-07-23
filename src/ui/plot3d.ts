@@ -357,9 +357,9 @@ export class Plot3D implements Renderer {
       grass.position.y = 0.6; grp.add(grass)
       // kopec (dóm) pro reliéf
       const hill = new THREE.Mesh(
-        new THREE.SphereGeometry(r * 0.72, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
-        new THREE.MeshStandardMaterial({ color: 0x5f8a42, roughness: 1, flatShading: true }))
-      hill.scale.y = (r * 0.42) / (r * 0.72)
+        new THREE.SphereGeometry(r * 0.75, 40, 24, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshStandardMaterial({ color: 0x5f8a42, roughness: 1 }))
+      hill.scale.y = (r * 0.4) / (r * 0.75)
       hill.position.set(cx, 0.6, -cy); hill.castShadow = true; hill.receiveShadow = true; grp.add(hill)
       grass.receiveShadow = true; beach.receiveShadow = true
       // stromy (kužely)
@@ -498,7 +498,7 @@ export class Plot3D implements Renderer {
     const t = now / 1000
 
     this.animateWater(t)
-    this.syncShips(st)
+    this.syncShips(st, t)
     this.syncBalls(st)
     this.emitWakes3(st, now)
     this.updateParticles(now)
@@ -528,7 +528,7 @@ export class Plot3D implements Renderer {
     this.waterGeo.computeVertexNormals()
   }
 
-  private syncShips(st: SimState): void {
+  private syncShips(st: SimState, t: number): void {
     const seen = new Set<number>()
     for (const sh of st.ships) {
       const isPlayer = sh.side === 'player'
@@ -539,8 +539,10 @@ export class Plot3D implements Renderer {
       if (!g) { g = this.buildShip(sh); this.ships.set(sh.id, g); this.scene.add(g) }
       const p = con?.memory ? con.pos : this.rpos(sh)
       const v3 = this.w3(p)
-      g.position.set(v3.x, 0, v3.z)
-      g.rotation.y = sh.heading
+      // jemné houpání na vlnách (bob + roll + pitch) — loď žije na hladině
+      const ph = sh.id * 1.7, amp = sh.destroyed ? 0 : 1
+      g.position.set(v3.x, Math.sin(t * 1.3 + ph) * hitRadius(sh) * 0.04 * amp, v3.z)
+      g.rotation.set(Math.sin(t * 0.9 + ph * 1.3) * 0.03 * amp, sh.heading, Math.sin(t * 1.1 + ph) * 0.05 * amp, 'YXZ')
       g.visible = !sh.destroyed
       // plachty dolů / loď vzdána
       const sails = g.userData.sails as THREE.Mesh[] | undefined
