@@ -234,6 +234,8 @@ export interface SimEvent {
   slowdown?: boolean
   /** světová pozice pro efekt plotu (kouř, výbuch, šplouchnutí) */
   pos?: Vec2
+  /** světový úhel efektu (rad) — např. směr boku, ze kterého padla salva */
+  dir?: number
   speaker?: Speaker
 }
 

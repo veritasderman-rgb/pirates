@@ -16,8 +16,16 @@ const ZOOM_MIN = 0.008 // px/m (hodně oddálené)
 const ZOOM_MAX = 4.0   // px/m (těsně u lodí — jednotlivé koule a detaily)
 const PICK_PX = 18
 
-/** krátkodobý vizuální efekt (záblesk děl, jiskra zásahu, výbuch) ve světě */
-interface Fx { x: number; y: number; born: number; kind: 'muzzle' | 'hit' | 'boom' }
+/** částice krátkodobého efektu ve světě (kouř, záblesk, šplouchnutí, tříska…) */
+type PKind = 'smoke' | 'flash' | 'splash' | 'drop' | 'spark' | 'debris' | 'fire' | 'ring'
+interface Particle {
+  x: number; y: number       // světová pozice (počátek)
+  vx: number; vy: number     // světový drift (m/s, animuje se reálným časem)
+  born: number; life: number // ms
+  kind: PKind
+  r0: number; r1: number     // světový poloměr začátek→konec (m)
+  col: string
+}
 
 const CLR = {
   own: '#4fd0e0', ownDim: '#2f8a96',
@@ -62,7 +70,10 @@ export class TacticalPlot {
   compression = 1
   selectedId: number | null = null
   targetId: number | null = null
-  private fx: Fx[] = []
+  private parts: Particle[] = []
+  private shake = 0        // síla otřesu kamery (px), tlumí se
+  private snapT = 0        // performance.now() posledního snapshotu
+  private exSim = 0        // extrapolovaný sim-čas (s) od posledního snapshotu
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')!
@@ -80,6 +91,7 @@ export class TacticalPlot {
 
   setState(state: SimState): void {
     this.state = state
+    this.snapT = performance.now()
     if (this.followId === null) {
       const own = state.ships.find(s => s.side === 'player' && !s.destroyed)
       if (own) { this.followId = own.id; this.selectedId = own.id }
@@ -88,13 +100,65 @@ export class TacticalPlot {
     // Každý snapshot nese ČERSTVOU dávku (worker události po odeslání maže),
     // takže zpracuj vždy — i když se sim čas nezměnil (pauza, ruční palba).
     const now = performance.now()
+    const wx = Math.cos(state.wind.dir) * state.wind.speed
+    const wy = Math.sin(state.wind.dir) * state.wind.speed
     for (const e of state.events) {
       if (!e.pos) continue
-      if (e.kind === 'gunFire') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'muzzle' })
-      else if (e.kind === 'ballHit') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'hit' })
-      else if (e.kind === 'shipDestroyed') this.fx.push({ x: e.pos.x, y: e.pos.y, born: now, kind: 'boom' })
+      if (e.kind === 'gunFire') this.emitGunFire(e.pos, e.dir ?? 0, e.count ?? 6, wx, wy, now)
+      else if (e.kind === 'ballMiss') this.emitSplash(e.pos, now)
+      else if (e.kind === 'ballHit') this.emitHit(e.pos, now)
+      else if (e.kind === 'shipDestroyed') this.emitBoom(e.pos, wx, wy, now)
     }
-    if (this.fx.length > 200) this.fx.splice(0, this.fx.length - 200)
+    if (this.parts.length > 900) this.parts.splice(0, this.parts.length - 900)
+  }
+
+  private push(p: Particle): void { this.parts.push(p) }
+
+  /** Salva: záblesky u hlavní + valící se kouř ven z boku a po větru. */
+  private emitGunFire(pos: Vec2, dir: number, count: number, wx: number, wy: number, now: number): void {
+    const dx = Math.cos(dir), dy = Math.sin(dir), kx = -dy, ky = dx
+    const guns = Math.min(count, 12)
+    for (let i = 0; i < guns; i++) {
+      const along = (guns > 1 ? i / (guns - 1) - 0.5 : 0)
+      const ox = pos.x + kx * along * 26, oy = pos.y + ky * along * 26
+      const out = 3 + Math.random() * 4
+      if (i % 3 === 0) this.push({ x: ox + dx * 7, y: oy + dy * 7, vx: dx * 9, vy: dy * 9, born: now, life: 130, kind: 'flash', r0: 4, r1: 9, col: '#ffe6a0' })
+      this.push({ x: ox + dx * 9, y: oy + dy * 9, vx: dx * out + wx * 0.3 + (Math.random() - 0.5) * 3, vy: dy * out + wy * 0.3 + (Math.random() - 0.5) * 3, born: now, life: 1400 + Math.random() * 600, kind: 'smoke', r0: 5, r1: 26, col: '#c9c4b6' })
+    }
+  }
+
+  /** Šplouchnutí koule do vody: rozbíhavý prstenec + vystřikující kapky. */
+  private emitSplash(pos: Vec2, now: number): void {
+    this.push({ x: pos.x, y: pos.y, vx: 0, vy: 0, born: now, life: 520, kind: 'ring', r0: 1, r1: 15, col: '#cdeef0' })
+    const n = 5 + Math.floor(Math.random() * 4)
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * 6.283, sp = 4 + Math.random() * 8
+      this.push({ x: pos.x, y: pos.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, born: now, life: 420, kind: 'drop', r0: 2.2, r1: 0.5, col: '#eafbfc' })
+    }
+  }
+
+  /** Zásah trupu: jiskry + dřevěné třísky + obláček kouře. */
+  private emitHit(pos: Vec2, now: number): void {
+    const n = 6 + Math.floor(Math.random() * 5)
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * 6.283, sp = 6 + Math.random() * 12, wood = Math.random() < 0.5
+      this.push({ x: pos.x, y: pos.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, born: now, life: wood ? 700 : 300, kind: wood ? 'debris' : 'spark', r0: wood ? 2.5 : 1.8, r1: wood ? 1 : 0.5, col: wood ? '#5a4326' : '#ffc070' })
+    }
+    this.push({ x: pos.x, y: pos.y, vx: 0, vy: 0, born: now, life: 800, kind: 'smoke', r0: 3, r1: 14, col: '#b8b2a2' })
+  }
+
+  /** Potopení: ohnivé jádro, rázová vlna, spousta trosek a kouřový sloup. */
+  private emitBoom(pos: Vec2, wx: number, wy: number, now: number): void {
+    this.push({ x: pos.x, y: pos.y, vx: 0, vy: 0, born: now, life: 600, kind: 'ring', r0: 2, r1: 60, col: '#ffd68a' })
+    for (let i = 0; i < 3; i++) this.push({ x: pos.x, y: pos.y, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, born: now, life: 500 + i * 120, kind: 'fire', r0: 8 - i * 2, r1: 24 + i * 8, col: '#c85028' })
+    const nd = 16 + Math.floor(Math.random() * 10)
+    for (let i = 0; i < nd; i++) {
+      const a = Math.random() * 6.283, sp = 8 + Math.random() * 22
+      this.push({ x: pos.x, y: pos.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, born: now, life: 900 + Math.random() * 500, kind: 'debris', r0: 2 + Math.random() * 2, r1: 0.5, col: Math.random() < 0.5 ? '#4a3620' : '#2a2018' })
+    }
+    for (let i = 0; i < 8; i++) this.push({ x: pos.x, y: pos.y, vx: wx * 0.4 + (Math.random() - 0.5) * 4, vy: wy * 0.4 + (Math.random() - 0.5) * 4 + 2, born: now, life: 1800 + Math.random() * 900, kind: 'smoke', r0: 6, r1: 40, col: '#8a8478' })
+    const sp = this.w2s(pos), cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
+    if (sp.x > -60 && sp.x < cw + 60 && sp.y > -60 && sp.y < ch + 60) this.shake = Math.min(16, this.shake + 9)
   }
 
   start(): void {
@@ -105,6 +169,11 @@ export class TacticalPlot {
   stop(): void { cancelAnimationFrame(this.raf) }
 
   follow(id: number | null): void { this.followId = id; this.userPanned = false }
+
+  /** Vizuální pozice: snapshot + extrapolace rychlostí (plynulý pohyb 60 fps). */
+  private rpos(o: { pos: Vec2; vel: Vec2 }): Vec2 {
+    return { x: o.pos.x + o.vel.x * this.exSim, y: o.pos.y + o.vel.y * this.exSim }
+  }
 
   // ---------- souřadnice ----------
   private w2s(p: Vec2): Vec2 {
@@ -161,7 +230,7 @@ export class TacticalPlot {
   recenter(): void {
     this.userPanned = false
     const f = this.state?.ships.find(s => s.id === this.followId)
-    if (f) this.cam = { ...f.pos }
+    if (f) this.cam = { ...this.rpos(f) }
   }
 
   /** loď/kontakt nejblíž kliknutí (do PICK_PX), nebo null. */
@@ -193,11 +262,27 @@ export class TacticalPlot {
     this.lastT = now
     if (!st) { ctx.clearRect(0, 0, cw, ch); return }
 
-    // kamera sleduje loď
+    // extrapolace sim-času od posledního snapshotu (plynulý pohyb 60 fps).
+    // pozice = snapshot + vel × exSim; comp škáluje kompresi času, strop
+    // brání přestřelení, když snapshoty na chvíli váznou
+    this.exSim = Math.min((now - this.snapT) / 1000 * (this.compression || 0), 2.0)
+
+    // kamera plynule sleduje (extrapolovanou) loď — měkký dojezd místo skoku
     if (this.followId !== null && !this.userPanned) {
       const f = st.ships.find(s => s.id === this.followId)
-      if (f) this.cam = { ...f.pos }
+      if (f) {
+        const tp = this.rpos(f)
+        this.cam.x += (tp.x - this.cam.x) * 0.18
+        this.cam.y += (tp.y - this.cam.y) * 0.18
+      }
     }
+
+    // otřes kamery při blízkém výbuchu — dočasný posun cam (px→svět), tlumí se.
+    // Sea je fullscreen fill (posun nevytvoří okraj); posunou se jen vlny/lodě.
+    const shk = this.shake
+    const ox = shk ? (Math.random() - 0.5) * shk : 0
+    const oy = shk ? (Math.random() - 0.5) * shk : 0
+    if (shk) { this.cam.x += ox / this.scale; this.cam.y -= oy / this.scale }
 
     const t = now / 1000
     this.drawSea(st, t)
@@ -209,6 +294,10 @@ export class TacticalPlot {
     for (const b of st.balls) this.drawBall(b)
     for (const sh of st.ships) this.drawShip(st, sh)
     this.drawFx()
+    if (shk) {
+      this.cam.x -= ox / this.scale; this.cam.y += oy / this.scale
+      this.shake *= 0.88; if (this.shake < 0.3) this.shake = 0
+    }
     this.drawVignette()
     this.drawWindRose(st)
   }
@@ -258,6 +347,12 @@ export class TacticalPlot {
         ctx.moveTo(sx - crest.x * L, sy - crest.y * L)
         ctx.lineTo(sx + crest.x * L, sy + crest.y * L)
         ctx.stroke()
+        // pěnová čepička na nejvyšších hřebenech (roste se silou větru)
+        if (detail && b > 0.72 && st.wind.speed > 6) {
+          ctx.globalAlpha = (b - 0.72) / 0.28 * 0.5
+          ctx.fillStyle = CLR.foam
+          ctx.beginPath(); ctx.arc(sx, sy, Math.max(0.8, L * 0.28), 0, Math.PI * 2); ctx.fill()
+        }
       }
     }
     // třpytivé odlesky (rychlejší, řidší)
@@ -302,19 +397,19 @@ export class TacticalPlot {
     }
     // vlastní vybraná loď — skutečná třída a pozice (bez maskování)
     const sel = st.ships.find(s => s.id === this.selectedId && s.side === 'player' && !s.destroyed)
-    if (sel) { const d = SHIP_CLASSES[sel.classId]; if (d) ring(sel.pos, d.gunRange, CLR.own) }
+    if (sel) { const d = SHIP_CLASSES[sel.classId]; if (d) ring(this.rpos(sel), d.gunRange, CLR.own) }
 
     // cizí loď — přes senzorový kontakt: respektuj masku (classGuess), paměť
     // (poslední známá pos) a jen když je třída aspoň částečně identifikovaná
     const enemyRing = (id: number): void => {
       const sh = st.ships.find(s => s.id === id && !s.destroyed)
       if (!sh) return
-      if (sh.side === 'player') { const d = SHIP_CLASSES[sh.classId]; if (d) ring(sh.pos, d.gunRange, CLR.own); return }
+      if (sh.side === 'player') { const d = SHIP_CLASSES[sh.classId]; if (d) ring(this.rpos(sh), d.gunRange, CLR.own); return }
       const con = st.contacts.player.find(c => c.shipId === id)
       if (!con || con.idQuality < 1) return
       const d = SHIP_CLASSES[con.classGuess ?? sh.classId]
       if (!d || d.gunRange <= 0) return
-      ring(con.memory ? con.pos : sh.pos, d.gunRange, CLR.enemy)
+      ring(con.memory ? con.pos : this.rpos(sh), d.gunRange, CLR.enemy)
     }
     if (this.targetId !== null) enemyRing(this.targetId)
     // pobřežní pevnosti — dosah je pro hráče klíčový (jen identifikované)
@@ -324,27 +419,50 @@ export class TacticalPlot {
     }
   }
 
-  /** Krátkodobé efekty: záblesk děl (kouř), jiskra zásahu, výbuch potopení. */
+  /** Vykreslení částic (kouř, záblesky, šplouchance, jiskry, trosky, výbuchy). */
   private drawFx(): void {
     const ctx = this.ctx, now = performance.now()
-    this.fx = this.fx.filter(f => now - f.born < (f.kind === 'boom' ? 900 : 500))
-    for (const f of this.fx) {
-      const s = this.w2s(f), age = (now - f.born) / (f.kind === 'boom' ? 900 : 500)
+    this.parts = this.parts.filter(p => now - p.born < p.life)
+    ctx.lineCap = 'round'
+    for (const p of this.parts) {
+      const age = (now - p.born) / p.life
+      const ageS = (now - p.born) / 1000
+      const s = this.w2s({ x: p.x + p.vx * ageS, y: p.y + p.vy * ageS })
+      const r = Math.max(0.8, (p.r0 + (p.r1 - p.r0) * age) * this.scale)
       const a = 1 - age
-      if (f.kind === 'muzzle') {
-        // kouřový obláček + záblesk (velikost roste s časem, mizí) — čitelné i z výšky jako salva
-        const r = (4 + age * 10) * Math.max(0.5, Math.min(2, this.scale * 20))
-        ctx.globalAlpha = a * 0.5; ctx.fillStyle = '#c8c0a8'
-        ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
-        ctx.globalAlpha = a; ctx.fillStyle = '#ffdf8a'
-        ctx.beginPath(); ctx.arc(s.x, s.y, 3, 0, Math.PI * 2); ctx.fill()
-      } else if (f.kind === 'hit') {
-        ctx.globalAlpha = a; ctx.fillStyle = '#ffb060'
-        ctx.beginPath(); ctx.arc(s.x, s.y, 2 + age * 5, 0, Math.PI * 2); ctx.fill()
-      } else {
-        const r = (6 + age * 26) * Math.max(0.7, Math.min(3, this.scale * 20))
-        ctx.globalAlpha = a * 0.8; ctx.fillStyle = age < 0.4 ? '#ffd070' : '#8a5030'
-        ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
+      switch (p.kind) {
+        case 'smoke':
+          ctx.globalAlpha = a * 0.5; ctx.fillStyle = p.col
+          ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill(); break
+        case 'fire': {
+          // bloom halo (měkká záře) + ohnivé jádro
+          const gl = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 2.4)
+          gl.addColorStop(0, `rgba(255,180,90,${a * 0.5})`); gl.addColorStop(1, 'rgba(255,180,90,0)')
+          ctx.globalAlpha = 1; ctx.fillStyle = gl
+          ctx.beginPath(); ctx.arc(s.x, s.y, r * 2.4, 0, Math.PI * 2); ctx.fill()
+          ctx.globalAlpha = a * 0.9; ctx.fillStyle = age < 0.5 ? '#ffd26a' : p.col
+          ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill(); break
+        }
+        case 'flash': {
+          const gl = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, r * 3)
+          gl.addColorStop(0, `rgba(255,230,150,${a * 0.6})`); gl.addColorStop(1, 'rgba(255,230,150,0)')
+          ctx.globalAlpha = 1; ctx.fillStyle = gl
+          ctx.beginPath(); ctx.arc(s.x, s.y, r * 3, 0, Math.PI * 2); ctx.fill()
+          ctx.globalAlpha = a; ctx.fillStyle = p.col
+          ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
+          ctx.globalAlpha = a * 0.6; ctx.fillStyle = '#fff6d8'
+          ctx.beginPath(); ctx.arc(s.x, s.y, r * 0.5, 0, Math.PI * 2); ctx.fill(); break
+        }
+        case 'splash': case 'drop': case 'spark':
+          ctx.globalAlpha = a; ctx.fillStyle = p.col
+          ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill(); break
+        case 'debris': {
+          ctx.globalAlpha = a; ctx.fillStyle = p.col
+          const d = Math.max(1, r); ctx.fillRect(s.x - d / 2, s.y - d / 2, d, d); break
+        }
+        case 'ring':
+          ctx.globalAlpha = a * 0.7; ctx.strokeStyle = p.col; ctx.lineWidth = Math.max(1, 2.5 * a)
+          ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.stroke(); break
       }
     }
     ctx.globalAlpha = 1
@@ -554,16 +672,20 @@ export class TacticalPlot {
       }
       return
     }
-    const s = this.w2s(sh.pos)
+    const s = this.w2s(this.rpos(sh))
     const r = hitRadius(sh)
     const lenPx = Math.max(7, r * this.scale * 1.95)
     const wPx = Math.max(3, lenPx * 0.42)
     const col = this.colorFor(sh.side, sh.destroyed || sh.surrendered)
     const t = performance.now() / 1000
+    // dělové porty odvoď z MASKOVANÉ třídy (classGuess), ne skutečné — jinak
+    // by zamaskovaná Q-loď prozradila výzbroj (počet portů) před identifikací
+    const visDef = isPlayer ? def : (SHIP_CLASSES[con?.classGuess ?? sh.classId] ?? def)
+    const gunPorts = visDef?.gunsPerBroadside ?? 0
 
     if (def?.hullCode === 'FORT') this.drawFort(s, lenPx, col, sh, t)
     else if (sh.destroyed) this.drawWreck(s, lenPx, t)
-    else this.drawVessel(st, sh, def, s, lenPx, wPx, col, t)
+    else this.drawVessel(st, sh, def, s, lenPx, wPx, col, t, gunPorts)
 
     // výběrový/cílový prstenec
     if (!sh.destroyed && sh.id === this.selectedId) { ctx.strokeStyle = CLR.own; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(s.x, s.y, lenPx + 6, 0, Math.PI * 2); ctx.stroke() }
@@ -599,7 +721,7 @@ export class TacticalPlot {
 
   /** Procedurální 2.5D loď: stín, brázda, stínovaný trup, nafouklé plachty, vlajka. */
   private drawVessel(st: SimState, sh: ShipState, def: ShipClassDef | undefined,
-    s: Vec2, lenPx: number, wPx: number, col: string, t: number): void {
+    s: Vec2, lenPx: number, wPx: number, col: string, t: number, gunPorts: number): void {
     const ctx = this.ctx
     const ph = sh.id * 1.7
     const hb = wPx * 0.5
@@ -653,9 +775,9 @@ export class TacticalPlot {
     // středový prkenný pás
     ctx.strokeStyle = shade(col, -0.3); ctx.lineWidth = Math.max(0.6, lenPx * 0.04)
     ctx.beginPath(); ctx.moveTo(lenPx * 0.82, 0); ctx.lineTo(-lenPx * 0.66, 0); ctx.stroke()
-    // dělové porty
-    if (lenPx > 16 && def && def.gunsPerBroadside) {
-      const gpb = Math.min(6, def.gunsPerBroadside)
+    // dělové porty (počet dle MASKOVANÉ třídy — viz gunPorts)
+    if (lenPx > 16 && gunPorts > 0) {
+      const gpb = Math.min(6, gunPorts)
       ctx.fillStyle = shade(col, -0.55)
       for (let i = 0; i < gpb; i++) {
         const gx = lenPx * 0.42 - (gpb === 1 ? 0 : (i / (gpb - 1)) * lenPx * 0.95)
@@ -667,6 +789,14 @@ export class TacticalPlot {
     // obrys trupu
     ctx.strokeStyle = shade(col, -0.5); ctx.lineWidth = Math.max(0.7, lenPx * 0.05)
     this.hullPath(lenPx, hb); ctx.stroke()
+    // sluncem nasvícený okraj (rim light) — světlý obrys posunutý ke slunci
+    const ssx = SUN.x, ssy = -SUN.y
+    const lsx = Math.cos(sh.heading) * ssx - Math.sin(sh.heading) * ssy
+    const lsy = Math.sin(sh.heading) * ssx + Math.cos(sh.heading) * ssy
+    const rim = Math.max(0.5, lenPx * 0.045)
+    ctx.save(); ctx.translate(lsx * rim, lsy * rim)
+    ctx.strokeStyle = 'rgba(255,244,208,0.5)'; ctx.lineWidth = Math.max(0.5, lenPx * 0.035)
+    this.hullPath(lenPx * 0.98, hb * 0.98); ctx.stroke(); ctx.restore()
 
     // stěžně + plachty
     const delta = st.wind.dir - sh.heading
@@ -701,6 +831,24 @@ export class TacticalPlot {
       }
       // stěžeň
       ctx.fillStyle = '#2a1f14'; ctx.beginPath(); ctx.arc(mx, 0, Math.max(0.8, lenPx * 0.055), 0, Math.PI * 2); ctx.fill()
+    }
+
+    // čnělka (bowsprit) + přední trojúhelníková plachta (kosatka)
+    if (lenPx > 14) {
+      const foreMx = nMast === 1 ? lenPx * 0.05 : lenPx * 0.45
+      const tip = lenPx * 1.06
+      ctx.strokeStyle = '#2a1f14'; ctx.lineWidth = Math.max(0.6, lenPx * 0.05)
+      ctx.beginPath(); ctx.moveTo(lenPx * 0.88, 0); ctx.lineTo(tip, 0); ctx.stroke()
+      if (sailUp) {
+        const side = -Math.sin(delta) >= 0 ? 1 : -1  // závětrná strana
+        ctx.beginPath()
+        ctx.moveTo(tip, 0)
+        ctx.quadraticCurveTo((tip + foreMx) / 2, side * hb * (0.4 + full * 0.8), foreMx, side * hb * 0.15)
+        ctx.lineTo(foreMx, -side * hb * 0.15)
+        ctx.closePath()
+        ctx.fillStyle = 'rgba(240,244,242,0.92)'; ctx.fill()
+        ctx.strokeStyle = 'rgba(150,165,165,0.85)'; ctx.lineWidth = Math.max(0.5, lenPx * 0.025); ctx.stroke()
+      }
     }
 
     // záďová vlajka (vlaje časem, barva strany)
@@ -793,7 +941,7 @@ export class TacticalPlot {
 
   private drawBall(b: Ball): void {
     const ctx = this.ctx
-    const s = this.w2s(b.pos)
+    const s = this.w2s(this.rpos(b))
     const col = b.shot === 'chain' ? '#c8d8e0' : b.shot === 'grape' ? '#e0a060' : CLR.ball
     // tracer podél rychlosti — při přiblížení dlouhý (vidíš dráhu každé koule),
     // z výšky splyne do drobné tečky (salva). y: svět nahoru → obrazovka dolů.
@@ -819,7 +967,7 @@ export class TacticalPlot {
       if (t) dest = t.pos
     }
     if (!dest) return
-    const a = this.w2s(sel.pos), b = this.w2s(dest)
+    const a = this.w2s(this.rpos(sel)), b = this.w2s(dest)
     ctx.strokeStyle = '#3aa0b0'; ctx.setLineDash([6, 6]); ctx.lineWidth = 1
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([])
     ctx.fillStyle = '#3aa0b0'; ctx.beginPath(); ctx.arc(b.x, b.y, 3, 0, Math.PI * 2); ctx.fill()
