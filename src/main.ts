@@ -4,6 +4,8 @@
  */
 import { SimBridge } from './worker/bridge'
 import { TacticalPlot } from './ui/plot'
+import { Plot3D } from './ui/plot3d'
+import type { Renderer } from './ui/renderer'
 import { Panels, esc, fmtTime } from './ui/panels'
 import { UIController } from './ui/input'
 import { AudioManager } from './ui/audio'
@@ -14,8 +16,22 @@ import type { Scenario, SimState } from './sim/types'
 
 const canvas = document.getElementById('plot') as HTMLCanvasElement
 
+// přepínač rendereru: ?r=3d nebo uložená volba → WebGL 3D, jinak 2D Canvas.
+// Přepínač jen přenačte stránku s druhým rendererem — 2D hra zůstává netknutá.
+const use3d = new URLSearchParams(location.search).get('r') === '3d'
+  || localStorage.getItem('r3d') === '1'
 const bridge = new SimBridge()
-const plot = new TacticalPlot(canvas)
+const plot: Renderer = use3d ? new Plot3D(canvas) : new TacticalPlot(canvas)
+
+const rBtn = document.createElement('button')
+rBtn.textContent = use3d ? '2D' : '3D'
+rBtn.title = 'Přepnout renderer (2D Canvas ↔ 3D WebGL)'
+rBtn.style.cssText = 'position:absolute;top:6px;right:120px;z-index:9'
+rBtn.addEventListener('click', () => {
+  localStorage.setItem('r3d', use3d ? '0' : '1')
+  location.reload()
+})
+document.body.appendChild(rBtn)
 const panels = new Panels(
   document.getElementById('topbar')!,
   document.getElementById('hud-left')!,
