@@ -20,6 +20,14 @@ const SIDE_COL: Record<string, number> = {
 }
 const colorFor = (side: string): number => SIDE_COL[side] ?? 0xcfeef2
 
+/** částice efektu (sprite ve světě) — kouř, záblesk, šplouchnutí, výbuch */
+interface Part {
+  sp: THREE.Sprite
+  x0: number; y0: number; z0: number
+  vx: number; vy: number; vz: number
+  born: number; life: number; r0: number; r1: number; fade: number
+}
+
 export class Plot3D implements Renderer {
   selectedId: number | null = null
   targetId: number | null = null
@@ -40,6 +48,10 @@ export class Plot3D implements Renderer {
   private raf = 0
 
   private ships = new Map<number, THREE.Group>()
+  private balls = new Map<number, THREE.Mesh>()
+  private parts: Part[] = []
+  private discTex!: THREE.Texture
+  private ballGeo = new THREE.SphereGeometry(1, 8, 8)
   private islandsBuilt = false
   private waterGeo!: THREE.PlaneGeometry
   private waterBase!: Float32Array
@@ -71,6 +83,7 @@ export class Plot3D implements Renderer {
     this.scene.add(this.sun.target)
     this.scene.add(new THREE.HemisphereLight(0xd6f0fb, 0x1f4a60, 0.7))
 
+    this.discTex = this.makeDiscTex()
     this.buildWater()
 
     // výběrový / cílový prstenec + kružnice dostřelu na hladině
@@ -83,6 +96,85 @@ export class Plot3D implements Renderer {
     this.resize()
     window.addEventListener('resize', () => this.resize())
     this.bindInput()
+  }
+
+  private makeDiscTex(): THREE.Texture {
+    const c = document.createElement('canvas'); c.width = c.height = 64
+    const ctx = c.getContext('2d')!
+    const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+    g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.6, 'rgba(255,255,255,0.55)'); g.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64)
+    return new THREE.CanvasTexture(c)
+  }
+
+  private spawn(x: number, y: number, z: number, vx: number, vy: number, vz: number,
+    life: number, r0: number, r1: number, color: number, fade: number, now: number): void {
+    const mat = new THREE.SpriteMaterial({ map: this.discTex, color, transparent: true, opacity: fade, depthWrite: false })
+    const sp = new THREE.Sprite(mat); sp.position.set(x, y, z); sp.scale.setScalar(r0)
+    this.scene.add(sp)
+    this.parts.push({ sp, x0: x, y0: y, z0: z, vx, vy, vz, born: now, life, r0, r1, fade })
+    if (this.parts.length > 700) { const old = this.parts.shift()!; this.scene.remove(old.sp); old.sp.material.dispose() }
+  }
+
+  private emitGun3(pos: Vec2, dir: number, count: number, wx: number, wy: number, now: number): void {
+    const dx = Math.cos(dir), dz = -Math.sin(dir), kx = dz, kz = -dx  // podél boku
+    const n = Math.min(10, count)
+    for (let i = 0; i < n; i++) {
+      const along = (n > 1 ? i / (n - 1) - 0.5 : 0) * 26
+      const px = pos.x + kx * along, pz = -pos.y + kz * along
+      if (i % 3 === 0) this.spawn(px + dx * 7, 7, pz + dz * 7, dx * 10, 4, dz * 10, 160, 6, 12, 0xffe6a0, 1, now)
+      this.spawn(px + dx * 9, 7, pz + dz * 9, dx * 5 + wx * 0.3, 6, dz * 5 - wy * 0.3, 1500, 6, 34, 0xc9c4b6, 0.55, now)
+    }
+  }
+  private emitSplash3(pos: Vec2, now: number): void {
+    for (let i = 0; i < 7; i++) {
+      const a = Math.random() * 6.283, sp = 5 + Math.random() * 9
+      this.spawn(pos.x, 1, -pos.y, Math.cos(a) * sp, 10 + Math.random() * 8, Math.sin(a) * sp, 500, 3, 1, 0xeafbfc, 0.9, now)
+    }
+  }
+  private emitHit3(pos: Vec2, now: number): void {
+    for (let i = 0; i < 9; i++) {
+      const a = Math.random() * 6.283, sp = 8 + Math.random() * 14, wood = Math.random() < 0.5
+      this.spawn(pos.x, 6, -pos.y, Math.cos(a) * sp, 6 + Math.random() * 8, Math.sin(a) * sp, wood ? 700 : 280, 3, 1, wood ? 0x5a4326 : 0xffc070, 1, now)
+    }
+    this.spawn(pos.x, 8, -pos.y, 0, 4, 0, 900, 4, 18, 0xb8b2a2, 0.6, now)
+  }
+  private emitBoom3(pos: Vec2, wx: number, wy: number, now: number): void {
+    for (let i = 0; i < 4; i++) this.spawn(pos.x, 6 + i * 3, -pos.y, (Math.random() - 0.5) * 6, 6, (Math.random() - 0.5) * 6, 550 + i * 100, 10, 34, 0xff8a3a, 0.95, now)
+    const nd = 18
+    for (let i = 0; i < nd; i++) {
+      const a = Math.random() * 6.283, sp = 10 + Math.random() * 24
+      this.spawn(pos.x, 6, -pos.y, Math.cos(a) * sp, 14 + Math.random() * 14, Math.sin(a) * sp, 1000, 3, 1, 0x3a2a1a, 1, now)
+    }
+    for (let i = 0; i < 8; i++) this.spawn(pos.x, 8, -pos.y, wx * 0.4 + (Math.random() - 0.5) * 5, 10 + Math.random() * 6, -wy * 0.4 + (Math.random() - 0.5) * 5, 2000, 8, 48, 0x8a8478, 0.55, now)
+  }
+
+  private updateParticles(now: number): void {
+    this.parts = this.parts.filter(pt => {
+      const age = (now - pt.born) / pt.life
+      if (age >= 1) { this.scene.remove(pt.sp); pt.sp.material.dispose(); return false }
+      const s = (now - pt.born) / 1000
+      pt.sp.position.set(pt.x0 + pt.vx * s, pt.y0 + pt.vy * s, pt.z0 + pt.vz * s)
+      pt.sp.scale.setScalar(pt.r0 + (pt.r1 - pt.r0) * age)
+      ;(pt.sp.material as THREE.SpriteMaterial).opacity = (1 - age) * pt.fade
+      return true
+    })
+  }
+
+  private syncBalls(st: SimState): void {
+    const seen = new Set<number>()
+    for (const b of st.balls) {
+      seen.add(b.id)
+      let m = this.balls.get(b.id)
+      if (!m) {
+        const col = b.shot === 'chain' ? 0xc8d8e0 : b.shot === 'grape' ? 0xe0a060 : 0xffe08a
+        m = new THREE.Mesh(this.ballGeo, new THREE.MeshBasicMaterial({ color: col }))
+        m.scale.setScalar(2.2); this.balls.set(b.id, m); this.scene.add(m)
+      }
+      const p = this.rpos(b)
+      m.position.set(p.x, 6, -p.y)
+    }
+    for (const [id, m] of this.balls) if (!seen.has(id)) { this.scene.remove(m); this.balls.delete(id) }
   }
 
   private makeRing(col: number, inner = 1, opacity = 0.8): THREE.Mesh {
@@ -129,6 +221,17 @@ export class Plot3D implements Renderer {
       if (own) { this.followId = own.id; this.selectedId = own.id }
     }
     if (!this.islandsBuilt) { this.buildIslands(state.islands); this.islandsBuilt = true }
+    // z událostí snapshotu vytvoř 3D efekty (kouř, šplouchnutí, zásah, výbuch)
+    const now = performance.now()
+    const wx = Math.cos(state.wind.dir) * state.wind.speed
+    const wy = Math.sin(state.wind.dir) * state.wind.speed
+    for (const e of state.events) {
+      if (!e.pos) continue
+      if (e.kind === 'gunFire') this.emitGun3(e.pos, e.dir ?? 0, e.count ?? 6, wx, wy, now)
+      else if (e.kind === 'ballMiss') this.emitSplash3(e.pos, now)
+      else if (e.kind === 'ballHit') this.emitHit3(e.pos, now)
+      else if (e.kind === 'shipDestroyed') this.emitBoom3(e.pos, wx, wy, now)
+    }
   }
 
   start(): void {
@@ -332,6 +435,8 @@ export class Plot3D implements Renderer {
 
     this.animateWater(t)
     this.syncShips(st)
+    this.syncBalls(st)
+    this.updateParticles(now)
     this.updateRings(st)
     this.updateCamera(st)
     this.renderer.render(this.scene, this.camera)
