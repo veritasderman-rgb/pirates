@@ -11,6 +11,7 @@ import { NO_GO_DEG } from '../sim/constants'
 import { fromAngle } from '../sim/vec'
 import { hitRadius } from '../sim/weapons'
 import { hashNoise } from '../sim/rng'
+import { SCENARIOS } from '../data/missions'
 
 const ZOOM_MIN = 0.008 // px/m (hodně oddálené)
 const ZOOM_MAX = 4.0   // px/m (těsně u lodí — jednotlivé koule a detaily)
@@ -242,14 +243,16 @@ export class TacticalPlot {
       const d = Math.hypot(s.x - sx, s.y - sy)
       if (d < bd) { bd = d; best = id }
     }
+    // hit-test na VYKRESLENÉ (extrapolované) pozici, ať klik sedí i při vysoké
+    // kompresi/zoomu, kdy je loď mezi snapshoty posunutá dál než pick radius
     for (const sh of this.state.ships) {
       if (sh.destroyed) continue
-      if (sh.side === 'player') consider(sh.id, sh.pos)
+      if (sh.side === 'player') consider(sh.id, this.rpos(sh))
     }
     for (const c of this.state.contacts.player) {
       const sh = this.state.ships.find(s => s.id === c.shipId)
       // paměťový kontakt se vybírá na poslední ZNÁMÉ pozici, ne na živé
-      if (sh && !sh.destroyed) consider(c.shipId, c.memory ? c.pos : sh.pos)
+      if (sh && !sh.destroyed) consider(c.shipId, c.memory ? c.pos : this.rpos(sh))
     }
     return best
   }
@@ -298,7 +301,7 @@ export class TacticalPlot {
       this.cam.x -= ox / this.scale; this.cam.y += oy / this.scale
       this.shake *= 0.88; if (this.shake < 0.3) this.shake = 0
     }
-    this.drawVignette()
+    this.drawVignette(st)
     this.drawWindRose(st)
   }
 
@@ -373,13 +376,16 @@ export class TacticalPlot {
     ctx.globalAlpha = 1
   }
 
-  /** Jemná viněta — ztmavené rohy pro atmosféru a fokus na střed dění. */
-  private drawVignette(): void {
+  /** Viněta tónovaná do atmosféry mise (ambient) — mood na okrajích, střed jasný. */
+  private drawVignette(st: SimState): void {
     const ctx = this.ctx, cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
-    const g = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * 0.42,
-      cw / 2, ch / 2, Math.max(cw, ch) * 0.72)
-    g.addColorStop(0, 'rgba(4,14,20,0)')
-    g.addColorStop(1, 'rgba(4,14,20,0.4)')
+    const amb = SCENARIOS[st.scenarioId]?.ambient ?? '#0a2630'
+    const n = parseInt(amb.slice(1), 16)
+    const r = ((n >> 16) & 255) * 0.55 | 0, g2 = ((n >> 8) & 255) * 0.55 | 0, b = (n & 255) * 0.55 | 0
+    const g = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * 0.46,
+      cw / 2, ch / 2, Math.max(cw, ch) * 0.74)
+    g.addColorStop(0, `rgba(${r},${g2},${b},0)`)
+    g.addColorStop(1, `rgba(${r},${g2},${b},0.38)`)
     ctx.fillStyle = g
     ctx.fillRect(0, 0, cw, ch)
   }
@@ -772,6 +778,15 @@ export class TacticalPlot {
     ctx.fillStyle = col; this.hullPath(lenPx, hb); ctx.fill()
     // paluba (světlejší, užší)
     ctx.fillStyle = shade(col, 0.3); this.hullPath(lenPx * 0.78, hb * 0.5); ctx.fill()
+    // dřevěná paluba: podélná prkna + záďová kajuta
+    if (lenPx > 18) {
+      ctx.strokeStyle = shade(col, 0.14); ctx.lineWidth = Math.max(0.4, lenPx * 0.02)
+      for (const fy of [-0.28, 0.28]) {
+        ctx.beginPath(); ctx.moveTo(lenPx * 0.66, hb * fy); ctx.lineTo(-lenPx * 0.5, hb * fy); ctx.stroke()
+      }
+      ctx.fillStyle = shade(col, -0.28)
+      ctx.beginPath(); ctx.ellipse(-lenPx * 0.48, 0, lenPx * 0.13, hb * 0.4, 0, 0, Math.PI * 2); ctx.fill()
+    }
     // středový prkenný pás
     ctx.strokeStyle = shade(col, -0.3); ctx.lineWidth = Math.max(0.6, lenPx * 0.04)
     ctx.beginPath(); ctx.moveTo(lenPx * 0.82, 0); ctx.lineTo(-lenPx * 0.66, 0); ctx.stroke()
@@ -860,6 +875,11 @@ export class TacticalPlot {
       ctx.lineTo(fx, -hb * 1.3)
       ctx.lineTo(fx - lenPx * 0.32, -hb * 1.3 + wv * hb * 0.5)
       ctx.closePath(); ctx.fill()
+      // emblém na vlajce (světlá tečka)
+      if (!surr && lenPx > 16) {
+        ctx.fillStyle = shade(col, 0.6)
+        ctx.beginPath(); ctx.arc(fx - lenPx * 0.12, -hb * 1.02, Math.max(0.6, hb * 0.2), 0, Math.PI * 2); ctx.fill()
+      }
     }
     ctx.globalAlpha = 1
     ctx.restore()
