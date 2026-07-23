@@ -52,6 +52,7 @@ export class Plot3D implements Renderer {
   private parts: Part[] = []
   private wakeAt = new Map<number, number>()
   private discTex!: THREE.Texture
+  private sunDisc!: THREE.Sprite
   private ballGeo = new THREE.SphereGeometry(1, 8, 8)
   private islandsBuilt = false
   private waterGeo!: THREE.PlaneGeometry
@@ -69,6 +70,9 @@ export class Plot3D implements Renderer {
     this.renderer.setClearColor(0x0a2630, 1)
     this.renderer.shadowMap.enabled = true
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    // filmové tónování — profesionálnější kontrast a jasy (AAA look)
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping
+    this.renderer.toneMappingExposure = 1.15
 
     // obloha jako gradient + odrazová mapa (envmap) pro realistickou vodu
     const sky = this.makeSky()
@@ -90,6 +94,10 @@ export class Plot3D implements Renderer {
     this.scene.add(new THREE.HemisphereLight(0xd6f0fb, 0x1f4a60, 0.7))
 
     this.discTex = this.makeDiscTex()
+    // sluneční kotouč na obloze (bez mlhy, daleko, sleduje kameru)
+    this.sunDisc = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.discTex, color: 0xfff4d0, transparent: true, opacity: 0.95, fog: false, depthWrite: false, depthTest: false }))
+    this.sunDisc.scale.setScalar(600)
+    this.scene.add(this.sunDisc)
     this.buildWater()
 
     // výběrový / cílový prstenec + kružnice dostřelu na hladině
@@ -603,6 +611,7 @@ export class Plot3D implements Renderer {
     this.sun.position.set(this.camTarget.x + SUN_DIR.x * 700, SUN_DIR.y * 700, this.camTarget.z + SUN_DIR.z * 700)
     this.sun.target.position.copy(this.camTarget)
     this.sun.target.updateMatrixWorld()
+    this.sunDisc.position.set(this.camera.position.x + SUN_DIR.x * 4000, SUN_DIR.y * 4000, this.camera.position.z + SUN_DIR.z * 4000)
   }
 
   private bindInput(): void {
