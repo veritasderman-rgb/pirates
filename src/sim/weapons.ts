@@ -102,7 +102,7 @@ export function fireBroadside(
 
   state.events.push({
     t: state.t, kind: 'gunFire', shipId: ship.id, side: ship.side, count: n,
-    pos: { ...ship.pos },
+    pos: { ...ship.pos }, dir: broadsideDir(ship, side),
     speaker: ship.doctrine === 'player' ? 'gunner' : undefined,
     text: ship.doctrine === 'player'
       ? `${side === 'port' ? 'Levobok' : 'Pravobok'} — PAL! (${n} děl, ${shotName(shot)})`
