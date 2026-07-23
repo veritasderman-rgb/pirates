@@ -891,21 +891,25 @@ export class TacticalPlot {
         ctx.strokeStyle = '#d9c9a6'; ctx.lineWidth = Math.max(0.8, lenPx * 0.06)
         ctx.beginPath(); ctx.moveTo(mx, -yh * 0.8); ctx.lineTo(mx, yh * 0.8); ctx.stroke()
       } else {
+        // v kleštích (nízká efektivita) plachty plandají — rychlý třepot místo bulení
+        const fb = eff < 0.18
+          ? { x: Math.cos(delta) * hb * 0.25 + Math.sin(t * 17 + m) * hb * 0.6, y: -Math.sin(delta) * hb * 0.25 + Math.cos(t * 15 + m) * hb * 0.5 }
+          : belly
         // plachta jako nafouklá čočka bulící po větru (k závětří)
         ctx.beginPath()
         ctx.moveTo(mx, -yh)
-        ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh)
-        ctx.quadraticCurveTo(mx + belly.x * 0.12, belly.y * 0.12, mx, -yh)
+        ctx.quadraticCurveTo(mx + fb.x, fb.y, mx, yh)
+        ctx.quadraticCurveTo(mx + fb.x * 0.12, fb.y * 0.12, mx, -yh)
         ctx.closePath()
         ctx.fillStyle = 'rgba(244,247,244,0.96)'; ctx.fill()
         ctx.fillStyle = 'rgba(84,104,116,0.22)'
         ctx.beginPath()
         ctx.moveTo(mx, -yh)
-        ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh)
-        ctx.quadraticCurveTo(mx + belly.x * 0.55, belly.y * 0.55, mx, -yh)
+        ctx.quadraticCurveTo(mx + fb.x, fb.y, mx, yh)
+        ctx.quadraticCurveTo(mx + fb.x * 0.55, fb.y * 0.55, mx, -yh)
         ctx.closePath(); ctx.fill()
         ctx.strokeStyle = 'rgba(150,165,165,0.9)'; ctx.lineWidth = Math.max(0.5, lenPx * 0.028)
-        ctx.beginPath(); ctx.moveTo(mx, -yh); ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(mx, -yh); ctx.quadraticCurveTo(mx + fb.x, fb.y, mx, yh); ctx.stroke()
       }
       // stěžeň
       ctx.fillStyle = '#2a1f14'; ctx.beginPath(); ctx.arc(mx, 0, Math.max(0.8, lenPx * 0.055), 0, Math.PI * 2); ctx.fill()
@@ -1034,8 +1038,17 @@ export class TacticalPlot {
     ctx.strokeStyle = col; ctx.globalAlpha = 0.55; ctx.lineWidth = Math.max(1, this.scale * 1.4)
     ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(s.x, s.y); ctx.stroke(); ctx.globalAlpha = 1
     const r = Math.max(1.4, Math.min(5, this.scale * 3))
+    // stín letící koule na hladině (posun ke slunci-opačně) → pocit výšky
+    if (this.scale > 0.06) {
+      ctx.globalAlpha = 0.28; ctx.fillStyle = '#03121a'
+      ctx.beginPath(); ctx.ellipse(s.x + r * 1.6, s.y + r * 2.2, r * 0.9, r * 0.6, 0, 0, Math.PI * 2); ctx.fill()
+      ctx.globalAlpha = 1
+    }
     ctx.fillStyle = col
     ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
+    // horní odlesk na kouli
+    ctx.fillStyle = 'rgba(255,255,235,0.7)'
+    ctx.beginPath(); ctx.arc(s.x - r * 0.3, s.y - r * 0.3, r * 0.4, 0, Math.PI * 2); ctx.fill()
   }
 
   private drawCourse(st: SimState): void {
