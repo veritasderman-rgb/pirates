@@ -141,6 +141,8 @@ export class Panels {
   private renderRight(state: SimState, ui: UiState): void {
     // cíl
     let tHtml = '<div class="dim">— žádný cíl —</div>'
+      + '<div class="fc-hint">Klikni na nepřítele na mapě = zaměřit. '
+      + 'Prázdná voda = kurz vybrané lodi. Pak PAL levobok/pravobok (Q/R) nebo AUTO.</div>'
     const tgt = state.ships.find(s => s.id === ui.targetId)
     if (tgt) {
       const con = state.contacts.player.find(c => c.shipId === tgt.id)
@@ -207,7 +209,7 @@ export class Panels {
       + `<span class="shot-desc">${esc(shotDesc[ui.shot])}</span></div>`
       + `<div class="obg"><button data-act="fire-port" ${sh.reloadPort > 0 ? 'disabled' : ''} title="Vypálit salvu z levoboku (cíl musí být v úhlu boku a dostřelu)">PAL levobok</button>`
       + `<button data-act="fire-stbd" ${sh.reloadStbd > 0 ? 'disabled' : ''} title="Vypálit salvu z pravoboku">PAL pravobok</button>`
-      + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}" title="Automatická palba: loď sama pálí bok, který nese na nejzraněnějšího nepřítele v dostřelu">AUTO</button></div>`
+      + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}" title="Přepínač: AUTO = loď sama pálí bok nesoucí na nejzraněnějšího nepřítele v dostřelu. Vypnuto = drží palbu, střílíš ručně (PAL levobok/pravobok, Q/R).">${auto ? 'AUTO: pálí sám' : 'AUTO: drží palbu'}</button></div>`
       + `<div class="obg"><button data-act="demand" title="Vyzvi zaměřený cíl ke kapitulaci. Šance roste s jeho poškozením, ztrátami posádky a tvou přesilou. Když spustí vlajku, můžeš ho obsadit.">výzva ke kapitulaci</button>`
       + `<button data-act="board" title="Boarding: přilehni k zaměřenému cíli na ~60 m a obsaď ho výsadkem. Rozhoduje převaha posádky (kartáč předtím pomáhá). Vzdaná loď se skoro nebrání. Zajmutá loď = kořist (víc bodů než potopení).">boarding</button></div>`
   }
