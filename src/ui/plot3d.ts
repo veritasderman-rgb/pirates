@@ -11,6 +11,7 @@ import type { Island, ShipState, SimState, Vec2 } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
 import { hitRadius } from '../sim/weapons'
 import { hashNoise } from '../sim/rng'
+import { storminess } from '../sim/wind'
 
 const DIST_MIN = 70, DIST_MAX = 4200
 const SUN_DIR = new THREE.Vector3(-0.55, 1.05, -0.83).normalize()
@@ -59,6 +60,9 @@ export class Plot3D implements Renderer {
   private waterBase!: Float32Array
   private waterMesh!: THREE.Mesh
   private sun!: THREE.DirectionalLight
+  private storm = 0
+  private rain!: THREE.LineSegments
+  private rainDrops: { x: number; z: number; y: number; len: number }[] = []
   private selRing: THREE.Mesh
   private tgtRing: THREE.Mesh
   private selRange: THREE.Mesh
@@ -74,10 +78,10 @@ export class Plot3D implements Renderer {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
     this.renderer.toneMappingExposure = 1.15
 
-    // obloha jako gradient + odrazová mapa (envmap) pro realistickou vodu
+    // obloha: barevné pozadí (mění se s počasím) + odrazová mapa (envmap) z gradientu
     const sky = this.makeSky()
-    this.scene.background = sky
-    this.scene.fog = new THREE.Fog(0x9fc6d6, 2000, 7600)
+    this.scene.background = new THREE.Color(0x8fbdcf)
+    this.scene.fog = new THREE.Fog(0x8fbdcf, 2000, 7600)
     const pmrem = new THREE.PMREMGenerator(this.renderer)
     this.scene.environment = pmrem.fromEquirectangular(sky).texture
     pmrem.dispose()
@@ -99,6 +103,7 @@ export class Plot3D implements Renderer {
     this.sunDisc.scale.setScalar(600)
     this.scene.add(this.sunDisc)
     this.buildWater()
+    this.buildRain()
 
     // výběrový / cílový prstenec + kružnice dostřelu na hladině
     this.selRing = this.makeRing(0x4fd0e0)
@@ -240,6 +245,22 @@ export class Plot3D implements Renderer {
     water.receiveShadow = true
     this.waterMesh = water
     this.scene.add(water)
+  }
+
+  /** Déšť jako úsečky padající kolem kamery (viditelný jen za bouřky). */
+  private buildRain(): void {
+    const N = 900
+    const pos = new Float32Array(N * 2 * 3)
+    for (let i = 0; i < N; i++) {
+      this.rainDrops.push({ x: (Math.random() - 0.5) * 700, z: (Math.random() - 0.5) * 700, y: Math.random() * 500, len: 8 + Math.random() * 8 })
+    }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    const mat = new THREE.LineBasicMaterial({ color: 0xcfe0e8, transparent: true, opacity: 0.35, fog: true })
+    this.rain = new THREE.LineSegments(geo, mat)
+    this.rain.frustumCulled = false
+    this.rain.visible = false
+    this.scene.add(this.rain)
   }
 
   private resize(): void {
@@ -497,6 +518,8 @@ export class Plot3D implements Renderer {
     this.exSim = Math.min((now - this.snapT) / 1000 * (this.compression || 0), 2.0)
     const t = now / 1000
 
+    this.storm += (storminess(st.wind.speed) - this.storm) * 0.03
+    this.updateWeather()
     this.animateWater(t)
     this.syncShips(st, t)
     this.syncBalls(st)
@@ -505,6 +528,42 @@ export class Plot3D implements Renderer {
     this.updateRings(st)
     this.updateCamera(st)
     this.renderer.render(this.scene, this.camera)
+  }
+
+  /** Aplikuje počasí (0 klid .. 1 bouřka) na mlhu, oblohu, slunce, vodu a déšť. */
+  private updateWeather(): void {
+    const s = this.storm
+    // obloha + mlha: za bouřky tmavší šedá a hustší
+    const skyR = 0x8f - (0x8f - 0x44) * s, skyG = 0xbd - (0xbd - 0x4c) * s, skyB = 0xcf - (0xcf - 0x54) * s
+    const sky = (skyR << 16) | (skyG << 8) | skyB
+    ;(this.scene.background as THREE.Color).setHex(sky)
+    this.scene.fog!.color.setHex(sky)
+    ;(this.scene.fog as THREE.Fog).near = 2000 - s * 900
+    ;(this.scene.fog as THREE.Fog).far = 7600 - s * 4200
+    // slunce slábne, kotouč mizí
+    this.sun.intensity = 1.25 - s * 0.7
+    ;(this.sunDisc.material as THREE.SpriteMaterial).opacity = 0.95 * (1 - s)
+    // voda tmavne a je drsnější (matnější odraz)
+    const wm = this.waterMesh.material as THREE.MeshStandardMaterial
+    wm.roughness = 0.52 + s * 0.3
+    wm.envMapIntensity = 0.55 * (1 - s * 0.7)
+    // déšť
+    this.rain.visible = s > 0.32
+    if (this.rain.visible) {
+      ;(this.rain.material as THREE.LineBasicMaterial).opacity = (s - 0.32) / 0.68 * 0.5
+      const pos = this.rain.geometry.attributes.position.array as Float32Array
+      const cx = this.camTarget.x, cz = this.camTarget.z
+      const fall = 260 + s * 180, dt = 0.016
+      for (let i = 0; i < this.rainDrops.length; i++) {
+        const d = this.rainDrops[i]
+        d.y -= fall * dt
+        if (d.y < 0) { d.y = 420 + Math.random() * 80; d.x = (Math.random() - 0.5) * 700; d.z = (Math.random() - 0.5) * 700 }
+        const j = i * 6
+        pos[j] = cx + d.x; pos[j + 1] = d.y; pos[j + 2] = cz + d.z
+        pos[j + 3] = cx + d.x + 2; pos[j + 4] = d.y - d.len; pos[j + 5] = cz + d.z + 2
+      }
+      this.rain.geometry.attributes.position.needsUpdate = true
+    }
   }
 
   private animateWater(t: number): void {
