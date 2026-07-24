@@ -12,17 +12,27 @@ export interface Profile {
   money: number
   up: Upgrades
   cleared: string[]   // id misí, které už byly poprvé dokončeny (plná odměna jen jednou)
+  flagship: string    // třída aktuálně velené vlajkové lodi
+  fleet: string[]     // vlastněné trupy (loděnice)
 }
 
 const KEY = 'pirates.profile.v1'
-const fresh = (): Profile => ({ money: 0, up: { gun: 0, hull: 0, speed: 0, acc: 0, board: 0 }, cleared: [] })
+/** Startovní trup — mrštná šalupa, jako v úvodní misi. */
+export const STARTER_HULL = 'sloop-albion'
+const fresh = (): Profile => ({
+  money: 0, up: { gun: 0, hull: 0, speed: 0, acc: 0, board: 0 }, cleared: [],
+  flagship: STARTER_HULL, fleet: [STARTER_HULL],
+})
 
 export function loadProfile(): Profile {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return fresh()
-    const p = JSON.parse(raw) as Profile
-    return { ...fresh(), ...p, up: { ...fresh().up, ...p.up } }
+    const p = JSON.parse(raw) as Partial<Profile>
+    const f = fresh()
+    const fleet = Array.isArray(p.fleet) && p.fleet.length ? p.fleet : f.fleet
+    const flagship = p.flagship && fleet.includes(p.flagship) ? p.flagship : fleet[0]
+    return { ...f, ...p, up: { ...f.up, ...p.up }, fleet, flagship }
   } catch { return fresh() }
 }
 export function saveProfile(p: Profile): void {
@@ -57,6 +67,27 @@ export function modsFrom(up: Upgrades): ShipMods {
     board: 1 + up.board * UPGRADE_DEFS.board.per,
   }
 }
+
+/**
+ * Loděnice — trupy Královského námořnictva, které si hráč může koupit jako
+ * vlajkovou loď. Pořadí = eskalace síly i ceny. Startovní šalupu má zdarma;
+ * dražší trupy unesou víc děl a pevnějsí bok, ale hůř projedou mělčinu.
+ * Cena je v dublonech; jméno/staty tahá UI ze SHIP_CLASSES podle classId.
+ */
+export interface ShipyardEntry { classId: string; price: number; blurb: string }
+export const SHIPYARD: ShipyardEntry[] = [
+  { classId: 'sloop-albion', price: 0,
+    blurb: 'Startovní trup. Mrštná, mělký ponor, do bezvětří nasadí vesla. Slabá salva.' },
+  { classId: 'brig-albion', price: 280,
+    blurb: 'Vyvážená pracantka: silnější salva a dost posádky na výsadek. Nevesluje.' },
+  { classId: 'frigate-albion', price: 720,
+    blurb: 'Rychlá válečná loď — 13 děl na bok, nejlepší výcvik, daleký dohled.' },
+  { classId: 'liner-albion', price: 1600,
+    blurb: 'Řadová loď — plovoucí pevnost. Zdrcující bok a tlustý pancíř, ale těžkopádná.' },
+]
+
+export const shipEntry = (classId: string): ShipyardEntry | undefined =>
+  SHIPYARD.find(s => s.classId === classId)
 
 /** Odměna za misi: kořist (zajaté) vydělá výrazně víc než potopené. */
 export interface MissionResult {
