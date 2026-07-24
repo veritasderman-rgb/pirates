@@ -43,11 +43,11 @@ export function saveProfile(p: Profile): void {
 export const UPGRADE_DEFS: Record<UpKey, {
   name: string; desc: string; max: number; base: number; step: number; per: number
 }> = {
-  gun: { name: 'Těžší děla', desc: 'silnější boční salva', max: 5, base: 120, step: 110, per: 0.12 },
-  hull: { name: 'Zesílený trup', desc: 'víc pevnosti trupu', max: 5, base: 120, step: 110, per: 0.15 },
-  acc: { name: 'Cvičení dělmistrů', desc: 'přesnější palba (víc zásahů)', max: 5, base: 100, step: 90, per: 0.15 },
-  speed: { name: 'Měděné dno', desc: 'vyšší rychlost', max: 4, base: 150, step: 130, per: 0.09 },
-  board: { name: 'Nájezdníci', desc: 'silnější výsadek (rychlejší boarding)', max: 4, base: 130, step: 120, per: 0.22 },
+  gun: { name: 'Heavier Guns', desc: 'a stronger broadside', max: 5, base: 120, step: 110, per: 0.12 },
+  hull: { name: 'Reinforced Hull', desc: 'more hull strength', max: 5, base: 120, step: 110, per: 0.15 },
+  acc: { name: 'Gun Crew Training', desc: 'more accurate fire (more hits)', max: 5, base: 100, step: 90, per: 0.15 },
+  speed: { name: 'Copper Bottom', desc: 'higher speed', max: 4, base: 150, step: 130, per: 0.09 },
+  board: { name: 'Boarders', desc: 'a stronger boarding party (faster boarding)', max: 4, base: 130, step: 120, per: 0.22 },
 }
 export const UP_ORDER: UpKey[] = ['gun', 'hull', 'acc', 'speed', 'board']
 
@@ -77,13 +77,13 @@ export function modsFrom(up: Upgrades): ShipMods {
 export interface ShipyardEntry { classId: string; price: number; blurb: string }
 export const SHIPYARD: ShipyardEntry[] = [
   { classId: 'sloop-albion', price: 0,
-    blurb: 'Startovní trup. Mrštná, mělký ponor, do bezvětří nasadí vesla. Slabá salva.' },
+    blurb: 'Starting hull. Nimble, shallow draft, puts out oars in a calm. Weak broadside.' },
   { classId: 'brig-albion', price: 280,
-    blurb: 'Vyvážená pracantka: silnější salva a dost posádky na výsadek. Nevesluje.' },
+    blurb: 'A balanced workhorse: a stronger broadside and crew enough for a boarding party. No oars.' },
   { classId: 'frigate-albion', price: 720,
-    blurb: 'Rychlá válečná loď — 13 děl na bok, nejlepší výcvik, daleký dohled.' },
+    blurb: 'A fast warship — 13 guns to a side, the best gun crews, a long lookout.' },
   { classId: 'liner-albion', price: 1600,
-    blurb: 'Řadová loď — plovoucí pevnost. Zdrcující bok a tlustý pancíř, ale těžkopádná.' },
+    blurb: 'A ship of the line — a floating fortress. A crushing broadside and thick armour, but ponderous.' },
 ]
 
 export const shipEntry = (classId: string): ShipyardEntry | undefined =>
@@ -97,11 +97,11 @@ export interface RewardBreak { label: string; coins: number }
 
 export function computeReward(r: MissionResult, alreadyCleared: boolean): { total: number; parts: RewardBreak[] } {
   if (!r.win) return { total: 0, parts: [] }
-  const parts: RewardBreak[] = [{ label: 'Vítězství', coins: 100 }]
-  if (r.enemySunk) parts.push({ label: `Potopeno (${r.enemySunk}×)`, coins: r.enemySunk * 45 })
-  if (r.prizes) parts.push({ label: `Kořist — zajato (${r.prizes}×)`, coins: r.prizes * 140 })
-  if (r.objectivesDone) parts.push({ label: `Splněné cíle (${r.objectivesDone}×)`, coins: r.objectivesDone * 40 })
+  const parts: RewardBreak[] = [{ label: 'Victory', coins: 100 }]
+  if (r.enemySunk) parts.push({ label: `Sunk (${r.enemySunk}×)`, coins: r.enemySunk * 45 })
+  if (r.prizes) parts.push({ label: `Prizes — captured (${r.prizes}×)`, coins: r.prizes * 140 })
+  if (r.objectivesDone) parts.push({ label: `Objectives met (${r.objectivesDone}×)`, coins: r.objectivesDone * 40 })
   let total = parts.reduce((s, p) => s + p.coins, 0)
-  if (alreadyCleared) { total = Math.round(total * 0.4); parts.push({ label: 'Opakování (×0,4)', coins: 0 }) }
+  if (alreadyCleared) { total = Math.round(total * 0.4); parts.push({ label: 'Replay (×0.4)', coins: 0 }) }
   return { total, parts }
 }

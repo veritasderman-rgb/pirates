@@ -17,15 +17,15 @@ const HAVEN = 4
 
 export const mission04: Scenario = {
   id: 'mission04',
-  title: 'Depeše',
+  title: 'Dispatches',
   briefing:
-    'Zajaté rozkazy z Q-lodi mířily do castillského přístavu Punta Negra. '
-    + 'Než jsme stačili zasáhnout, vyplul odtud kurýr „Céfiro" s odpovědí — '
-    + 'a teď pádí zpátky pod ochranu pevnosti.\n\n'
-    + 'Dostihni ho a zajmi ty depeše. Céfiro je rychlejší na čistém větru, '
-    + 'ale musí k přístavu; uřízni mu cestu, drž nejlepší bod plavby a do '
-    + 'bezvětří nasaď vesla. Pozor na pevnost Punta Negra — její koule '
-    + 'dolétnou dál než tvoje.',
+    'The captured orders from the Q-ship were bound for the Castillan port of Punta '
+    + 'Negra. Before we could act, a courier — the "Céfiro" — put out from there with '
+    + 'a reply, and now she is racing back under the protection of the fortress.\n\n'
+    + 'Run her down and seize those dispatches. The Céfiro is faster on a clean wind, '
+    + 'but she must make for the harbor; cut off her path, hold your best point of '
+    + 'sail and put out oars in a calm. Beware the Punta Negra Fortress — its shot '
+    + 'carries farther than yours.',
   seed: 17031530,
   ambient: '#0e2b38',
   // vítr tak, aby plavba k přístavu (na východ) byla zadoboční (rychlá honba)
@@ -33,11 +33,11 @@ export const mission04: Scenario = {
 
   islands: [
     { id: 'negra', name: 'Punta Negra', kind: 'island', poly: circlePoly(6900, -300, 560, 16, 0.3),
-      desc: 'Punta Negra — černý čedičový mys; castillský přístav leží v jeho závětří, '
-        + 'hrdlo hlídá pobřežní baterie.' },
-    { id: 'sisters', name: 'Sestry', kind: 'island', poly: circlePoly(2800, 1500, 420, 12, 0.35),
-      desc: 'Dvě skaliska „Sestry" — úžina mezi nimi krátí cestu, kdo si troufne.' },
-    { id: 'shoal', name: 'Písečná lavice', kind: 'reef', depth: 3, poly: circlePoly(4200, -1100, 340, 10, 0.4) },
+      desc: 'Punta Negra — a black basalt cape; the Castillan port lies in its lee, '
+        + 'and a coastal battery guards the throat.' },
+    { id: 'sisters', name: 'The Sisters', kind: 'island', poly: circlePoly(2800, 1500, 420, 12, 0.35),
+      desc: 'Two rocks, "The Sisters" — the strait between them cuts the way short, for whoever dares.' },
+    { id: 'shoal', name: 'Sandbar', kind: 'reef', depth: 3, poly: circlePoly(4200, -1100, 340, 10, 0.4) },
   ],
 
   ships: [
@@ -53,29 +53,29 @@ export const mission04: Scenario = {
       classId: 'courier-castilla', side: 'enemy', name: 'Céfiro',
       pos: { x: 1400, y: -1200 }, vel: { x: 5, y: 0 }, heading: 0.2, doctrine: 'transit',
       nav: { kind: 'course', dest: { x: 6050, y: -300 }, arriveAtRest: false }, trim: 1,
-      desc: 'Kurýrní šalup „Céfiro" — rychlý jako vítr sám, beze zbraní. Veze to, '
-        + 'kvůli čemu tu jsme.',
+      desc: 'The courier sloop "Céfiro" — fast as the wind itself, unarmed. She carries '
+        + 'the thing we came for.',
     },
     {
       // baterie u hrdla přístavu, na vodě; natočená tak, aby nesla děla k moři (na západ)
-      classId: 'fort-coastal', side: 'enemy', name: 'Pevnost Punta Negra',
+      classId: 'fort-coastal', side: 'enemy', name: 'Punta Negra Fortress',
       pos: { x: 6250, y: -300 }, vel: { x: 0, y: 0 }, heading: Math.PI / 2, doctrine: 'fort',
       sailsUp: false, trim: 0,
-      desc: 'Pobřežní baterie Punta Negra — kamenné hrdlo castillského přístavu. '
-        + 'Její žhavé koule dolétnou dál než lodní děla.',
+      desc: 'The Punta Negra coastal battery — the stone throat of the Castillan port. '
+        + 'Its red-hot shot carries farther than ship\'s guns.',
     },
     {
-      classId: 'merch', side: 'neutral', name: 'Vjezd do přístavu',
+      classId: 'merch', side: 'neutral', name: 'Harbor Entrance',
       pos: { x: 6150, y: -300 }, vel: { x: 0, y: 0 }, heading: 0, doctrine: 'buoy',
       sailsUp: false, trim: 0,
-      desc: 'Vjezdová bóje přístavu Punta Negra — za ní je Céfiro pod ochranou '
-        + 'pevnosti a mimo náš dosah.',
+      desc: 'The entrance buoy of Punta Negra harbor — beyond it the Céfiro is under '
+        + 'the fortress\'s protection and out of our reach.',
     },
   ],
 
   objectives: [
-    { id: 'obj-catch', text: 'Dostihni kurýr Céfiro (na 400 m)', state: 'open' },
-    { id: 'obj-seize', text: 'Zajmi nebo potop kurýr, než dorazí do přístavu', state: 'open' },
+    { id: 'obj-catch', text: 'Run down the courier Céfiro (within 400 m)', state: 'open' },
+    { id: 'obj-seize', text: 'Capture or sink the courier before she reaches the harbor', state: 'open' },
   ],
 
   triggers: [
@@ -83,17 +83,17 @@ export const mission04: Scenario = {
       id: 'trg-brief', once: true, conditions: [{ kind: 'time', t: 3 }],
       actions: [{
         kind: 'comm', speaker: 'admiral',
-        text: 'admirál Thorne: „Ty depeše chci celé, kapitáne — ne na dně. Zpomalte '
-          + 'ho řetězovými do plachet a přinuťte ke kapitulaci. A nepleťte se pod '
-          + 'pevnost víc, než musíte."',
+        text: 'Admiral Thorne: "I want those dispatches whole, captain — not on the '
+          + 'seabed. Slow her with chain shot to the sails and force her to surrender. '
+          + 'And don\'t stray under the fortress any more than you must."',
       }],
     },
     {
       id: 'trg-wind-tip', once: true, conditions: [{ kind: 'time', t: 18 }],
       actions: [{
         kind: 'comm', speaker: 'mate',
-        text: 'Rusk: „Na čistém větru nám ujíždí. Uřízni mu to zkratší cestou přes '
-          + 'Sestry a chyť si zadoboční vítr — tam ho doženeme."',
+        text: 'Rusk: "On a clean wind she\'s pulling away. Cut her off by the shorter '
+          + 'way through the Sisters and catch a broad reach — that\'s where we run her down."',
       }],
     },
     {
@@ -103,8 +103,8 @@ export const mission04: Scenario = {
         { kind: 'objectiveComplete', objectiveId: 'obj-catch' },
         {
           kind: 'comm', speaker: 'gunner',
-          text: 'Hargrove: „Na dostřel! Řetězovou mu do ráhnoví, ať zpomalí — pak '
-            + 'kartáč na palubu a bereme ho do háku."',
+          text: 'Hargrove: "In range! Chain shot to her rigging to slow her — then grape '
+            + 'on the deck and we take her with the grapples."',
         },
       ],
     },
@@ -112,14 +112,14 @@ export const mission04: Scenario = {
       id: 'trg-courier-struck', once: true, conditions: [{ kind: 'shipSurrendered', shipId: COURIER }],
       actions: [
         { kind: 'objectiveComplete', objectiveId: 'obj-seize' },
-        { kind: 'winMission', text: 'Céfiro spustil vlajku — depeše jsou naše. De Vega odpovídal někomu výš.' },
+        { kind: 'winMission', text: 'The Céfiro struck her colours — the dispatches are ours. De Vega was answering to someone higher.' },
       ],
     },
     {
       id: 'trg-courier-sunk', once: true, conditions: [{ kind: 'shipDestroyed', shipId: COURIER }],
       actions: [
         { kind: 'objectiveComplete', objectiveId: 'obj-seize' },
-        { kind: 'winMission', text: 'Céfiro potopen. Depeše šly ke dnu s ním — ale posel se domů nevrátí.' },
+        { kind: 'winMission', text: 'The Céfiro sunk. The dispatches went down with her — but the messenger will not return home.' },
       ],
     },
     {
@@ -127,12 +127,12 @@ export const mission04: Scenario = {
       conditions: [{ kind: 'distanceBelow', shipA: COURIER, shipB: HAVEN, distance: 350 }],
       actions: [
         { kind: 'objectiveFail', objectiveId: 'obj-seize' },
-        { kind: 'loseMission', text: 'Céfiro proklouzl pod děla pevnosti. Depeše jsou pryč.' },
+        { kind: 'loseMission', text: 'The Céfiro slipped in under the guns of the fortress. The dispatches are gone.' },
       ],
     },
     {
       id: 'trg-player-lost', once: true, conditions: [{ kind: 'shipDestroyed', shipId: FORTUNA }],
-      actions: [{ kind: 'loseMission', text: 'HMS Fortuna se potopila pod děly Punta Negry.' }],
+      actions: [{ kind: 'loseMission', text: 'HMS Fortuna has sunk under the guns of Punta Negra.' }],
     },
   ],
 }

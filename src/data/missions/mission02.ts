@@ -18,65 +18,65 @@ const PIRATE_BRIG = 6
 
 export const mission02: Scenario = {
   id: 'mission02',
-  title: 'Konvoj v Soutěsce',
+  title: 'Convoy in the Narrows',
   briefing:
-    'HMS Ostříž vede dva kupce Soutěskou — úžinou mezi Kančím a Mlžným ostrovem. '
-    + 'Rozvědka varuje před pirátskou smečkou, která tu číhá v návětří.\n\n'
-    + 'Kupci plují k východnímu vjezdu; tvým úkolem je udržet je naživu a vyřídit '
-    + 'piráty. Využij ostrovy: v úžině se velké lodě špatně otáčejí a v závětří '
-    + 'ztrácejí vítr. Řetězovou salvou zpomal, plnou potop, kartáčem proděravěj '
-    + 'posádku před výsadkem.',
+    'HMS Goshawk leads two merchantmen through the Narrows — the strait between Boar '
+    + 'Island and Mist Island. Scouts warn of a pirate pack lying in wait to windward.\n\n'
+    + 'The merchantmen are making for the eastern entrance; your task is to keep them '
+    + 'alive and deal with the pirates. Use the islands: in the strait big ships turn '
+    + 'poorly and lose the wind in the lee. Slow them with chain shot, sink them with '
+    + 'round, and thin their crews with grape before a boarding party.',
   seed: 17020918,
   ambient: '#0e3340',
   wind: { baseDir: 0.1, baseSpeed: 7.5, rotationRate: 0.001, gustiness: 0.5 },
 
   islands: [
-    { id: 'boar', name: 'Kančí ostrov', kind: 'island', poly: circlePoly(2600, 1500, 700, 16, 0.3),
-      desc: 'Kančí ostrov — zalesněný hřbet nad severním břehem Soutěsky.' },
-    { id: 'mist', name: 'Mlžný ostrov', kind: 'island', poly: circlePoly(3200, -1600, 620, 14, 0.35),
-      desc: 'Mlžný ostrov — nižší, obklopený mělčinami; za ním vítr téměř ustává.' },
-    { id: 'reef-mid', name: 'Střední mělčina', kind: 'reef', depth: 3, poly: circlePoly(3000, 0, 300, 10, 0.4),
-      desc: 'Mělčina uprostřed úžiny — past pro těžké kýly.' },
+    { id: 'boar', name: 'Boar Island', kind: 'island', poly: circlePoly(2600, 1500, 700, 16, 0.3),
+      desc: 'Boar Island — a wooded ridge above the northern shore of the Narrows.' },
+    { id: 'mist', name: 'Mist Island', kind: 'island', poly: circlePoly(3200, -1600, 620, 14, 0.35),
+      desc: 'Mist Island — lower, ringed with shoals; behind it the wind all but dies.' },
+    { id: 'reef-mid', name: 'Middle Shallows', kind: 'reef', depth: 3, poly: circlePoly(3000, 0, 300, 10, 0.4),
+      desc: 'A shoal in the middle of the strait — a trap for heavy keels.' },
   ],
 
   ships: [
     {
-      classId: 'brig-albion', side: 'player', name: 'HMS Ostříž',
+      classId: 'brig-albion', side: 'player', name: 'HMS Goshawk',
       pos: { x: 300, y: 0 }, vel: { x: 3, y: 0 }, heading: 0.1, doctrine: 'player',
       fireControl: { mode: 'auto', shot: 'round', engaged: false },
     },
     {
       // eskortovaní kupci jsou albionští (strana player) — piráti (enemy) na ně
       // útočí, hráč je chrání; doktrína freighter je nechá prchat, ne bojovat
-      classId: 'merch', side: 'player', name: 'Naděje',
+      classId: 'merch', side: 'player', name: 'Hope',
       pos: { x: -200, y: 250 }, vel: { x: 2.5, y: 0 }, heading: 0.1, doctrine: 'freighter',
       nav: { kind: 'course', dest: { x: 6500, y: 400 }, arriveAtRest: false }, trim: 1,
-      desc: 'Kupecká loď Naděje — náklad plátna a koření pro východní přístav.',
+      desc: 'The merchantman Hope — a cargo of canvas and spices for the eastern port.',
     },
     {
-      classId: 'merch', side: 'player', name: 'Vytrvalost',
+      classId: 'merch', side: 'player', name: 'Perseverance',
       pos: { x: -450, y: -200 }, vel: { x: 2.5, y: 0 }, heading: 0.1, doctrine: 'freighter',
       nav: { kind: 'course', dest: { x: 6500, y: -300 }, arriveAtRest: false }, trim: 1,
-      desc: 'Kupecká loď Vytrvalost — sesterská loď Naděje, stejná linka.',
+      desc: 'The merchantman Perseverance — sister ship to the Hope, the same run.',
     },
     {
-      classId: 'sloop-pirate', side: 'enemy', name: 'Krysí ocas',
+      classId: 'sloop-pirate', side: 'enemy', name: 'Rat\'s Tail',
       pos: { x: 2400, y: 2100 }, vel: { x: -2, y: -1 }, heading: 3.6, doctrine: 'buoy',
     },
     {
-      classId: 'sloop-pirate', side: 'enemy', name: 'Hladová vlna',
+      classId: 'sloop-pirate', side: 'enemy', name: 'Hungry Wave',
       pos: { x: 3000, y: -2200 }, vel: { x: -2, y: 1 }, heading: 2.6, doctrine: 'buoy',
     },
     {
-      classId: 'brig-pirate', side: 'enemy', name: 'Černý příboj',
+      classId: 'brig-pirate', side: 'enemy', name: 'Black Surf',
       pos: { x: 4200, y: 200 }, vel: { x: -3, y: 0 }, heading: Math.PI, doctrine: 'buoy',
-      desc: 'Vlajková briga pirátského kapitána — vynoří se, až smečka sevře kořist.',
+      desc: 'The flagship brig of the pirate captain — she shows herself once the pack closes on its prey.',
     },
   ],
 
   objectives: [
-    { id: 'obj-convoy', text: 'Ochraň konvoj — aspoň jeden kupec musí přežít', state: 'open' },
-    { id: 'obj-pirates', text: 'Vyřiď pirátskou smečku (potop nebo přinuť ke kapitulaci)', state: 'open' },
+    { id: 'obj-convoy', text: 'Protect the convoy — at least one merchantman must survive', state: 'open' },
+    { id: 'obj-pirates', text: 'Deal with the pirate pack (sink or force surrender)', state: 'open' },
   ],
 
   triggers: [
@@ -85,8 +85,8 @@ export const mission02: Scenario = {
       conditions: [{ kind: 'time', t: 4 }],
       actions: [{
         kind: 'comm', speaker: 'lookout',
-        text: 'Plachty v návětří! Dvě šalupy od ostrovů — pirátská smečka, kapitáne. '
-          + 'A za nimi něco většího.',
+        text: 'Sails to windward! Two sloops off the islands — a pirate pack, captain. '
+          + 'And behind them, something larger.',
       }],
     },
     {
@@ -105,7 +105,7 @@ export const mission02: Scenario = {
       actions: [
         { kind: 'setDoctrine', shipId: PIRATE_BRIG, doctrine: 'raider' },
         { kind: 'revealClass', shipId: PIRATE_BRIG },
-        { kind: 'comm', speaker: 'pirate', text: 'Pirátská briga: „Vztyčte černou! Berem všechno, co plave!"' },
+        { kind: 'comm', speaker: 'pirate', text: 'Pirate brig: "Run up the black! We take everything that floats!"' },
       ],
     },
 
@@ -123,7 +123,7 @@ export const mission02: Scenario = {
       actions: [
         { kind: 'objectiveComplete', objectiveId: 'obj-pirates' },
         { kind: 'objectiveComplete', objectiveId: 'obj-convoy' },
-        { kind: 'winMission', text: 'Smečka rozprášena, konvoj v bezpečí. Soutěska je zase průchozí.' },
+        { kind: 'winMission', text: 'The pack is scattered, the convoy safe. The Narrows is passable again.' },
       ],
     },
 
@@ -135,7 +135,7 @@ export const mission02: Scenario = {
       conditions: [{ kind: 'flag', flag: 'mA-out' }, { kind: 'flag', flag: 'mB-out' }],
       actions: [
         { kind: 'objectiveFail', objectiveId: 'obj-convoy' },
-        { kind: 'loseMission', text: 'Oba kupci na dně. Konvoj byl ztracen.' },
+        { kind: 'loseMission', text: 'Both merchantmen on the bottom. The convoy is lost.' },
       ],
     },
     {
@@ -143,7 +143,7 @@ export const mission02: Scenario = {
       // proto ne allDestroyed, ale konkrétní eskortní loď
       id: 'trg-player-lost', once: true,
       conditions: [{ kind: 'shipDestroyed', shipId: OSTRIZ }],
-      actions: [{ kind: 'loseMission', text: 'HMS Ostříž se potopila — konvoj zůstal bez ochrany.' }],
+      actions: [{ kind: 'loseMission', text: 'HMS Goshawk has sunk — the convoy is left unprotected.' }],
     },
   ],
 }

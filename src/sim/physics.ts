@@ -139,7 +139,7 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
       state.events.push({
         t: state.t, kind: 'shipDestroyed', shipId: ship.id, side: ship.side,
         pos: { ...ship.pos }, slowdown: true,
-        text: `${ship.name} se roztříštila na ${isl.kind === 'reef' ? 'útesu' : 'mělčině'}!`,
+        text: `${ship.name} has been wrecked on the ${isl.kind === 'reef' ? 'reef' : 'shoals'}!`,
       })
       return
     }
@@ -151,8 +151,8 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
         pos: { ...ship.pos }, slowdown: ship.doctrine === 'player',
         speaker: ship.doctrine === 'player' ? 'bosun' : undefined,
         text: ship.doctrine === 'player'
-          ? `Najeli jsme na ${isl.kind === 'reef' ? 'útes' : 'mělčinu'}! Zpětný vítr do plachet, dostat nás z toho!`
-          : `${ship.name} uvázla na mělčině.`,
+          ? `We've run onto ${isl.kind === 'reef' ? 'a reef' : 'a shoal'}! Back the sails, get us off it!`
+          : `${ship.name} has run aground.`,
       })
     }
   } else {

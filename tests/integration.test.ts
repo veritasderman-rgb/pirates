@@ -12,7 +12,7 @@ describe('integrace / hratelnost', () => {
   it('mise 1: pronásledování + AUTO palba dovede k rozhodnutí, bez NaN', () => {
     const st = sim.create(SCENARIOS.mission01)
     const player = st.ships.find(s => s.side === 'player') as ShipState
-    const runner = st.ships.find(s => s.name === 'Mořská panna') as ShipState
+    const runner = st.ships.find(s => s.name === 'Sea Maiden') as ShipState
 
     // hráč: napni plachty, sleduj cíl, pal automaticky koulí
     sim.applyOrder(st, { kind: 'setSails', shipId: player.id, on: true })
