@@ -20,8 +20,8 @@ const windArrow = (dir: number): string => {
 
 export type PanelAction =
   | 'toggle-sails' | 'trim-up' | 'trim-down' | 'toggle-oars'
-  | 'shot-round' | 'shot-chain' | 'shot-grape'
-  | 'fire-port' | 'fire-stbd' | 'toggle-auto' | 'board' | 'demand' | 'hold'
+  | 'shot-round' | 'shot-chain' | 'shot-grape' | 'shot-cycle'
+  | 'fire-port' | 'fire-stbd' | 'fire' | 'toggle-auto' | 'board' | 'demand' | 'hold'
   | 'comp-0' | 'comp-1' | 'comp-2' | 'comp-4' | 'comp-8'
 
 export interface UiState {
@@ -29,6 +29,11 @@ export interface UiState {
   targetId: number | null
   compression: number
   shot: ShotType
+}
+
+/** Vykreslovací vrstva HUD — implementuje desktop Panels i mobilní MobileHud. */
+export interface Hud {
+  render(state: SimState, ui: UiState): void
 }
 
 export const esc = (s: string): string =>

@@ -164,6 +164,80 @@
     .sy-stats { margin: 3px 0 2px; }
     .sy-stat { display: inline-block; font-size: 10px; color: #8fb0b8; margin-right: 10px; }
     .sy-stat b { color: #cfe6ec; }
+
+    /* ================= mobilní UX (aktivní jen s .mobile) ================= */
+    #mhud { display: none; }
+    .mobile #topbar, .mobile #hud-left, .mobile #hud-right, .mobile #hud-bottom,
+    .mobile #hud-log, .mobile #navpad, .mobile #r-toggle { display: none !important; }
+    .mobile #mhud { display: block; position: fixed; inset: 0; z-index: 15; pointer-events: none;
+      font: 12px/1.2 ui-monospace, monospace; }
+    .mobile #mhud button { pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+    /* horní lišta */
+    #mh-top { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 5px); left: 7px; right: 7px;
+      display: flex; align-items: center; gap: 7px; pointer-events: none; }
+    #mh-top > * { pointer-events: auto; }
+    .mh-play { width: 44px; height: 34px; font-size: 15px; background: rgba(12,40,48,.85);
+      border: 1px solid #2b4a52; border-radius: 7px; color: #cfe6ec; }
+    .mh-time { color: #cfe6ec; font-size: 13px; }
+    .mh-spd { display: inline-flex; gap: 3px; }
+    .mh-sp { width: 30px; height: 28px; font-size: 11px; background: rgba(12,40,48,.85);
+      border: 1px solid #2b4a52; border-radius: 5px; color: #9fb8bf; }
+    .mh-sp.on { background: #2a6b78; color: #fff; border-color: #4fd0e0; }
+    .mh-wind { display: inline-flex; align-items: center; gap: 2px; }
+    .mh-wind-c { fill: rgba(10,40,50,.6); stroke: #3a6b78; stroke-width: 1.5; }
+    .mh-wind-a { fill: #7fd0e0; }
+    .mh-wind-kn { color: #9fb8bf; font-size: 11px; }
+    .mh-objs { margin-left: auto; max-width: 42%; text-align: right; }
+    .mh-obj { font-size: 9.5px; color: #9fb8bf; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mh-obj.done { color: #6fd06a; } .mh-obj.failed { color: #e0603a; }
+    /* vlastní loď — barevné pipy (top-left) */
+    #mh-status { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 46px); left: 9px;
+      display: flex; gap: 5px; pointer-events: none; }
+    .mh-pip { display: flex; flex-direction: column; align-items: center; }
+    .mh-pipbar { width: 8px; height: 40px; background: rgba(10,30,36,.65); border-radius: 3px;
+      display: flex; align-items: flex-end; overflow: hidden; }
+    .mh-pipbar i { width: 100%; display: block; }
+    .mh-pipi { font-size: 11px; margin-top: 1px; }
+    /* cíl (nad lištou akcí) */
+    #mh-target { position: absolute; left: 8px; right: 8px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+      display: flex; align-items: center; gap: 10px; pointer-events: none; }
+    .mh-t-main { flex: 1; background: rgba(10,30,36,.72); border: 1px solid #2b4a52; border-radius: 6px; padding: 5px 8px; }
+    .mh-t-name { color: #e0a0a0; font-size: 12px; margin-bottom: 3px; }
+    .mh-t-bar { height: 6px; background: #2a1414; border-radius: 3px; overflow: hidden; }
+    .mh-t-bar i { display: block; height: 100%; background: #e0603a; }
+    .mh-t-lost { color: #6a8a90; font-size: 11px; font-style: italic; }
+    .mh-t-ics { margin-top: 3px; }
+    .mh-t-ic { font-size: 14px; opacity: .3; margin-right: 6px; }
+    .mh-t-ic.on { opacity: 1; } .mh-t-ic.bad { opacity: .55; }
+    .mh-ring { position: relative; width: 34px; height: 34px; }
+    .mh-ring-bg { fill: none; stroke: #2a3a40; stroke-width: 4; }
+    .mh-ring-fg { fill: none; stroke: #d8b24f; stroke-width: 4; stroke-linecap: round; }
+    .mh-ring.near .mh-ring-fg { stroke: #6fd06a; }
+    .mh-ring-t { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 9px; color: #cfe6ec; }
+    /* palcová lišta akcí */
+    #mh-actions { position: absolute; left: 0; right: 0; bottom: 0; display: flex; gap: 4px; justify-content: center;
+      padding: 6px 6px calc(env(safe-area-inset-bottom, 0px) + 6px); pointer-events: none; }
+    .mh-btn { pointer-events: auto; flex: 1; max-width: 76px; min-height: 54px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 2px; background: rgba(12,40,48,.85);
+      border: 1px solid #2b4a52; border-radius: 8px; color: #cfe6ec; }
+    .mh-btn.on { background: #2a6b78; border-color: #4fd0e0; }
+    .mh-btn[disabled] { opacity: .35; }
+    .mh-bi { font-size: 20px; } .mh-bl { font-size: 9px; color: #9fb8bf; }
+    .mh-btn[data-act="fire"] { background: rgba(120,34,22,.85); border-color: #e0603a; }
+    .mh-btn[data-act="fire"] .mh-bi { font-size: 24px; }
+    .mh-btn[data-act="fire"][disabled] { background: rgba(40,40,46,.55); border-color: #2b4a52; }
+    /* bubliny (nahrazují log) */
+    #mh-toasts { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 94px); left: 50%;
+      transform: translateX(-50%); display: flex; flex-direction: column; gap: 4px; align-items: center;
+      width: 88%; pointer-events: none; }
+    .mh-toast { background: rgba(10,30,36,.92); border-left: 3px solid #7fd0e0; color: #dfeaee; font-size: 11.5px;
+      padding: 5px 9px; border-radius: 4px; max-width: 100%; transition: opacity .5s; text-align: center; }
+    .mh-toast.comm { border-left-color: #d8c24f; }
+    /* překryvy na celou šířku telefonu */
+    .mobile .overlay { padding: 8px; }
+    .mobile .overlay .box, .mobile .overlay .box.wide { max-width: 100%; padding: 16px 14px; }
   </style>
 </head>
 <body>

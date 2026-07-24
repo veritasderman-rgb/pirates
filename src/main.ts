@@ -6,7 +6,8 @@ import { SimBridge } from './worker/bridge'
 import { TacticalPlot } from './ui/plot'
 import { Plot3D } from './ui/plot3d'
 import type { Renderer } from './ui/renderer'
-import { Panels, esc, fmtTime } from './ui/panels'
+import { Panels, esc, fmtTime, type Hud } from './ui/panels'
+import { isMobileUX, MobileHud, TouchInput } from './ui/mobile'
 import { UIController } from './ui/input'
 import { AudioManager } from './ui/audio'
 import { SCENARIOS } from './data/missions'
@@ -27,6 +28,7 @@ const bridge = new SimBridge()
 const plot: Renderer = use3d ? new Plot3D(canvas) : new TacticalPlot(canvas)
 
 const rBtn = document.createElement('button')
+rBtn.id = 'r-toggle'
 rBtn.textContent = use3d ? '2D' : '3D'
 rBtn.title = 'Switch renderer (2D Canvas ↔ 3D WebGL)'
 rBtn.style.cssText = 'position:absolute;top:6px;right:120px;z-index:9'
@@ -35,15 +37,21 @@ rBtn.addEventListener('click', () => {
   location.reload()
 })
 document.body.appendChild(rBtn)
-const panels = new Panels(
-  document.getElementById('topbar')!,
-  document.getElementById('hud-left')!,
-  document.getElementById('hud-right')!,
-  document.getElementById('hud-bottom')!,
-  document.getElementById('hud-log')!,
-  a => controller.handleAction(a),
-)
-const controller = new UIController(bridge, plot, panels, canvas)
+// na telefonu se aktivuje samostatná dotyková vrstva (infografický HUD),
+// jinak klasické desktopové panely. Sim i renderer zůstávají sdílené.
+const mobile = isMobileUX()
+const hud: Hud = mobile
+  ? new MobileHud(a => controller.handleAction(a))
+  : new Panels(
+    document.getElementById('topbar')!,
+    document.getElementById('hud-left')!,
+    document.getElementById('hud-right')!,
+    document.getElementById('hud-bottom')!,
+    document.getElementById('hud-log')!,
+    a => controller.handleAction(a),
+  )
+const controller = new UIController(bridge, plot, hud, canvas)
+if (mobile) new TouchInput(canvas, plot)
 
 // kapitánský profil (dublony + upgrady) — nese se mezi misemi (localStorage)
 let profile = loadProfile()
