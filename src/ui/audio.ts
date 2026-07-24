@@ -112,6 +112,7 @@ export class AudioManager {
         case 'ballMiss': if (this.can('splash')) this.splash(); break
         case 'shipDestroyed': if (this.can('boom')) this.boom(0.9, 0.6); break
         case 'aground': if (this.can('aground')) this.thud(); break
+        case 'subsystemHit': if (this.can('sub')) this.bell(); break
         case 'surrender':
         case 'board': if (this.can('bell')) this.bell(); break
       }

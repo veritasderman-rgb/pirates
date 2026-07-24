@@ -11,7 +11,7 @@ import { updateSensors } from './sensors'
 import { updateFireControl } from './firecontrol'
 import { updateCrew } from './crew'
 import { collectAIOrders } from './ai'
-import { demandSurrender, board, updateSurrender } from './surrender'
+import { demandSurrender, board, updateSurrender, updateBoarding } from './surrender'
 import { spawnShip, updateTriggers } from './scenario'
 import { SIM_DT } from './constants'
 import { SCENARIOS } from '../data/missions'
@@ -165,6 +165,8 @@ export const sim: SimApi = {
     updateFireControl(state)
     // (8) kapitulace
     updateSurrender(state, dt)
+    // (8a) kontaktní boj výsadků (boarding jako souboj: postup + ztráty)
+    updateBoarding(state, dt)
     // (8b) nástupnictví vlajky: padne-li velitelská loď hráče, admirál přenese
     // vlajku na jinou loď flotily (prohra až když padne celá flotila)
     updatePlayerCommand(state)

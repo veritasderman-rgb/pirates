@@ -126,6 +126,30 @@ export const BOARD_RANGE = 60
 /** rychlost obsazení lodi výsadkem (podíl/s převahy) */
 export const BOARD_RATE = 0.08
 
+// ---------- dovednostní boj: čitelnost a telegraf ----------
+
+/** práh, pod nímž je subsystém považován za „vyřazený" (hláška + telegraf) */
+export const SUBSYSTEM_DISABLED = 0.4
+/**
+ * Weather gage (návětrná výhoda): maximální zpřesnění boční salvy, když
+ * střelec pálí přesně po větru na cíl (kouř se valí na nepřítele, ne do
+ * vlastních očí). Škáluje s tím, jak přesně je střelec v návětří.
+ */
+export const WEATHER_GAGE_ACC = 0.35
+
+// ---------- kontaktní boj (grappling / boarding jako souboj) ----------
+
+/** rychlost postupu obsazení za s při jednotkové převaze výsadku */
+export const BOARD_PROGRESS_RATE = 0.17
+/** úbytek posádky OBRÁNCE za s aktivního boje (× poměr sil) */
+export const BOARD_DEF_CASUALTY = 0.06
+/** úbytek posádky ÚTOČNÍKA za s aktivního boje (× poměr sil) */
+export const BOARD_ATK_CASUALTY = 0.035
+/** pokles morálky obránce za s probíhajícího boardingu */
+export const BOARD_DEF_MORALE = 0.055
+/** pod tuto posádku útočník výsadek odvolá (boarding selhal, riziko!) */
+export const BOARD_ABORT_CREW = 0.12
+
 // ---------- terén ----------
 
 /** poškození trupu za s uváznutí na mělčině / nárazu na břeh */

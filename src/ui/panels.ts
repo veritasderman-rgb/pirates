@@ -7,6 +7,10 @@ import type { ShipState, SimState, SimEvent, ShotType } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
 import { offWindAngle, sailEfficiency, inNoGo } from '../sim/sail'
 import { forecastWind } from '../sim/wind'
+import { weatherGage, rakeAvailable } from '../sim/weapons'
+import { boardingOdds } from '../sim/surrender'
+import { BOARD_RANGE } from '../sim/constants'
+import { dist } from '../sim/vec'
 
 /** Šipka směru větru (kam vane) — 8 světových stran. */
 const windArrow = (dir: number): string => {
@@ -171,6 +175,7 @@ export class Panels {
           : nearSurr ? `<div class="hintline">nalomená morálka — zkus „výzvu ke kapitulaci"</div>` : '')
         + (liveId && tgt.boardingProgress && tgt.boardingProgress < 1 && !tgt.boarded
           ? `<div class="row"><span>boarding</span>${bar(tgt.boardingProgress, '#8ad0a0')}</div>` : '')
+        + this.tacticsHtml(state, tgt, liveId)
     }
     // kontakty
     const contacts = state.contacts.player.map(c => {
@@ -189,6 +194,39 @@ export class Panels {
       `<div class="panel"><h3>Cíl</h3>${tHtml}</div>`
       + `<div class="panel"><h3>Kontakty</h3>${contacts || '<div class="dim">klid na moři</div>'}</div>`
       + `<div class="panel"><h3>Mise</h3>${objs}</div>`
+  }
+
+  /**
+   * Taktický telegraf u zaměřeného nepřítele: návětrná výhoda (weather gage),
+   * dostupnost rakingu a šance boardingu — aby hráč viděl, kdy má jeho manévr
+   * zásadní dopad. Gage/rake jsou čistá geometrie (viditelná z mapy), odds
+   * potřebuje živá data cíle (posádka/morálka), proto jen u liveId.
+   */
+  private tacticsHtml(state: SimState, tgt: ShipState, liveId: boolean): string {
+    if (tgt.side === 'player' || tgt.boarded || tgt.destroyed) return ''
+    const flag = state.ships.find(s => s.doctrine === 'player' && !s.destroyed)
+    if (!flag) return ''
+    const rows: string[] = []
+    // weather gage
+    const gage = weatherGage(flag.pos, tgt.pos, state.wind.dir)
+    const gLabel = gage > 0.55 ? '<span class="ok">návětří ✓ (přesnější salva)</span>'
+      : gage < 0.3 ? '<span class="bad">závětří ✗ (kouř do očí)</span>'
+      : '<span class="dim">bok větru</span>'
+    rows.push(`<div class="tac-row"><span>⚑ gage</span>${gLabel}</div>`)
+    // raking
+    const rk = rakeAvailable(flag, tgt)
+    rows.push(`<div class="tac-row"><span>🎯 raking</span>${rk
+      ? '<span class="ok">linie na příď/záď — 2× ničivá salva!</span>'
+      : '<span class="dim">natoč se na příď/záď cíle</span>'}</div>`)
+    // boarding odds (jen u živě identifikovaného cíle)
+    if (liveId && !tgt.surrendered) {
+      const odds = Math.round(boardingOdds(flag, tgt) * 100)
+      const near = dist(flag.pos, tgt.pos) <= BOARD_RANGE
+      const cls = odds >= 60 ? 'ok' : odds >= 45 ? '' : 'bad'
+      rows.push(`<div class="tac-row"><span>⚓ boarding</span>`
+        + `<span class="${cls}">šance ~${odds} %${near ? ' · na dosah!' : ''}</span></div>`)
+    }
+    return `<div class="tactics">${rows.join('')}</div>`
   }
 
   private renderBottom(state: SimState, ui: UiState): void {
@@ -215,7 +253,7 @@ export class Panels {
       + `<button data-act="fire-stbd" ${sh.reloadStbd > 0 ? 'disabled' : ''} title="Vypálit salvu z pravoboku">PAL pravobok</button>`
       + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}" title="Přepínač: AUTO = loď sama pálí bok nesoucí na nejzraněnějšího nepřítele v dostřelu. Vypnuto = drží palbu, střílíš ručně (PAL levobok/pravobok, Q/R).">${auto ? 'AUTO: pálí sám' : 'AUTO: drží palbu'}</button></div>`
       + `<div class="obg"><button data-act="demand" title="Vyzvi zaměřený cíl ke kapitulaci. Šance roste s jeho poškozením, ztrátami posádky a tvou přesilou. Když spustí vlajku, můžeš ho obsadit.">výzva ke kapitulaci</button>`
-      + `<button data-act="board" title="Boarding: přilehni k zaměřenému cíli na ~60 m a obsaď ho výsadkem. Rozhoduje převaha posádky (kartáč předtím pomáhá). Vzdaná loď se skoro nebrání. Zajmutá loď = kořist (víc bodů než potopení).">boarding</button></div>`
+      + `<button data-act="board" title="Boarding: přilehni k zaměřenému cíli na ~60 m a dej rozkaz — výsadek pak útočí sám (sleduj ukazatel). Dokud se cíl nevzdal, je to krvavý souboj: obě posádky ztrácí muže, slabší víc. Kartáč (grape) nepřítele předem změkčí. Vykrvácíš-li, výsadek se stáhne. Zajmutá loď = kořist (víc bodů než potopení).">boarding</button></div>`
   }
 
   private renderLog(state: SimState): void {

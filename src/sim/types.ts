@@ -128,6 +128,8 @@ export interface ShipState {
   boarded: boolean
   /** postup obsazování výsadkem 0–1 (roste, když poblíž běží boarding) */
   boardingProgress?: number
+  /** aktivní boarding: cíl, na který loď vysílá výsadek (persistentní záměr) */
+  boardingTargetId?: number
   /** AI doktrína ('player' = ovládá hráč, 'surrendered' = spustila vlajku) */
   doctrine: string
   /** násobiče statů z upgradů (jen hráčova vlajková loď); chybí = bez úprav */
