@@ -199,6 +199,8 @@ export class TacticalPlot {
 
   // ---------- interakce ----------
   private armed = false
+  private pointers = new Set<number>()   // aktivní prsty/ukazatele nad plátnem
+  private activePointer: number | null = null
 
   private bindPan(): void {
     // kolečko / pinch = zoom (jemnější krok u pinch s ctrl/meta)
@@ -209,13 +211,20 @@ export class TacticalPlot {
     }, { passive: false })
 
     // TAŽENÍ (jakýmkoli tlačítkem/prstem) = posun mapy; TAP/KLIK bez pohybu
-    // zůstává klikem (výběr/kurz řeší controller). Funguje i na touchpadu.
+    // zůstává klikem (výběr/kurz řeší controller). Posun jen JEDNÍM ukazatelem —
+    // druhý prst = pinch (o zoom se stará TouchInput), pan se do něj neplete.
     this.canvas.addEventListener('pointerdown', e => {
-      this.armed = true
-      this.lastPan = { x: e.clientX, y: e.clientY }
+      this.pointers.add(e.pointerId)
+      if (this.pointers.size === 1) {
+        this.activePointer = e.pointerId
+        this.armed = true
+        this.lastPan = { x: e.clientX, y: e.clientY }
+      } else {
+        this.armed = false; this.panning = false; this.activePointer = null
+      }
     })
     window.addEventListener('pointermove', e => {
-      if (!this.armed) return
+      if (!this.armed || e.pointerId !== this.activePointer || this.pointers.size !== 1) return
       const dx = e.clientX - this.lastPan.x, dy = e.clientY - this.lastPan.y
       if (!this.panning && Math.hypot(dx, dy) < 5) return // ještě to může být klik
       this.panning = true; this.userPanned = true
@@ -223,7 +232,12 @@ export class TacticalPlot {
       this.cam.y += dy / this.scale
       this.lastPan = { x: e.clientX, y: e.clientY }
     })
-    window.addEventListener('pointerup', () => { this.armed = false; this.panning = false })
+    const release = (e: PointerEvent): void => {
+      this.pointers.delete(e.pointerId)
+      if (e.pointerId === this.activePointer) { this.armed = false; this.panning = false; this.activePointer = null }
+    }
+    window.addEventListener('pointerup', release)
+    window.addEventListener('pointercancel', release)
     this.canvas.addEventListener('contextmenu', e => e.preventDefault())
   }
 

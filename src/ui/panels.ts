@@ -153,7 +153,7 @@ export class Panels {
   private renderRight(state: SimState, ui: UiState): void {
     // cíl
     let tHtml = '<div class="dim">— no target —</div>'
-      + '<div class="fc-hint">Click an enemy on the map = target it (for manual FIRE port/stbd Q/R, '
+      + '<div class="fc-hint">Select an enemy on the map = target it (for manual FIRE port/stbd, '
       + 'surrender demand and boarding). Empty water = course for the selected ship. '
       + 'AUTO fires on its own at the most-damaged enemy in range — it ignores your target.</div>'
     const tgt = state.ships.find(s => s.id === ui.targetId)

@@ -19,6 +19,8 @@ export class UIController {
   private shot: ShotType = 'round'
   private compression = 0
   private lastRunning = 1
+  private tapTimer = 0      // odložený kurz (okno dvojklepu na dotyku)
+  private lastTapAt = 0
 
   constructor(
     private bridge: SimBridge,
@@ -77,11 +79,23 @@ export class UIController {
       if (e.button === 2 || e.shiftKey || moved) return
       const rect = this.canvas.getBoundingClientRect()
       const sx = e.clientX - rect.left, sy = e.clientY - rect.top
-      this.onClick(sx, sy, e.shiftKey)
+      const touch = e.pointerType === 'touch'
+      if (touch) {
+        // dvojklep na dotyku = vycentrovat kameru a NEvydat kurz — zruší i
+        // kurz čekající po prvním ťuknutí (jinak by centrování měnilo směr lodi)
+        if (e.timeStamp - this.lastTapAt < 300) {
+          if (this.tapTimer) { clearTimeout(this.tapTimer); this.tapTimer = 0 }
+          this.lastTapAt = 0
+          this.plot.recenter()
+          return
+        }
+        this.lastTapAt = e.timeStamp
+      }
+      this.onClick(sx, sy, e.shiftKey, touch)
     })
   }
 
-  private onClick(sx: number, sy: number, append: boolean): void {
+  private onClick(sx: number, sy: number, append: boolean, touch = false): void {
     if (!this.state) return
     const id = this.plot.pick(sx, sy)
     if (id !== null) {
@@ -95,10 +109,12 @@ export class UIController {
     }
     // prázdná voda → kurz vybrané vlastní lodi
     const sel = this.selectedShip()
-    if (sel) {
-      const w = this.plot.s2w(sx, sy)
-      this.order({ kind: 'setCourse', shipId: sel.id, dest: w, arriveAtRest: false, append })
-    }
+    if (!sel) return
+    const w = this.plot.s2w(sx, sy)
+    const issue = (): void => this.order({ kind: 'setCourse', shipId: sel.id, dest: w, arriveAtRest: false, append })
+    // na dotyku počkej okno dvojklepu: druhé ťuknutí kurz zruší a vycentruje
+    if (touch) { if (this.tapTimer) clearTimeout(this.tapTimer); this.tapTimer = window.setTimeout(issue, 300) }
+    else issue()
   }
 
   // ---------- akce panelů ----------

@@ -680,17 +680,30 @@ export class Plot3D implements Renderer {
       e.preventDefault()
       this.zoomStep(e.deltaY < 0 ? 1.12 : 1 / 1.12)
     }, { passive: false })
+    // posun jen JEDNÍM ukazatelem — druhý prst = pinch (zoom řeší TouchInput),
+    // pan se do něj neplete (jinak by druhý pointerdown přepsal kotvu → cukání)
     let armed = false, moved = false, last = { x: 0, y: 0 }
-    this.canvas.addEventListener('pointerdown', e => { armed = true; moved = false; last = { x: e.clientX, y: e.clientY } })
+    let active: number | null = null
+    const pointers = new Set<number>()
+    this.canvas.addEventListener('pointerdown', e => {
+      pointers.add(e.pointerId)
+      if (pointers.size === 1) { armed = true; moved = false; active = e.pointerId; last = { x: e.clientX, y: e.clientY } }
+      else { armed = false; active = null }
+    })
     window.addEventListener('pointermove', e => {
-      if (!armed) return
+      if (!armed || e.pointerId !== active || pointers.size !== 1) return
       const dx = e.clientX - last.x, dy = e.clientY - last.y
       if (!moved && Math.hypot(dx, dy) < 5) return
       moved = true
       this.panByScreen(dx, dy)
       last = { x: e.clientX, y: e.clientY }
     })
-    window.addEventListener('pointerup', () => { armed = false })
+    const release = (e: PointerEvent): void => {
+      pointers.delete(e.pointerId)
+      if (e.pointerId === active) { armed = false; active = null }
+    }
+    window.addEventListener('pointerup', release)
+    window.addEventListener('pointercancel', release)
     this.canvas.addEventListener('contextmenu', e => e.preventDefault())
   }
 }
