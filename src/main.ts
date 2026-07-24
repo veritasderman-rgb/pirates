@@ -55,6 +55,19 @@ if (mobile) new TouchInput(canvas, plot)
 
 // kapitánský profil (dublony + upgrady) — nese se mezi misemi (localStorage)
 let profile = loadProfile()
+
+// DEV: odemknutí všech misí pro testování. `?unlock=all` zapne (a uloží, takže
+// platí i po přenačtení), `?unlock=off` vypne. Neovlivňuje odměny ani postup.
+const UNLOCK_KEY = 'pirates.unlockAll'
+{
+  const u = new URLSearchParams(location.search).get('unlock')
+  try {
+    if (u === 'all') localStorage.setItem(UNLOCK_KEY, '1')
+    else if (u === 'off' || u === '0') localStorage.removeItem(UNLOCK_KEY)
+  } catch { /* ignore */ }
+}
+const allUnlocked = ((): boolean => { try { return localStorage.getItem(UNLOCK_KEY) === '1' } catch { return false } })()
+
 const startMission = (id: string): void =>
   bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship))
 
@@ -124,7 +137,8 @@ const MISSION_SCENES: Record<string, string> = {
 function showCampaignMap(): void {
   const cleared = new Set(profile.cleared)
   const byId = new Map(CAMPAIGN_NODES.map(n => [n.id, n]))
-  const avail = (n: typeof CAMPAIGN_NODES[number]): boolean => isMissionUnlocked(n.id, profile.cleared)
+  const avail = (n: typeof CAMPAIGN_NODES[number]): boolean =>
+    allUnlocked || isMissionUnlocked(n.id, profile.cleared)
 
   const isles = CAMPAIGN_ISLES.map(i => `<circle cx="${i.x}" cy="${i.y}" r="${i.r}" class="cm-isle"/>`).join('')
   const routes = CAMPAIGN_NODES.filter(n => n.requires).map(n => {
@@ -157,6 +171,7 @@ function showCampaignMap(): void {
     + `<span>Flagship: <b>${esc(flagName)}</b></span>`
     + `<button id="btn-port">🛠 PORT — shipyard &amp; outfitting</button></div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
+    + (allUnlocked ? `<div class="fc-hint" style="color:#e8c874">🔓 DEV: all missions unlocked (append <b>?unlock=off</b> to the URL to restore normal progression).</div>` : '')
     + `<div class="fc-hint">Click a port (node) = set sail on the mission. A cleared mission (✔) unlocks the next. `
     + `Cleared ones can be replayed (smaller reward). At port, buy a new hull or upgrade the one you have.</div>`)
   el.querySelector('.box')!.classList.add('wide')
@@ -357,5 +372,5 @@ bridge.onSnapshot = (state, compression) => {
 // start: ?mission=id přeskočí menu, jinak výběr mise
 const requested = new URLSearchParams(location.search).get('mission')
 // přímý vstup `?mission=` respektuje postup kampaní (záložka/URL neobejde zámek)
-if (requested && SCENARIOS[requested] && isMissionUnlocked(requested, profile.cleared)) startMission(requested)
+if (requested && SCENARIOS[requested] && (allUnlocked || isMissionUnlocked(requested, profile.cleared))) startMission(requested)
 else showCampaignMap()
