@@ -67,7 +67,6 @@ export class MobileHud implements Hud {
   private actions: HTMLElement
   private toasts: HTMLElement
   private sheet: HTMLElement
-  private seenLog = 0
   private sheetMode: 'own' | 'target' | null = null
   private lastState: SimState | null = null
   private lastUi: UiState | null = null
@@ -109,8 +108,12 @@ export class MobileHud implements Hud {
 
   render(state: SimState, ui: UiState): void {
     this.lastState = state; this.lastUi = ui
-    // legenda ikon až při prvním vykreslení bojového HUDu (ne na mapě)
-    if (!this.coachShown) { this.coachShown = true; this.maybeCoach() }
+    // legenda ikon až u prvního BĚŽÍCÍHO snímku boje (ne na mapě/briefingu);
+    // po dobu čtení pozastavíme simulaci a po „Got it“ ji zase rozjedeme
+    if (!this.coachShown && ui.compression > 0) {
+      this.coachShown = true
+      if (this.maybeCoach()) this.onAction('comp-0')
+    }
     this.renderTop(state, ui)
     this.renderStatus(state, ui)
     this.renderTarget(state, ui)
@@ -215,23 +218,29 @@ export class MobileHud implements Hud {
 
   private openSheet(mode: 'own' | 'target'): void {
     this.sheetMode = mode
-    if (this.lastState && this.lastUi) this.renderSheet(this.lastState, this.lastUi)
+    // skořápku postavíme JEN jednou — snapshoty (à 50 ms) pak přepisují pouhá
+    // čísla uvnitr, takže se úvodní animace nerestartuje a scroll listu drží
+    this.sheet.innerHTML =
+      `<div class="mh-sh-bd" data-sheet="close"></div>`
+      + `<div class="mh-sh-card"><div class="mh-sh-body"></div>`
+      + `<button class="mh-sh-x" data-sheet="close">Close</button></div>`
     this.sheet.classList.add('open')
+    if (this.lastState && this.lastUi) this.renderSheet(this.lastState, this.lastUi)
   }
 
   private closeSheet(): void {
     this.sheetMode = null
     this.sheet.classList.remove('open')
+    this.sheet.innerHTML = ''
   }
 
-  /** Detailní list s plnými čísly — infografika je přehled, tohle je pravda. */
+  /** Aktualizuje jen čísla v otevřeném listu (skořápka + animace + scroll zůstávají). */
   private renderSheet(state: SimState, ui: UiState): void {
-    const inner = this.sheetMode === 'target'
+    const body = this.sheet.querySelector('.mh-sh-body')
+    if (!body) return
+    body.innerHTML = this.sheetMode === 'target'
       ? this.buildTargetSheet(state, ui)
       : this.buildOwnSheet(state, ui)
-    this.sheet.innerHTML =
-      `<div class="mh-sh-bd" data-sheet="close"></div>`
-      + `<div class="mh-sh-card">${inner}<button class="mh-sh-x" data-sheet="close">Close</button></div>`
   }
 
   /** Řádek listu: štítek + hodnota, volitelně barevný proužek dle podílu. */
@@ -291,11 +300,11 @@ export class MobileHud implements Hud {
       + (tgt.surrendered ? this.row('Status', 'surrendered') : '')
   }
 
-  /** První spuštění na telefonu → jednorázová legenda ikon. */
-  private maybeCoach(): void {
+  /** První spuštění na telefonu → jednorázová legenda ikon. Vrací true, když se zobrazila. */
+  private maybeCoach(): boolean {
     let seen = false
     try { seen = localStorage.getItem(COACH_KEY) === '1' } catch { /* private mode */ }
-    if (seen) return
+    if (seen) return false
     const legend: [string, string][] = [
       ['🛡', 'Hull'], ['⛵', 'Rigging / sails'], ['🧭', 'Rudder'], ['💥', 'Guns'],
       ['👥', 'Crew'], ['🚩', 'Morale'], ['⚑', 'Weather gage'], ['🎯', 'Raking line'],
@@ -313,8 +322,10 @@ export class MobileHud implements Hud {
       e.preventDefault()
       try { localStorage.setItem(COACH_KEY, '1') } catch { /* ignore */ }
       el.remove()
+      this.onAction('comp-1') // dočteno → rozjet simulaci na 1×
     })
     this.root.appendChild(el)
+    return true
   }
 
   /** Krátká vibrace na dotyk/výstřel/zásah — hmatová zpětná vazba (throttled). */
@@ -326,13 +337,17 @@ export class MobileHud implements Hud {
     try { navigator.vibrate(ms) } catch { /* not supported */ }
   }
 
-  /** Nové sim události → hmatová odezva: náš výstřel krátce, potopení silněji. */
+  /** Nové sim události → hmatová odezva: náš výstřel krátce, potopení silněji.
+   * Každý snapshot nese jen NOVÉ události (worker po odeslání state.events
+   * vyprázdní), takže projdeme celou dávku; potopení má přednost před výstřelem. */
   private pumpHaptics(state: SimState): void {
-    for (let i = this.seenLog; i < state.events.length; i++) {
-      const e = state.events[i]
-      if (e.kind === 'shipDestroyed') { this.buzz(40, false); return }
-      if (e.kind === 'gunFire' && e.side === 'player') { this.buzz(14); return }
+    let sink = false, shot = false
+    for (const e of state.events) {
+      if (e.kind === 'shipDestroyed') sink = true
+      else if (e.kind === 'gunFire' && e.side === 'player') shot = true
     }
+    if (sink) this.buzz(40, false)
+    else if (shot) this.buzz(14)
   }
 
   /** Nové události → mizející bubliny (nahrazuje textový log). */
@@ -349,7 +364,6 @@ export class MobileHud implements Hud {
       setTimeout(() => { el.remove() }, 3800)
     }
     while (this.toasts.childElementCount > 4) this.toasts.removeChild(this.toasts.firstChild!)
-    this.seenLog = state.events.length
   }
 }
 
