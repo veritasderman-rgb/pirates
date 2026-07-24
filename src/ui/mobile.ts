@@ -8,7 +8,7 @@ import type { Hud, PanelAction, UiState } from './panels'
 import type { Renderer } from './renderer'
 import type { ShipState, SimState, ShotType } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
-import { weatherGage, rakeAvailable } from '../sim/weapons'
+import { weatherGage, rakeAvailable, bestBroadside } from '../sim/weapons'
 import { boardingOdds } from '../sim/surrender'
 import { BOARD_RANGE } from '../sim/constants'
 import { dist } from '../sim/vec'
@@ -130,24 +130,30 @@ export class MobileHud implements Hud {
     if (!tgt || tgt.destroyed) { this.target.innerHTML = ''; return }
     const con = state.contacts.player.find(c => c.shipId === tgt.id)
     const known = !!(con && con.idQuality >= 1)
-    const liveId = !!(con && con.idQuality >= 1 && !con.memory)
+    // živá data (trup, gage, rake, šance) jen u aktuálně viditelného a
+    // identifikovaného cíle — u ztraceného (memory) kontaktu senzory drží jen
+    // poslední polohu, ne aktuální stav, tak ho nesmíme prozrazovat
+    const live = !!(con && con.idQuality >= 1 && !con.memory) && tgt.side !== 'player'
     const hp = tgt.hullMax ?? SHIP_CLASSES[tgt.classId]?.hullPoints ?? 100
     const flag = state.ships.find(s => s.doctrine === 'player' && !s.destroyed)
     const bits: string[] = []
-    if (flag && tgt.side !== 'player') {
+    if (flag && live) {
       const gage = weatherGage(flag.pos, tgt.pos, state.wind.dir)
       bits.push(`<span class="mh-t-ic ${gage > 0.55 ? 'on' : gage < 0.3 ? 'bad' : ''}" title="weather gage">⚑</span>`)
       bits.push(`<span class="mh-t-ic ${rakeAvailable(flag, tgt) ? 'on' : ''}" title="raking">🎯</span>`)
     }
     const badge = tgt.boarded ? '⚓' : tgt.surrendered ? '⚑' : ''
-    const oddsRing = flag && liveId && !tgt.surrendered && tgt.side !== 'player'
+    const oddsRing = flag && live && !tgt.surrendered
       ? ring(boardingOdds(flag, tgt), `${Math.round(boardingOdds(flag, tgt) * 100)}%`,
           dist(flag.pos, tgt.pos) <= BOARD_RANGE ? 'near' : '')
       : ''
+    const body = live
+      ? `<div class="mh-t-bar"><i style="width:${Math.round(Math.max(0, tgt.hull / hp) * 100)}%"></i></div>`
+        + `<div class="mh-t-ics">${bits.join('')}</div>`
+      : `<div class="mh-t-lost">${con?.memory ? 'contact lost' : 'unidentified'}</div>`
     this.target.innerHTML =
       `<div class="mh-t-main"><div class="mh-t-name">${esc(known ? tgt.name : 'Unknown contact')} ${badge}</div>`
-      + `<div class="mh-t-bar"><i style="width:${Math.round(Math.max(0, tgt.hull / hp) * 100)}%"></i></div>`
-      + `<div class="mh-t-ics">${bits.join('')}</div></div>`
+      + body + `</div>`
       + oddsRing
   }
 
@@ -158,7 +164,10 @@ export class MobileHud implements Hud {
     const auto = sh.fireControl.mode === 'auto'
     const hasTgt = ui.targetId !== null
     const tgt = hasTgt ? state.ships.find(s => s.id === ui.targetId) : undefined
-    const canFire = hasTgt && (sh.reloadPort <= 0 || sh.reloadStbd <= 0)
+    // FIRE jen když bok, který NESE na cíl, je zároveň nabitý (jinak sim salvu odmítne)
+    const bearSide = tgt && !tgt.destroyed ? bestBroadside(sh, tgt) : null
+    const canFire = bearSide === 'port' ? sh.reloadPort <= 0
+      : bearSide === 'stbd' ? sh.reloadStbd <= 0 : false
     const btn = (act: PanelAction, icon: string, label: string, on = false, dis = false): string =>
       `<button data-act="${act}" class="mh-btn ${on ? 'on' : ''}" ${dis ? 'disabled' : ''}>`
       + `<span class="mh-bi">${icon}</span><span class="mh-bl">${label}</span></button>`
@@ -200,6 +209,11 @@ export class MobileHud implements Hud {
 export class TouchInput {
   private pinchD = 0
   private lastTap = 0
+  // sledování aktuálního gesta: začátek prstu, jestli se hnul, jestli byl vícedotyk
+  private startX = 0
+  private startY = 0
+  private moved = false
+  private multi = false
 
   constructor(private canvas: HTMLCanvasElement, private plot: Renderer) {
     canvas.style.touchAction = 'none'
@@ -209,24 +223,34 @@ export class TouchInput {
   }
 
   private onStart(e: TouchEvent): void {
-    if (e.touches.length === 2) { e.preventDefault(); this.pinchD = this.spread(e) }
+    if (e.touches.length === 1 && !this.multi) {
+      this.startX = e.touches[0].clientX; this.startY = e.touches[0].clientY; this.moved = false
+    }
+    if (e.touches.length >= 2) { this.multi = true; e.preventDefault(); this.pinchD = this.spread(e) }
   }
 
   private onMove(e: TouchEvent): void {
-    if (e.touches.length === 2 && this.pinchD > 0) {
+    if (e.touches.length >= 2 && this.pinchD > 0) {
+      this.multi = true
       e.preventDefault()
       const d = this.spread(e)
       if (d > 0) { this.plot.zoomStep(d / this.pinchD); this.pinchD = d }
+    } else if (e.touches.length === 1) {
+      const t = e.touches[0]
+      if (Math.hypot(t.clientX - this.startX, t.clientY - this.startY) > 10) this.moved = true
     }
   }
 
   private onEnd(e: TouchEvent): void {
     if (e.touches.length < 2) this.pinchD = 0
-    if (e.touches.length === 0 && (e.changedTouches?.length ?? 0) === 1) {
-      const now = e.timeStamp || 0
-      if (now - this.lastTap < 300) { this.plot.recenter(); this.lastTap = 0 }
-      else this.lastTap = now
-    }
+    if (e.touches.length > 0) return // gesto ještě běží (zbývá prst)
+    // dvojklep jen když gesto bylo čistý jednoprstý tap (bez tažení a bez pinche)
+    const wasTap = !this.multi && !this.moved && (e.changedTouches?.length ?? 0) === 1
+    this.multi = false; this.moved = false
+    if (!wasTap) { this.lastTap = 0; return }
+    const now = e.timeStamp || 0
+    if (now - this.lastTap < 300) { this.plot.recenter(); this.lastTap = 0 }
+    else this.lastTap = now
   }
 
   private spread(e: TouchEvent): number {

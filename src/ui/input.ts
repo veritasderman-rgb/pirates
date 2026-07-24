@@ -122,10 +122,11 @@ export class UIController {
       case 'fire-port': this.fire(sel, 'port'); break
       case 'fire-stbd': this.fire(sel, 'stbd'); break
       case 'fire': {
-        // mobil: jedno tlačítko vypálí bok, který zrovna nese na cíl
+        // mobil: jedno tlačítko vypálí bok, který zrovna nese na cíl (jen když nese)
         if (this.targetId === null) break
         const tgt = this.state?.ships.find(s => s.id === this.targetId)
-        if (tgt) this.fire(sel, bestBroadside(sel, tgt) ?? 'port')
+        const side = tgt ? bestBroadside(sel, tgt) : null
+        if (side) this.fire(sel, side)
         break
       }
       case 'toggle-auto':
