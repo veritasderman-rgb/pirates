@@ -57,6 +57,8 @@ function ring(v: number, label: string, cls: string): string {
     + `</svg><span class="mh-ring-t">${label}</span></div>`
 }
 
+const COACH_KEY = 'pirates.mobileCoach'
+
 export class MobileHud implements Hud {
   private root: HTMLElement
   private top: HTMLElement
@@ -64,7 +66,13 @@ export class MobileHud implements Hud {
   private target: HTMLElement
   private actions: HTMLElement
   private toasts: HTMLElement
+  private sheet: HTMLElement
   private seenLog = 0
+  private sheetMode: 'own' | 'target' | null = null
+  private lastState: SimState | null = null
+  private lastUi: UiState | null = null
+  private lastBuzz = 0
+  private coachShown = false
 
   constructor(private onAction: (a: PanelAction) => void) {
     document.body.classList.add('mobile')
@@ -73,25 +81,43 @@ export class MobileHud implements Hud {
     this.root.innerHTML =
       '<div id="mh-top"></div><div id="mh-status"></div><div id="mh-toasts"></div>'
       + '<div id="mh-target"></div><div id="mh-actions"></div>'
+      + '<div id="mh-sheet"></div>'
     document.body.appendChild(this.root)
     this.top = this.root.querySelector('#mh-top')!
     this.status = this.root.querySelector('#mh-status')!
     this.target = this.root.querySelector('#mh-target')!
     this.actions = this.root.querySelector('#mh-actions')!
     this.toasts = this.root.querySelector('#mh-toasts')!
+    this.sheet = this.root.querySelector('#mh-sheet')!
     const handler = (e: Event): void => {
       const t = (e.target as HTMLElement).closest('[data-act]') as HTMLElement | null
-      if (t && !t.hasAttribute('disabled')) { e.preventDefault(); this.onAction(t.dataset.act as PanelAction) }
+      if (t && !t.hasAttribute('disabled')) {
+        e.preventDefault(); this.buzz(8, false); this.onAction(t.dataset.act as PanelAction)
+      }
     }
     for (const el of [this.top, this.target, this.actions]) el.addEventListener('pointerdown', handler)
+    // ťuknutí na infografiku vlastní lodi / cíle → detailní list s čísly
+    this.status.addEventListener('pointerdown', e => { e.preventDefault(); this.openSheet('own') })
+    this.target.addEventListener('pointerdown', e => {
+      if ((e.target as HTMLElement).closest('.mh-t-main')) { e.preventDefault(); this.openSheet('target') }
+    })
+    // list se zavírá ťuknutím na pozadí nebo křížek
+    this.sheet.addEventListener('pointerdown', e => {
+      if ((e.target as HTMLElement).closest('[data-sheet="close"]')) { e.preventDefault(); this.closeSheet() }
+    })
   }
 
   render(state: SimState, ui: UiState): void {
+    this.lastState = state; this.lastUi = ui
+    // legenda ikon až při prvním vykreslení bojového HUDu (ne na mapě)
+    if (!this.coachShown) { this.coachShown = true; this.maybeCoach() }
     this.renderTop(state, ui)
     this.renderStatus(state, ui)
     this.renderTarget(state, ui)
     this.renderActions(state, ui)
+    this.pumpHaptics(state)
     this.pumpToasts(state)
+    if (this.sheetMode) this.renderSheet(state, ui)
   }
 
   private renderTop(state: SimState, ui: UiState): void {
@@ -185,6 +211,128 @@ export class MobileHud implements Hud {
       + btn('fire', '🔥', 'FIRE', false, !canFire)
       + btn('toggle-auto', auto ? '🎯' : '✋', auto ? 'auto' : 'hold', auto)
       + ctx
+  }
+
+  private openSheet(mode: 'own' | 'target'): void {
+    this.sheetMode = mode
+    if (this.lastState && this.lastUi) this.renderSheet(this.lastState, this.lastUi)
+    this.sheet.classList.add('open')
+  }
+
+  private closeSheet(): void {
+    this.sheetMode = null
+    this.sheet.classList.remove('open')
+  }
+
+  /** Detailní list s plnými čísly — infografika je přehled, tohle je pravda. */
+  private renderSheet(state: SimState, ui: UiState): void {
+    const inner = this.sheetMode === 'target'
+      ? this.buildTargetSheet(state, ui)
+      : this.buildOwnSheet(state, ui)
+    this.sheet.innerHTML =
+      `<div class="mh-sh-bd" data-sheet="close"></div>`
+      + `<div class="mh-sh-card">${inner}<button class="mh-sh-x" data-sheet="close">Close</button></div>`
+  }
+
+  /** Řádek listu: štítek + hodnota, volitelně barevný proužek dle podílu. */
+  private row(label: string, value: string, frac?: number): string {
+    const bar = frac === undefined ? ''
+      : `<div class="mh-sh-bar"><i style="width:${Math.round(Math.max(0, Math.min(1, frac)) * 100)}%;`
+        + `background:${gaugeCol(frac)}"></i></div>`
+    return `<div class="mh-sh-row"><span class="mh-sh-l">${esc(label)}</span>`
+      + `<span class="mh-sh-v">${esc(value)}</span></div>${bar}`
+  }
+
+  private buildOwnSheet(state: SimState, ui: UiState): string {
+    const sh = state.ships.find(s => s.id === ui.selectedId)
+    if (!sh) return `<div class="mh-sh-h">No ship</div>`
+    const def = SHIP_CLASSES[sh.classId]
+    const hp = sh.hullMax ?? def?.hullPoints ?? 100
+    const ss = sh.subsystems
+    const kn = Math.round(Math.hypot(sh.vel.x, sh.vel.y) * 1.94)
+    const pct = (v: number): string => `${Math.round(v * 100)}%`
+    return `<div class="mh-sh-h">${esc(def?.name ?? sh.name)}</div>`
+      + this.row('Hull', `${Math.round(sh.hull)} / ${Math.round(hp)}`, sh.hull / hp)
+      + this.row('Rigging', pct(ss.rigging), ss.rigging)
+      + this.row('Rudder', pct(ss.rudder), ss.rudder)
+      + this.row('Guns (port)', pct(ss.gunsPort), ss.gunsPort)
+      + this.row('Guns (stbd)', pct(ss.gunsStbd), ss.gunsStbd)
+      + this.row('Crew', pct(ss.crew), ss.crew)
+      + this.row('Morale', pct(sh.morale), sh.morale)
+      + this.row('Ammo', `${sh.ammo}`)
+      + this.row('Speed', `${kn} kn`)
+      + this.row('Sails', sh.sailsUp ? 'set' : 'furled')
+      + (def?.canRow ? this.row('Oars', sh.oaring ? 'out' : 'shipped') : '')
+  }
+
+  private buildTargetSheet(state: SimState, ui: UiState): string {
+    const tgt = ui.targetId !== null ? state.ships.find(s => s.id === ui.targetId) : undefined
+    if (!tgt) return `<div class="mh-sh-h">No target</div>`
+    const con = state.contacts.player.find(c => c.shipId === tgt.id)
+    const known = !!(con && con.idQuality >= 1)
+    const live = !!(con && con.idQuality >= 1 && !con.memory) && tgt.side !== 'player'
+    const def = SHIP_CLASSES[tgt.classId]
+    const hp = tgt.hullMax ?? def?.hullPoints ?? 100
+    const flag = state.ships.find(s => s.doctrine === 'player' && !s.destroyed)
+    const head = `<div class="mh-sh-h">${esc(known ? tgt.name : 'Unknown contact')}</div>`
+    if (!live) {
+      return head + `<div class="mh-sh-note">${con?.memory ? 'Contact lost — last known position only.' : 'Not yet identified.'}</div>`
+    }
+    const gage = flag ? weatherGage(flag.pos, tgt.pos, state.wind.dir) : 0
+    const rng = flag ? Math.round(dist(flag.pos, tgt.pos)) : 0
+    const odds = flag && !tgt.surrendered ? boardingOdds(flag, tgt) : 0
+    return head
+      + (known ? this.row('Class', def?.name ?? tgt.classId) : '')
+      + this.row('Hull', `${Math.round(Math.max(0, tgt.hull / hp) * 100)}%`, tgt.hull / hp)
+      + this.row('Range', `${rng} m`)
+      + (flag ? this.row('Weather gage', `${Math.round(gage * 100)}%`, gage) : '')
+      + (flag ? this.row('Raking', rakeAvailable(flag, tgt) ? 'yes — aligned' : 'no') : '')
+      + (flag && !tgt.surrendered ? this.row('Boarding odds', `${Math.round(odds * 100)}%`, odds) : '')
+      + (tgt.surrendered ? this.row('Status', 'surrendered') : '')
+  }
+
+  /** První spuštění na telefonu → jednorázová legenda ikon. */
+  private maybeCoach(): void {
+    let seen = false
+    try { seen = localStorage.getItem(COACH_KEY) === '1' } catch { /* private mode */ }
+    if (seen) return
+    const legend: [string, string][] = [
+      ['🛡', 'Hull'], ['⛵', 'Rigging / sails'], ['🧭', 'Rudder'], ['💥', 'Guns'],
+      ['👥', 'Crew'], ['🚩', 'Morale'], ['⚑', 'Weather gage'], ['🎯', 'Raking line'],
+      ['🔥', 'Fire the ready guns'], ['⚓', 'Board'],
+    ]
+    const rows = legend.map(([i, t]) => `<div class="mh-co-row"><span>${i}</span><b>${esc(t)}</b></div>`).join('')
+    const el = document.createElement('div')
+    el.id = 'mh-coach'
+    el.innerHTML =
+      `<div class="mh-co-card"><div class="mh-co-h">Quick guide</div>`
+      + `<div class="mh-co-sub">Bars fill green→red as things break. Tap your bars or the target to see full numbers.</div>`
+      + `<div class="mh-co-grid">${rows}</div>`
+      + `<button class="mh-co-ok">Got it</button></div>`
+    el.querySelector('.mh-co-ok')!.addEventListener('pointerdown', e => {
+      e.preventDefault()
+      try { localStorage.setItem(COACH_KEY, '1') } catch { /* ignore */ }
+      el.remove()
+    })
+    this.root.appendChild(el)
+  }
+
+  /** Krátká vibrace na dotyk/výstřel/zásah — hmatová zpětná vazba (throttled). */
+  private buzz(ms: number, throttle = true): void {
+    if (typeof navigator === 'undefined' || !navigator.vibrate) return
+    const now = typeof performance !== 'undefined' ? performance.now() : 0
+    if (throttle && now - this.lastBuzz < 90) return
+    this.lastBuzz = now
+    try { navigator.vibrate(ms) } catch { /* not supported */ }
+  }
+
+  /** Nové sim události → hmatová odezva: náš výstřel krátce, potopení silněji. */
+  private pumpHaptics(state: SimState): void {
+    for (let i = this.seenLog; i < state.events.length; i++) {
+      const e = state.events[i]
+      if (e.kind === 'shipDestroyed') { this.buzz(40, false); return }
+      if (e.kind === 'gunFire' && e.side === 'player') { this.buzz(14); return }
+    }
   }
 
   /** Nové události → mizející bubliny (nahrazuje textový log). */
