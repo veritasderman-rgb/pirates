@@ -7,6 +7,14 @@
  * docs/STRIPE_PAYWALL_PLAN.md.
  */
 
+/**
+ * Hlavní vypínač paywallu. Dokud je hra ve vývoji, je VYPNUTÝ: všechen obsah
+ * (kampaň i skirmish) je zdarma a odemčený, žádné „Buy"/zámky/store se
+ * neukazují. Až bude čas prodávat, stačí přepnout na true (a nastavit Stripe
+ * env dle docs/STRIPE_PAYWALL_PLAN.md). Skirmish zůstává dostupný v obou režimech.
+ */
+export const PAYWALL_ENABLED = false
+
 /** Zobrazená cena ve storu. MUSÍ se ručně držet v souladu se Stripe Price. */
 export const STORE_PRICE_LABEL = '€6.99'
 

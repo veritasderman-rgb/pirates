@@ -33,7 +33,8 @@ self.onmessage = (e: MessageEvent<WorkerInMsg>) => {
   const msg = e.data
   switch (msg.kind) {
     case 'init': {
-      const scenario = loadScenario(msg.scenarioId)
+      // skirmish posílá hotový scénář přímo (není v SCENARIOS); kampaň jen id
+      const scenario = msg.scenario ?? loadScenario(msg.scenarioId)
       state = sim.create(scenario)
       applyFlagshipLoadout(state, msg.flagshipClass, msg.upgrades, msg.condition)
       compression = 0

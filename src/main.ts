@@ -15,7 +15,8 @@ import { CAMPAIGN_INTRO, DEFEAT_GENERIC, MISSION_STORY } from './data/story'
 import { scoreMission } from './sim/score'
 import { loadProfile, saveProfile, modsFrom, computeReward, upgradeCost, UPGRADE_DEFS, UP_ORDER, SHIPYARD, shipEntry, shipCondition, isDamaged, repairCost, type UpKey } from './data/profile'
 import { CAMPAIGN_NODES, CAMPAIGN_ISLES, isMissionUnlocked, isPaidMission } from './data/campaign'
-import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, STORE_PRICE_LABEL, UNLOCK_PERKS } from './data/entitlement'
+import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, PAYWALL_ENABLED, STORE_PRICE_LABEL, UNLOCK_PERKS } from './data/entitlement'
+import { buildSkirmish, SKIRMISH_PLAYER_SHIPS, SKIRMISH_ENEMY_SHIPS, WEATHER_LABEL, MAP_LABEL, type SkirmishOptions, type Weather, type SkirmishMap } from './data/skirmish'
 import { SHIP_CLASSES } from './data/defs'
 import type { Scenario, SimState } from './sim/types'
 
@@ -72,11 +73,18 @@ const allUnlocked = ((): boolean => { try { return localStorage.getItem(UNLOCK_K
 // paywall: jednorázové odemčení celé hry. `?own=1` je vývojářský přepínač pro
 // testování placeného obsahu bez platby (obdoba ?unlock=all). DEV odemčení misí
 // zároveň uděluje vlastnictví, ať tester může placené mise skutečně hrát.
+// Dokud je PAYWALL_ENABLED false (hra ve vývoji), je vše odemčené a skirmish
+// otevřený — žádné zámky ani store; skirmish zůstává dostupný.
 applyOwnDevFlag(location.search)
-const owned = (): boolean => allUnlocked || isOwned()
+const owned = (): boolean => !PAYWALL_ENABLED || allUnlocked || isOwned()
 
 const startMission = (id: string): void =>
   bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship))
+
+// skirmish: hotový scénář se posílá přímo do workeru; žádné kampaňové upgrady
+// ani opotřebení (čistý, férový souboj s vybranou lodí). Poslední drží REPLAY.
+let lastSkirmish: Scenario | null = null
+const startSkirmish = (sc: Scenario): void => { lastSkirmish = sc; bridge.start(sc.id, undefined, undefined, undefined, sc) }
 
 const audio = new AudioManager()
 audio.setMenuMode(true)
@@ -184,6 +192,7 @@ function showCampaignMap(): void {
     + `<div class="cm-bar"><span>Treasury: <b>${profile.money} 🪙</b></span>`
     + `<span>Flagship: <b>${esc(flagName)}</b></span>`
     + `<button id="btn-port">🛠 PORT — shipyard &amp; outfitting</button>`
+    + `<button id="btn-skirmish"${owned() ? '' : ' class="cm-locked-feat"'}>⚔ Skirmish${owned() ? '' : ' 🔒'}</button>`
     + (owned() ? '' : `<button id="btn-store" class="cm-buy">🔓 Unlock full game — ${esc(STORE_PRICE_LABEL)}</button>`)
     + `</div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
@@ -193,6 +202,8 @@ function showCampaignMap(): void {
   el.querySelector('.box')!.classList.add('wide')
   el.querySelector('#btn-port')!.addEventListener('click', () => { el.remove(); showOutfitting() })
   el.querySelector('#btn-store')?.addEventListener('click', () => { el.remove(); showStore() })
+  // skirmish je placený obsah: bez vlastnictví vede tlačítko do storu
+  el.querySelector('#btn-skirmish')!.addEventListener('click', () => { el.remove(); owned() ? showSkirmish() : showStore() })
   el.querySelectorAll<SVGGElement>('g[data-mission]').forEach(g =>
     g.addEventListener('click', () => {
       // placený uzel (za paywallem) vede do storu, ostatní rovnou vyplouvají
@@ -263,6 +274,59 @@ function showStore(): void {
   })
 
   el.querySelector('#btn-store-back')!.addEventListener('click', () => { el.remove(); showCampaignMap() })
+}
+
+/**
+ * Skirmish — nastavení volné bitvy (placený obsah). Hráč zvolí loď, nepřítele,
+ * počet, počasí a mapu; z toho se sestaví ad-hoc scénář a spustí. Determinismus:
+ * seed z voleb, takže REPLAY dá stejnou bitvu.
+ */
+function showSkirmish(): void {
+  const opts: SkirmishOptions = {
+    playerClass: SKIRMISH_PLAYER_SHIPS.includes(profile.flagship) ? profile.flagship : SKIRMISH_PLAYER_SHIPS[0],
+    enemyClass: SKIRMISH_ENEMY_SHIPS[0],
+    enemyCount: 2, weather: 'breeze', map: 'open',
+  }
+  const el = overlay('')
+  const box = el.querySelector('.box') as HTMLElement
+  box.classList.add('wide')
+  const shipCard = (id: string, sel: boolean, group: 'pc' | 'ec'): string => {
+    const def = SHIP_CLASSES[id]
+    return `<button class="sk-ship ${sel ? 'on' : ''}" data-${group}="${esc(id)}">`
+      + `<b>${esc(def?.name ?? id)}</b>`
+      + `<span class="sk-s">${def?.gunsPerBroadside ?? '?'}/side · hull ${def?.hullPoints ?? '?'}</span></button>`
+  }
+  const draw = (): void => {
+    const players = SKIRMISH_PLAYER_SHIPS.map(id => shipCard(id, opts.playerClass === id, 'pc')).join('')
+    const enemies = SKIRMISH_ENEMY_SHIPS.map(id => shipCard(id, opts.enemyClass === id, 'ec')).join('')
+    const counts = [1, 2, 3, 4].map(n => `<button class="sk-opt ${opts.enemyCount === n ? 'on' : ''}" data-count="${n}">${n}</button>`).join('')
+    const weathers = (['calm', 'breeze', 'storm'] as Weather[]).map(w =>
+      `<button class="sk-opt ${opts.weather === w ? 'on' : ''}" data-weather="${w}">${esc(WEATHER_LABEL[w])}</button>`).join('')
+    const maps = (['open', 'islands', 'reef'] as SkirmishMap[]).map(m =>
+      `<button class="sk-opt ${opts.map === m ? 'on' : ''}" data-map="${m}">${esc(MAP_LABEL[m])}</button>`).join('')
+    box.innerHTML = `<h1>SKIRMISH</h1>`
+      + `<div class="hint">A free battle on your terms — pick your ship, the enemy squadron, the weather and the ground, then fight. No campaign upgrades: a clean duel.</div>`
+      + `<h2>Your ship</h2><div class="sk-grid">${players}</div>`
+      + `<h2>Enemy ship</h2><div class="sk-grid">${enemies}</div>`
+      + `<h2>Enemy squadron</h2><div class="sk-row">${counts}</div>`
+      + `<h2>Weather</h2><div class="sk-row">${weathers}</div>`
+      + `<h2>Ground</h2><div class="sk-row">${maps}</div>`
+      + `<div style="margin-top:16px"><button id="btn-fight" class="sk-fight">⚔ BATTLE</button> `
+      + `<button id="btn-sk-back">← Back to map</button></div>`
+    box.querySelectorAll<HTMLButtonElement>('[data-pc]').forEach(b =>
+      b.addEventListener('click', () => { opts.playerClass = b.dataset.pc!; draw() }))
+    box.querySelectorAll<HTMLButtonElement>('[data-ec]').forEach(b =>
+      b.addEventListener('click', () => { opts.enemyClass = b.dataset.ec!; draw() }))
+    box.querySelectorAll<HTMLButtonElement>('[data-count]').forEach(b =>
+      b.addEventListener('click', () => { opts.enemyCount = Number(b.dataset.count); draw() }))
+    box.querySelectorAll<HTMLButtonElement>('[data-weather]').forEach(b =>
+      b.addEventListener('click', () => { opts.weather = b.dataset.weather as Weather; draw() }))
+    box.querySelectorAll<HTMLButtonElement>('[data-map]').forEach(b =>
+      b.addEventListener('click', () => { opts.map = b.dataset.map as SkirmishMap; draw() }))
+    box.querySelector('#btn-fight')!.addEventListener('click', () => { el.remove(); startSkirmish(buildSkirmish(opts)) })
+    box.querySelector('#btn-sk-back')!.addEventListener('click', () => { el.remove(); showCampaignMap() })
+  }
+  draw()
 }
 
 /** Přístav — nákup trvalých upgradů vlajkové lodi za dublony. */
@@ -378,6 +442,8 @@ function showBriefing(sc: Scenario): void {
 
 function showOutcome(state: SimState): void {
   const win = state.outcome === 'win'
+  // skirmish je mimo kampaň: nikdy nesahá do profilu (dublony, cleared, kondice)
+  const isSkirmish = currentMissionId === 'skirmish'
   const objs = state.objectives.map(o => {
     const m = o.state === 'done' ? '■' : o.state === 'failed' ? '✗' : '□'
     return `<div class="obj ${o.state}">${m} ${esc(o.text)}</div>`
@@ -388,7 +454,7 @@ function showOutcome(state: SimState): void {
   // v DEV režimu (?unlock=all) neukládej nic do profilu — testovací běhy nesmí
   // změnit skutečný postup, dublony ani opotřebení lodi
   const survivor = state.ships.find(s => s.doctrine === 'player' && !s.destroyed && s.classId === profile.flagship)
-  if (survivor && !allUnlocked) {
+  if (survivor && !allUnlocked && !isSkirmish) {
     const hpFull = survivor.hullMax ?? SHIP_CLASSES[survivor.classId]?.hullPoints ?? 100
     const ss = survivor.subsystems
     profile.condition[profile.flagship] = {
@@ -405,9 +471,9 @@ function showOutcome(state: SimState): void {
     objectivesDone: state.objectives.filter(o => o.state === 'done').length,
     ownLosses: losses, prizesTaken: prizes, enemySunk: sunk,
   })
-  // ekonomika: odměna v dublonech (plná jen při prvním dokončení mise)
+  // ekonomika: odměna v dublonech (plná jen při prvním dokončení mise) — ne pro skirmish
   let rewardHtml = ''
-  if (win) {
+  if (win && !isSkirmish) {
     const already = profile.cleared.includes(currentMissionId)
     const rew = computeReward({
       missionId: currentMissionId, win: true, enemySunk: sunk, prizes,
@@ -436,10 +502,15 @@ function showOutcome(state: SimState): void {
     + rewardHtml
     + (epilog ? `<div class="brief story">${esc(epilog)}</div>` : '')
     + `<div style="margin-top:14px"><button id="btn-again">REPLAY</button> `
-    + (win ? `<button id="btn-port">🛠 PORT</button> ` : '')
+    + (isSkirmish ? `<button id="btn-newsk">⚔ NEW SKIRMISH</button> ` : (win ? `<button id="btn-port">🛠 PORT</button> ` : ''))
     + `<button id="btn-menu">CAMPAIGN MAP</button></div>`)
   el.querySelector('#btn-port')?.addEventListener('click', () => { el.remove(); showOutfitting() })
-  el.querySelector('#btn-again')!.addEventListener('click', () => { location.href = `${location.pathname}?mission=${encodeURIComponent(currentMissionId)}` })
+  el.querySelector('#btn-newsk')?.addEventListener('click', () => { el.remove(); showSkirmish() })
+  el.querySelector('#btn-again')!.addEventListener('click', () => {
+    // skirmish přehraj v místě (stejný scénář, deterministicky); kampaň přes URL
+    if (isSkirmish && lastSkirmish) { el.remove(); outcomeShown = false; startSkirmish(lastSkirmish) }
+    else location.href = `${location.pathname}?mission=${encodeURIComponent(currentMissionId)}`
+  })
   el.querySelector('#btn-menu')!.addEventListener('click', () => { location.href = location.pathname })
 }
 
