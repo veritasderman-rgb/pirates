@@ -5,7 +5,7 @@
  */
 import type { ShipState, SimState } from './types'
 import { dist } from './vec'
-import { bestBroadside, fireBroadside } from './weapons'
+import { bestBroadside, fireBroadside, bestChaser, fireChaser } from './weapons'
 import { SHIP_CLASSES } from '../data/defs'
 import { hostileTo } from './util'
 
@@ -21,7 +21,8 @@ export function updateFireControl(state: SimState): void {
     for (const other of state.ships) {
       if (other.destroyed || other.surrendered) continue
       if (!hostileTo(ship.side, other.side)) continue
-      if (!bestBroadside(ship, other)) continue
+      // kandidát, na kterého lze nést bok NEBO aspoň stíhací dělo (honička)
+      if (!bestBroadside(ship, other) && !bestChaser(ship, other)) continue
       const hp = SHIP_CLASSES[other.classId]?.hullPoints ?? 100
       const frac = other.hull / hp
       const d = dist(ship.pos, other.pos)
@@ -32,9 +33,15 @@ export function updateFireControl(state: SimState): void {
     }
     if (!target) { ship.fireControl.engaged = false; continue }
 
+    // přednost plné boční salvě; nenese-li bok, aspoň štípni stíhacím dělem
     const side = bestBroadside(ship, target)
-    if (!side) { ship.fireControl.engaged = false; continue }
     ship.fireControl.engaged = true
-    fireBroadside(state, ship, side, target, ship.fireControl.shot)
+    if (side) {
+      fireBroadside(state, ship, side, target, ship.fireControl.shot)
+    } else {
+      const end = bestChaser(ship, target)
+      if (end) fireChaser(state, ship, end, target, ship.fireControl.shot)
+      else ship.fireControl.engaged = false
+    }
   }
 }

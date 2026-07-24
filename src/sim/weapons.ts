@@ -8,6 +8,7 @@ import {
   CHAIN_HULL_FACTOR, CHAIN_RIG_FACTOR, GRAPE_HULL_FACTOR, GRAPE_CREW_FACTOR,
   RAKE_BONUS, RAKE_CONE, SUBSYSTEM_SHARE, MORALE_HULL_WEIGHT, MORALE_CREW_WEIGHT,
   DAMAGE_SCALE, SUBSYSTEM_DISABLED, WEATHER_GAGE_ACC,
+  CHASE_CONE, CHASE_RELOAD, CHASE_DMG_FACTOR,
 } from './constants'
 import { add, angleDiff, angleOf, dist, fromAngle, len, norm, scale, sub, dot } from './vec'
 import { SHIP_CLASSES } from '../data/defs'
@@ -42,6 +43,38 @@ export function canBear(ship: ShipState, side: Broadside, target: ShipState): bo
   const toT = angleOf(sub(target.pos, ship.pos))
   const arc = Math.abs(angleDiff(toT, broadsideDir(ship, side)))
   return arc < 1.1 // ~63° půlúhel palebného vějíře
+}
+
+export type ChaseEnd = 'bow' | 'stern'
+
+/** Směr stíhacího děla ve světě (rad): příď = kurz, záď = kurz + π. */
+export function chaserDir(ship: ShipState, end: ChaseEnd): number {
+  return end === 'bow' ? ship.heading : ship.heading + Math.PI
+}
+
+/** Počet stíhacích děl (na přídi i zádi). Odvozeno z třídy; pevnosti nemají. */
+export function chaseGunCount(ship: ShipState): number {
+  const def = SHIP_CLASSES[ship.classId]
+  if (!def || def.hullCode === 'FORT') return 0
+  if (def.chaseGuns !== undefined) return def.chaseGuns
+  return def.gunsPerBroadside >= 6 ? 2 : def.gunsPerBroadside >= 3 ? 1 : 0
+}
+
+/** Nese stíhací dělo (příď/záď) na cíl a je v dostřelu? Úzký kužel podél osy. */
+export function canChase(ship: ShipState, end: ChaseEnd, target: ShipState): boolean {
+  const def = SHIP_CLASSES[ship.classId]
+  if (!def) return false
+  if (dist(ship.pos, target.pos) > def.gunRange) return false
+  const toT = angleOf(sub(target.pos, ship.pos))
+  return Math.abs(angleDiff(toT, chaserDir(ship, end))) < CHASE_CONE
+}
+
+/** Který konec (pokud vůbec) může stíhacím dělem pálit na cíl? Přednost přídi. */
+export function bestChaser(ship: ShipState, target: ShipState): ChaseEnd | null {
+  if (chaseGunCount(ship) <= 0) return null
+  if (canChase(ship, 'bow', target)) return 'bow'
+  if (canChase(ship, 'stern', target)) return 'stern'
+  return null
 }
 
 /** Který bok (pokud vůbec) může na cíl pálit? Preferuje ten s víc děly. */
@@ -138,6 +171,56 @@ export function fireBroadside(
 
 const shotName = (s: ShotType): string =>
   s === 'round' ? 'round shot' : s === 'chain' ? 'chain shot' : 'grape shot'
+
+/**
+ * Stíhací dělo (příď/záď): pár lehkých děl mířících podél osy. Slabé oproti
+ * boční salvě, ale nemusíš kvůli němu natáčet bok — při honičce jím štípeš cíl
+ * před sebou. Vrací true, pokud vypálil.
+ */
+export function fireChaser(
+  state: SimState, ship: ShipState, end: ChaseEnd, target: ShipState, shot: ShotType,
+): boolean {
+  const def = SHIP_CLASSES[ship.classId]
+  if (!def || ship.destroyed || ship.surrendered) return false
+  const reload = end === 'bow' ? ship.reloadBow : ship.reloadStern
+  if (reload > 0) return false
+  const guns = chaseGunCount(ship)
+  if (guns <= 0 || ship.ammo <= 0) return false
+  if (!canChase(ship, end, target)) return false
+
+  const d = dist(ship.pos, target.pos)
+  const aim = leadPoint(ship.pos, target)
+  const baseAng = angleOf(sub(aim, ship.pos))
+  const gage = weatherGage(ship.pos, target.pos, state.wind.dir)
+  const spread = GUN_SPREAD_PER_M * d
+    / (Math.max(0.3, def.gunnery) * (ship.mods?.acc ?? 1) * (1 + WEATHER_GAGE_ACC * gage))
+  const dmgPer = def.gunDamage * CHASE_DMG_FACTOR * (0.85 + 0.15 * ACCURACY_BASE) * (ship.mods?.gun ?? 1)
+
+  const dir = chaserDir(ship, end)
+  const n = Math.min(guns, ship.ammo)
+  for (let i = 0; i < n; i++) {
+    const jitter = (rand(state.rng) - 0.5) * 2 * spread
+    state.balls.push({
+      id: state.nextId++, side: ship.side, shot,
+      pos: add(ship.pos, scale(fromAngle(dir), hitRadius(ship) * 0.9)),
+      vel: fromAngle(baseAng + jitter, BALL_SPEED),
+      targetId: target.id, range: def.gunRange * 1.1, damage: dmgPer,
+    })
+  }
+  ship.ammo -= n
+  if (end === 'bow') ship.reloadBow = CHASE_RELOAD
+  else ship.reloadStern = CHASE_RELOAD
+
+  state.events.push({
+    t: state.t, kind: 'gunFire', shipId: ship.id, side: ship.side, count: n,
+    pos: { ...ship.pos }, dir,
+    speaker: ship.doctrine === 'player' ? 'gunner' : undefined,
+    text: ship.doctrine === 'player'
+      ? `${end === 'bow' ? 'Bow' : 'Stern'} chaser — fire! (${n} guns, ${shotName(shot)})`
+      : '',
+  })
+  return true
+}
 
 /** Posun a vyhodnocení všech letících koulí za dt. */
 export function updateBalls(state: SimState, dt: number): void {

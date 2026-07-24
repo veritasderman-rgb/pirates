@@ -8,7 +8,7 @@ import type { Hud, PanelAction, UiState } from './panels'
 import type { Renderer } from './renderer'
 import type { ShipState, SimState, ShotType } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
-import { weatherGage, rakeAvailable, bestBroadside } from '../sim/weapons'
+import { weatherGage, rakeAvailable, bestBroadside, bestChaser } from '../sim/weapons'
 import { boardingOdds } from '../sim/surrender'
 import { BOARD_RANGE } from '../sim/constants'
 import { dist } from '../sim/vec'
@@ -164,10 +164,14 @@ export class MobileHud implements Hud {
     const auto = sh.fireControl.mode === 'auto'
     const hasTgt = ui.targetId !== null
     const tgt = hasTgt ? state.ships.find(s => s.id === ui.targetId) : undefined
-    // FIRE jen když bok, který NESE na cíl, je zároveň nabitý (jinak sim salvu odmítne)
+    // FIRE když nese nabitý bok, nebo (v honičce) nabité stíhací dělo podél osy
     const bearSide = tgt && !tgt.destroyed ? bestBroadside(sh, tgt) : null
-    const canFire = bearSide === 'port' ? sh.reloadPort <= 0
+    const broadsideReady = bearSide === 'port' ? sh.reloadPort <= 0
       : bearSide === 'stbd' ? sh.reloadStbd <= 0 : false
+    const chaseEnd = tgt && !tgt.destroyed && !bearSide ? bestChaser(sh, tgt) : null
+    const chaseReady = chaseEnd === 'bow' ? sh.reloadBow <= 0
+      : chaseEnd === 'stern' ? sh.reloadStern <= 0 : false
+    const canFire = broadsideReady || chaseReady
     const btn = (act: PanelAction, icon: string, label: string, on = false, dis = false): string =>
       `<button data-act="${act}" class="mh-btn ${on ? 'on' : ''}" ${dis ? 'disabled' : ''}>`
       + `<span class="mh-bi">${icon}</span><span class="mh-bl">${label}</span></button>`

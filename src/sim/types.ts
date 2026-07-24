@@ -44,6 +44,8 @@ export interface ShipClassDef {
   hullPoints: number
   /** počet děl na jeden bok */
   gunsPerBroadside: number
+  /** stíhací děla na přídi i zádi (volitelné; chybí = odvodí se z gunsPerBroadside) */
+  chaseGuns?: number
   /** poškození jedné dělové koule (round shot) na trup před odečtením */
   gunDamage: number
   /** dostřel děl (m) */
@@ -121,6 +123,9 @@ export interface ShipState {
   /** cooldowny nabití děl (s do další salvy) na bok */
   reloadPort: number
   reloadStbd: number
+  /** cooldowny stíhacích děl na přídi / zádi */
+  reloadBow: number
+  reloadStern: number
   destroyed: boolean
   /** loď spustila vlajku (nebojuje, dá se obsadit) */
   surrendered: boolean
@@ -213,6 +218,7 @@ export type Order =
   | { kind: 'setTrim'; shipId: number; trim: number }
   | { kind: 'setOars'; shipId: number; on: boolean }
   | { kind: 'fireBroadside'; shipId: number; side: Broadside; targetId: number; shot: ShotType }
+  | { kind: 'fireChaser'; shipId: number; end: 'bow' | 'stern'; targetId: number; shot: ShotType }
   | { kind: 'setFireControl'; shipId: number; fc: Partial<Omit<FireControl, 'engaged'>> }
   | { kind: 'holdFire'; shipId: number }
   | { kind: 'demandSurrender'; shipId: number; targetId: number }

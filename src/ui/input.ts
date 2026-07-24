@@ -6,7 +6,7 @@ import type { Order, ShipState, ShotType, SimState, Broadside } from '../sim/typ
 import type { SimBridge } from '../worker/bridge'
 import type { Renderer } from './renderer'
 import type { PanelAction, Hud } from './panels'
-import { bestBroadside } from '../sim/weapons'
+import { bestBroadside, bestChaser } from '../sim/weapons'
 
 const SHOT_ORDER: ShotType[] = ['round', 'chain', 'grape']
 
@@ -121,12 +121,17 @@ export class UIController {
       case 'shot-cycle': this.shot = SHOT_ORDER[(SHOT_ORDER.indexOf(this.shot) + 1) % SHOT_ORDER.length]; break
       case 'fire-port': this.fire(sel, 'port'); break
       case 'fire-stbd': this.fire(sel, 'stbd'); break
+      case 'fire-bow': this.fireChase(sel, 'bow'); break
+      case 'fire-stern': this.fireChase(sel, 'stern'); break
       case 'fire': {
-        // mobil: jedno tlačítko vypálí bok, který zrovna nese na cíl (jen když nese)
+        // mobil: jedno tlačítko — přednost boční salvě, jinak štípni stíhacím dělem
         if (this.targetId === null) break
         const tgt = this.state?.ships.find(s => s.id === this.targetId)
-        const side = tgt ? bestBroadside(sel, tgt) : null
-        if (side) this.fire(sel, side)
+        if (!tgt) break
+        const side = bestBroadside(sel, tgt)
+        if (side) { this.fire(sel, side); break }
+        const end = bestChaser(sel, tgt)
+        if (end) this.fireChase(sel, end)
         break
       }
       case 'toggle-auto':
@@ -144,6 +149,11 @@ export class UIController {
     this.order({ kind: 'fireBroadside', shipId: sel.id, side, targetId: this.targetId, shot: this.shot })
   }
 
+  private fireChase(sel: ShipState, end: 'bow' | 'stern'): void {
+    if (this.targetId === null) return
+    this.order({ kind: 'fireChaser', shipId: sel.id, end, targetId: this.targetId, shot: this.shot })
+  }
+
   private order(o: Order): void { this.bridge.sendOrder(o) }
 
   // ---------- klávesy ----------
@@ -156,6 +166,8 @@ export class UIController {
         case 'e': if (sel) this.order({ kind: 'setOars', shipId: sel.id, on: !sel.oaring }); break
         case 'q': if (sel) this.fire(sel, 'port'); break
         case 'r': if (sel) this.fire(sel, 'stbd'); break
+        case 'f': if (sel) this.fireChase(sel, 'bow'); break
+        case 'g': if (sel) this.fireChase(sel, 'stern'); break
         case '1': this.shot = 'round'; break
         case '2': this.shot = 'chain'; break
         case '3': this.shot = 'grape'; break

@@ -87,6 +87,19 @@ export const RAKE_BONUS = 2.0
 /** úhlové okno raku od podélné osy cíle (rad) */
 export const RAKE_CONE = 0.6
 
+// ---------- stíhací děla (příď / záď) ----------
+/**
+ * Historicky nesly lodě pár lehkých děl na přídi (bow chasers) a zádi. Slabá,
+ * ale míří podél osy — při honičce jimi štípeš cíl, aniž bys musel křižovat a
+ * natáčet bok. Plná boční salva zůstává cíl (mnohem silnější).
+ */
+/** polovina úhlu kužele, ve kterém stíhací dělo nese na cíl (rad, ~29°) */
+export const CHASE_CONE = 0.5
+/** stíhací dělo se nabíjí pomaleji (méně obsluhy) */
+export const CHASE_RELOAD = 28
+/** poškození stíhacího děla vůči plnému dělu boku */
+export const CHASE_DMG_FACTOR = 0.9
+
 // ---------- poškození ----------
 
 /**

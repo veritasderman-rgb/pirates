@@ -6,7 +6,7 @@
 import type { Order, Scenario, ShipState, SimApi, SimState } from './types'
 import { globalWind, updateWind } from './wind'
 import { updateShipPhysics } from './physics'
-import { updateBalls, fireBroadside } from './weapons'
+import { updateBalls, fireBroadside, fireChaser } from './weapons'
 import { updateSensors } from './sensors'
 import { updateFireControl } from './firecontrol'
 import { updateCrew } from './crew'
@@ -96,6 +96,11 @@ function applyOrder(state: SimState, order: Order): void {
       if (target) fireBroadside(state, ship, order.side, target, order.shot)
       break
     }
+    case 'fireChaser': {
+      const target = liveTarget(state, order.targetId)
+      if (target) fireChaser(state, ship, order.end, target, order.shot)
+      break
+    }
     case 'setFireControl': {
       const fc = ship.fireControl
       if (order.fc.mode !== undefined) fc.mode = order.fc.mode
@@ -149,6 +154,8 @@ export const sim: SimApi = {
     for (const ship of state.ships) {
       ship.reloadPort = Math.max(0, ship.reloadPort - dt)
       ship.reloadStbd = Math.max(0, ship.reloadStbd - dt)
+      ship.reloadBow = Math.max(0, ship.reloadBow - dt)
+      ship.reloadStern = Math.max(0, ship.reloadStern - dt)
     }
     // (2) vítr
     const ws = scenarioSeeds.get(state)
