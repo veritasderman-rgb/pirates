@@ -94,6 +94,40 @@ export const MISSION_STORY: Record<string, MissionStory> = {
       'The battery and the pack were more than two ships could handle. The Fortuna '
       + 'stayed behind in the bay of Bone Island, and Rourke laughs on.',
   },
+  side01: {
+    prolog:
+      'The Tin Cays, a bright forenoon and a steady wind. No fleet action here, no '
+      + 'Castillan seal — only the Revenue Office, a tip-off, and three trim sloops '
+      + 'wearing an honest face that will not survive a second look. HMS Swallow lies '
+      + 'across their run; the rest is chase and gunnery.',
+    epilog:
+      'The smugglers\' run is broken. Whatever came out of their holds — brandy and '
+      + 'powder, and manifests that named no honest port — will not reach the free '
+      + 'ports now. It was no part of the war against de Vega, but the crew have their '
+      + 'prize money and the Cays are quiet, and a captain takes his easy days where '
+      + 'the sea offers them.',
+    epilogLose:
+      'The sloops scattered into the shoals where the Swallow could not follow, and '
+      + 'took their cargo with them. The Revenue Office logs it as "contact lost". A '
+      + 'small failure, in the scale of the war — but the free ports will drink to it.',
+  },
+  side02: {
+    prolog:
+      'Widow\'s Comb, in the last of the light. This is no campaign against a crown, '
+      + 'but a reckoning owed to every captain lost on these reefs to a lantern that '
+      + 'lied. The false light burns on Beacon Rock; the Santa Rosa lies broken on the '
+      + 'coral; and somewhere in the shoals the wreckers wait. HMS Goshawk draws deep '
+      + '— sail carefully, and settle the account.',
+    epilog:
+      'The false light is out and the wreckers are finished — sunk or struck and bound '
+      + 'for a rope ashore. No silver in it, no seal, no thread of the great net: only '
+      + 'a stretch of reef that honest men may cross again without a lie to drown them. '
+      + 'Some victories are worth more than the war remembers.',
+    epilogLose:
+      'The Goshawk found the coral the wreckers meant her to find, and Widow\'s Comb '
+      + 'took a frigate for its tally. The false light still burns on Beacon Rock, and '
+      + 'the next ship down the channel will trust it just as the Santa Rosa did.',
+  },
   mission06: {
     prolog:
       'The strait at the Three Beacons. On the horizon a Castillan squadron and, with '

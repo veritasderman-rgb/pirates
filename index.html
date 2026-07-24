@@ -157,6 +157,12 @@
     .cm-node.locked .cm-num { fill: #4c6b74; }
     .cm-title { fill: #9fb8bf; font-size: 12px; text-anchor: middle; }
     .cm-node.locked .cm-title { fill: #43626b; }
+    /* volitelné odbočky (zlaté) */
+    .cm-route.opt { stroke-dasharray: 3 5; opacity: .6; }
+    .cm-node.opt .cm-c { stroke: #d8a24f; }
+    .cm-node.opt.open .cm-c { stroke: #e8c874; fill: #2e2410; }
+    .cm-node.opt .cm-num { fill: #e8c874; }
+    .cm-node.opt.done .cm-c { stroke: #6fd06a; }
     .cm-you-i { font-size: 22px; text-anchor: middle; }
     .cm-you-t { fill: #d8c24f; font-size: 10px; text-anchor: middle; }
     /* loděnice */
@@ -164,6 +170,10 @@
     .sy-stats { margin: 3px 0 2px; }
     .sy-stat { display: inline-block; font-size: 10px; color: #8fb0b8; margin-right: 10px; }
     .sy-stat b { color: #cfe6ec; }
+    /* oprava lodi (kondice) */
+    .cond-row { display: grid; grid-template-columns: 68px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #9fb8bf; padding: 1px 0; }
+    .cond-bar { height: 7px; background: #10242b; border-radius: 3px; overflow: hidden; }
+    .cond-bar i { display: block; height: 100%; }
 
     /* ================= mobilní UX (aktivní jen s .mobile) ================= */
     #mhud { display: none; }

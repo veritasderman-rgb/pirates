@@ -362,8 +362,18 @@ export interface ShipMods {
   board?: number    // síla výsadku
 }
 
+/** Stav opotřebení vlajkové lodi (0..1, 1 = bez poškození). Nese se mezi misemi. */
+export interface ShipCondition {
+  hull: number
+  rigging: number
+  rudder: number
+  gunsPort: number
+  gunsStbd: number
+  crew: number
+}
+
 export type WorkerInMsg =
-  | { kind: 'init'; scenarioId: string; upgrades?: ShipMods; flagshipClass?: string }
+  | { kind: 'init'; scenarioId: string; upgrades?: ShipMods; flagshipClass?: string; condition?: ShipCondition }
   | { kind: 'order'; order: Order }
   | { kind: 'setCompression'; factor: number }
   | { kind: 'snapshotRequest' }

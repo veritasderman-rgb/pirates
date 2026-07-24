@@ -11,6 +11,8 @@ import { mission08 } from './mission08'
 import { mission09 } from './mission09'
 import { mission10 } from './mission10'
 import { mission11 } from './mission11'
+import { side01 } from './side01'
+import { side02 } from './side02'
 
 export const SCENARIOS: Record<string, Scenario> = {
   mission01,
@@ -24,4 +26,7 @@ export const SCENARIOS: Record<string, Scenario> = {
   mission09,
   mission10,
   mission11,
+  // volitelné vedlejší mise (odbočky na mapě)
+  side01,
+  side02,
 }
