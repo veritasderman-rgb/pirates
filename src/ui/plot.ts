@@ -371,8 +371,8 @@ export class TacticalPlot {
     const freq = 0.028               // 1/m — vlnová délka ~220 m
     const speed = 1.7                // drift hřebenů po větru
     const detail = this.scale > 0.03 // blíž = víc detailu
-    const step = detail ? 32 : 48
-    const L = Math.max(3.5, Math.min(8, this.scale * 90)) // délka čeřiny (px)
+    const step = detail ? 46 : 66 // řidší mřížka — decentní hladina, méně rušivá
+    const L = Math.max(3, Math.min(7, this.scale * 78)) // délka čeřiny (px)
     ctx.lineCap = 'round'
     for (let sx = (step / 2); sx < cw; sx += step) {
       for (let sy = (step / 2); sy < ch; sy += step) {
@@ -380,11 +380,12 @@ export class TacticalPlot {
         const proj = w.x * wd.x + w.y * wd.y
         const ph = hashNoise(Math.floor(w.x / 180), Math.floor(w.y / 180), 3) * 6.283
         const amp = Math.sin(proj * freq - t * speed + ph)
-        if (amp <= 0.2) continue
-        const b = (amp - 0.2) / 0.8
-        ctx.globalAlpha = 0.06 + b * (0.17 + storm * 0.18)
+        // jen výraznější hřebeny (vyšší práh) → řídce a jemně, ne celá mapa v čárkách
+        if (amp <= 0.45) continue
+        const b = (amp - 0.45) / 0.55
+        ctx.globalAlpha = 0.03 + b * (0.06 + storm * 0.17)
         ctx.strokeStyle = CLR.crest
-        ctx.lineWidth = 1 + b * (1.3 + storm * 1.2)
+        ctx.lineWidth = 0.8 + b * (0.6 + storm * 1.1)
         ctx.beginPath()
         ctx.moveTo(sx - crest.x * L, sy - crest.y * L)
         ctx.lineTo(sx + crest.x * L, sy + crest.y * L)
@@ -397,18 +398,18 @@ export class TacticalPlot {
         }
       }
     }
-    // třpytivé odlesky (rychlejší, řidší)
+    // třpytivé odlesky (jen občasné jiskřičky — řídké a jemné)
     if (detail) {
-      const s2 = 66
+      const s2 = 98
       for (let sx = 22; sx < cw; sx += s2) {
         for (let sy = 40; sy < ch; sy += s2) {
           const w = this.s2w(sx, sy)
           const tw = hashNoise(Math.floor(w.x / 90), Math.floor(w.y / 90), 9)
           const amp = Math.sin(t * 2.3 + tw * 6.283)
-          if (amp < 0.86) continue
-          ctx.globalAlpha = (amp - 0.86) / 0.14 * 0.5
+          if (amp < 0.92) continue
+          ctx.globalAlpha = (amp - 0.92) / 0.08 * 0.28
           ctx.fillStyle = CLR.sparkle
-          ctx.beginPath(); ctx.arc(sx, sy, 1.4, 0, Math.PI * 2); ctx.fill()
+          ctx.beginPath(); ctx.arc(sx, sy, 1.1, 0, Math.PI * 2); ctx.fill()
         }
       }
     }
