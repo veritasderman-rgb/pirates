@@ -74,11 +74,14 @@ export class Panels {
     const comps = [0, 1, 2, 4, 8]
     const btns = comps.map(c =>
       `<button data-act="comp-${c}" class="${ui.compression === c ? 'active' : ''}">${c === 0 ? '❚❚' : c + '×'}</button>`).join('')
-    const wind = `vítr ${Math.round(state.wind.speed * 1.94)} kn`
+    const kn = Math.round(state.wind.speed * 1.94)
+    const label = kn < 5 ? 'bezvětří' : kn < 11 ? 'vánek' : kn < 16 ? 'mírný vítr'
+      : kn < 22 ? 'čerstvý vítr' : kn < 28 ? 'vichr' : 'bouřka'
+    const icon = kn < 5 ? '🌤' : kn < 22 ? '🧭' : '🌩'
     this.topbar.innerHTML =
       `<span class="tb-time">⏱ ${fmtTime(state.t)}</span>`
       + `<span class="tb-comp">${btns}</span>`
-      + `<span class="tb-wind">🧭 ${wind}</span>`
+      + `<span class="tb-wind">${icon} vítr ${kn} kn · ${label}</span>`
   }
 
   private renderLeft(state: SimState, ui: UiState): void {

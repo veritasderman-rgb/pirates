@@ -5,7 +5,7 @@
  */
 import type { Ball, Contact, Island, ShipClassDef, ShipState, SimState, Vec2 } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
-import { windAt } from '../sim/wind'
+import { windAt, storminess } from '../sim/wind'
 import { offWindAngle, sailEfficiency } from '../sim/sail'
 import { NO_GO_DEG } from '../sim/constants'
 import { fromAngle } from '../sim/vec'
@@ -57,6 +57,14 @@ function shade(hex: string, amt: number): string {
   return `rgb(${r | 0},${g | 0},${b | 0})`
 }
 
+/** lineární míchání dvou hex barev (f=0 → a, f=1 → b) */
+function mixHex(a: string, b: string, f: number): string {
+  const na = parseInt(a.slice(1), 16), nb = parseInt(b.slice(1), 16)
+  const ar = (na >> 16) & 255, ag = (na >> 8) & 255, ab = na & 255
+  const br = (nb >> 16) & 255, bg = (nb >> 8) & 255, bb = nb & 255
+  return `rgb(${(ar + (br - ar) * f) | 0},${(ag + (bg - ag) * f) | 0},${(ab + (bb - ab) * f) | 0})`
+}
+
 export class TacticalPlot {
   private ctx: CanvasRenderingContext2D
   private state: SimState | null = null
@@ -71,6 +79,7 @@ export class TacticalPlot {
   compression = 1
   selectedId: number | null = null
   targetId: number | null = null
+  private storm = 0                            // počasí 0 klid .. 1 bouřka
   private parts: Particle[] = []
   private wakes: Particle[] = []              // pěnová brázda (kreslí se pod loděmi)
   private wakeAt = new Map<number, number>()  // shipId → čas poslední pěny brázdy
@@ -271,6 +280,8 @@ export class TacticalPlot {
     // pozice = snapshot + vel × exSim; comp škáluje kompresi času, strop
     // brání přestřelení, když snapshoty na chvíli váznou
     this.exSim = Math.min((now - this.snapT) / 1000 * (this.compression || 0), 2.0)
+    // počasí (plynule dohání cílovou hodnotu z rychlosti větru) — 0 klid .. 1 bouřka
+    this.storm += (storminess(st.wind.speed) - this.storm) * 0.05
 
     // kamera plynule sleduje (extrapolovanou) loď — měkký dojezd místo skoku
     if (this.followId !== null && !this.userPanned) {
@@ -305,8 +316,30 @@ export class TacticalPlot {
       this.cam.x -= ox / this.scale; this.cam.y += oy / this.scale
       this.shake *= 0.88; if (this.shake < 0.3) this.shake = 0
     }
+    this.drawRain(t)
     this.drawVignette(st)
     this.drawWindRose(st)
+  }
+
+  /** Déšť za bouřky — šikmé pruhy padající po větru, hustota dle síly bouřky. */
+  private drawRain(t: number): void {
+    if (this.storm < 0.35) return
+    const ctx = this.ctx, cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
+    const s = (this.storm - 0.35) / 0.65
+    const n = Math.floor(s * 260)
+    const wd = fromAngle(this.state!.wind.dir)
+    const dx = wd.x * 0.5 + 0.25, dy = 1.1     // šikmo dolů po větru
+    const len = 14 + s * 10
+    ctx.strokeStyle = `rgba(200,220,230,${0.12 + s * 0.16})`; ctx.lineWidth = 1
+    ctx.beginPath()
+    for (let i = 0; i < n; i++) {
+      // deterministicky rozmístěné kapky, animované pádem (mod výška)
+      const seed = i * 12.9898
+      const px = (Math.abs(Math.sin(seed) * 43758.5) % 1) * cw
+      const py = (((Math.abs(Math.cos(seed) * 12345.6) % 1) + t * (0.9 + s * 0.6)) % 1) * (ch + 40) - 20
+      ctx.moveTo(px, py); ctx.lineTo(px + dx * len, py + dy * len)
+    }
+    ctx.stroke()
   }
 
   /**
@@ -317,14 +350,16 @@ export class TacticalPlot {
    */
   private drawSea(st: SimState, t: number): void {
     const ctx = this.ctx, cw = this.canvas.clientWidth, ch = this.canvas.clientHeight
-    // hloubkový gradient (diagonální podle slunce)
+    const storm = this.storm
+    // hloubkový gradient (za bouřky tmavší šedozelený)
     const g = ctx.createLinearGradient(0, 0, cw * 0.4, ch)
-    g.addColorStop(0, CLR.seaHi); g.addColorStop(1, CLR.seaLo)
+    g.addColorStop(0, mixHex(CLR.seaHi, '#2c3b42', storm * 0.72))
+    g.addColorStop(1, mixHex(CLR.seaLo, '#141f24', storm * 0.72))
     ctx.fillStyle = g
     ctx.fillRect(0, 0, cw, ch)
-    // měkký sluneční třpyt (rozjasní hladinu, rozbije plochý gradient)
+    // sluneční třpyt (za bouřky mizí — slunce schované)
     const sg = ctx.createRadialGradient(cw * 0.32, ch * 0.26, 0, cw * 0.32, ch * 0.26, Math.max(cw, ch) * 0.6)
-    sg.addColorStop(0, 'rgba(150,225,225,0.16)'); sg.addColorStop(1, 'rgba(150,225,225,0)')
+    sg.addColorStop(0, `rgba(150,225,225,${0.16 * (1 - storm)})`); sg.addColorStop(1, 'rgba(150,225,225,0)')
     ctx.fillStyle = sg
     ctx.fillRect(0, 0, cw, ch)
 
@@ -347,18 +382,18 @@ export class TacticalPlot {
         const amp = Math.sin(proj * freq - t * speed + ph)
         if (amp <= 0.2) continue
         const b = (amp - 0.2) / 0.8
-        ctx.globalAlpha = 0.06 + b * 0.17
+        ctx.globalAlpha = 0.06 + b * (0.17 + storm * 0.18)
         ctx.strokeStyle = CLR.crest
-        ctx.lineWidth = 1 + b * 1.3
+        ctx.lineWidth = 1 + b * (1.3 + storm * 1.2)
         ctx.beginPath()
         ctx.moveTo(sx - crest.x * L, sy - crest.y * L)
         ctx.lineTo(sx + crest.x * L, sy + crest.y * L)
         ctx.stroke()
-        // pěnová čepička na nejvyšších hřebenech (roste se silou větru)
-        if (detail && b > 0.72 && st.wind.speed > 6) {
-          ctx.globalAlpha = (b - 0.72) / 0.28 * 0.5
+        // pěnová čepička na hřebenech — za bouřky mnohem víc a níž na hřebeni
+        if (detail && b > 0.72 - storm * 0.42) {
+          ctx.globalAlpha = Math.min(0.85, (b - (0.72 - storm * 0.42)) * (0.5 + storm * 1.1))
           ctx.fillStyle = CLR.foam
-          ctx.beginPath(); ctx.arc(sx, sy, Math.max(0.8, L * 0.28), 0, Math.PI * 2); ctx.fill()
+          ctx.beginPath(); ctx.arc(sx, sy, Math.max(0.8, L * (0.28 + storm * 0.22)), 0, Math.PI * 2); ctx.fill()
         }
       }
     }
@@ -388,10 +423,15 @@ export class TacticalPlot {
     const r = ((n >> 16) & 255) * 0.55 | 0, g2 = ((n >> 8) & 255) * 0.55 | 0, b = (n & 255) * 0.55 | 0
     const g = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * 0.46,
       cw / 2, ch / 2, Math.max(cw, ch) * 0.74)
-    g.addColorStop(0, `rgba(${r},${g2},${b},0)`)
-    g.addColorStop(1, `rgba(${r},${g2},${b},0.38)`)
+    g.addColorStop(0, `rgba(${r},${g2},${b},${this.storm * 0.12})`)
+    g.addColorStop(1, `rgba(${r},${g2},${b},${0.38 + this.storm * 0.28})`)
     ctx.fillStyle = g
     ctx.fillRect(0, 0, cw, ch)
+    // celkové ztmavení za bouřky (zatažená obloha)
+    if (this.storm > 0.05) {
+      ctx.fillStyle = `rgba(20,28,34,${this.storm * 0.28})`
+      ctx.fillRect(0, 0, cw, ch)
+    }
   }
 
   /** Kružnice dostřelu děl kolem vybrané vlastní lodi, cíle a pevností. */

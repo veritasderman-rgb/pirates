@@ -136,6 +136,15 @@ export const AGROUND_PUSH = 3
 /** globální zpomalení rotace větru — pozvolné změny počasí (čitelná předpověď) */
 export const WIND_ROTATION_SCALE = 0.5
 
+// ---------- počasí (pomalé střídání bezvětří ↔ bouřka) ----------
+
+/** perioda sinu střídání počasí (s) — plný cyklus klid→bouře→klid ≈ 2π× */
+export const WEATHER_PERIOD = 62
+/** násobič základní síly větru v bezvětří (klid) */
+export const WEATHER_CALM = 0.42
+/** násobič základní síly větru v bouřce */
+export const WEATHER_STORM = 1.85
+
 // ---------- vítr: závětří ----------
 
 /** hloubka závětří za ostrovem (m) — do této vzdálenosti po větru je slabší */

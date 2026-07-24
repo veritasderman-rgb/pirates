@@ -6,7 +6,27 @@ import type { SimState, Vec2, Wind, WindConfig } from './types'
 import { fromAngle } from './vec'
 import { hashNoise } from './rng'
 import { leeFactor } from './terrain'
-import { LEE_DEPTH, LEE_MIN_FACTOR, WIND_ROTATION_SCALE } from './constants'
+import {
+  LEE_DEPTH, LEE_MIN_FACTOR, WIND_ROTATION_SCALE,
+  WEATHER_PERIOD, WEATHER_CALM, WEATHER_STORM,
+} from './constants'
+
+/**
+ * Pomalé „počasí" 0..1 (0 = skoro bezvětří, 1 = bouřka) — deterministická
+ * funkce času a seedu. Sinus s dlouhou periodou + jemná nepravidelnost z šumu,
+ * takže se klid a bouřka pozvolna střídají a start mise je náhodně někde v cyklu.
+ */
+export function weatherPhase(seed: number, t: number): number {
+  const off = hashNoise(seed * 0.001, 0, 21) * 6.283
+  const s = Math.sin(t / WEATHER_PERIOD + off) * 0.5 + 0.5
+  const n = hashNoise(seed * 0.001, Math.floor(t / 40) * 0.017, 31)
+  return Math.min(1, Math.max(0, s * 0.82 + n * 0.18))
+}
+
+/** Storminess 0..1 z rychlosti větru (m/s) — sdílené mapování pro vizuál rendererů. */
+export function storminess(speedMps: number): number {
+  return Math.min(1, Math.max(0, (speedMps - 4) / 8))
+}
 
 /** Globální vítr v čase t z konfigurace (bez lokálních poryvů). */
 export function globalWind(cfg: WindConfig, seed: number, t: number): Wind {
@@ -15,9 +35,11 @@ export function globalWind(cfg: WindConfig, seed: number, t: number): Wind {
   const gust = cfg.gustiness ?? 0
   const dirWobble = (hashNoise(seed * 0.001, t * 0.01, 7) - 0.5) * gust * 0.6
   const spdWobble = 1 + (hashNoise(seed * 0.001, t * 0.013, 13) - 0.5) * gust * 0.5
+  // pomalé střídání bezvětří ↔ bouřka (násobič síly větru)
+  const weather = WEATHER_CALM + (WEATHER_STORM - WEATHER_CALM) * weatherPhase(seed, t)
   return {
     dir: cfg.baseDir + rot + dirWobble,
-    speed: Math.max(0.5, cfg.baseSpeed * spdWobble),
+    speed: Math.max(0.5, cfg.baseSpeed * spdWobble * weather),
   }
 }
 
