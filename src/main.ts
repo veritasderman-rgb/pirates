@@ -300,8 +300,10 @@ function showOutcome(state: SimState): void {
   // trvalé opotřebení: ulož stav přeživší vlajkové lodi (bojová poškození se
   // nesou do další mise, dokud je hráč v přístavu neopraví). Padne-li loď,
   // stav se nemění — mise je prohra, hráč ji opakuje s dřívějším stavem.
+  // v DEV režimu (?unlock=all) neukládej nic do profilu — testovací běhy nesmí
+  // změnit skutečný postup, dublony ani opotřebení lodi
   const survivor = state.ships.find(s => s.doctrine === 'player' && !s.destroyed && s.classId === profile.flagship)
-  if (survivor) {
+  if (survivor && !allUnlocked) {
     const hpFull = survivor.hullMax ?? SHIP_CLASSES[survivor.classId]?.hullPoints ?? 100
     const ss = survivor.subsystems
     profile.condition[profile.flagship] = {
@@ -326,12 +328,15 @@ function showOutcome(state: SimState): void {
       missionId: currentMissionId, win: true, enemySunk: sunk, prizes,
       objectivesDone: state.objectives.filter(o => o.state === 'done').length,
     }, already)
-    profile.money += rew.total
-    if (!already) profile.cleared.push(currentMissionId)
-    saveProfile(profile)
-    rewardHtml = `<div class="score"><div class="stot">Plunder: <b>+${rew.total} 🪙</b> · treasury: ${profile.money} 🪙</div>`
+    if (!allUnlocked) {
+      profile.money += rew.total
+      if (!already) profile.cleared.push(currentMissionId)
+      saveProfile(profile)
+    }
+    rewardHtml = `<div class="score"><div class="stot">Plunder: <b>+${rew.total} 🪙</b>`
+      + (allUnlocked ? ` <span class="dim">(dev — not saved)</span>` : ` · treasury: ${profile.money} 🪙`) + `</div>`
       + rew.parts.map(p => `<div class="row"><span>${esc(p.label)}</span><span class="ok">${p.coins ? '+' + p.coins : ''}</span></div>`).join('')
-      + `</div><div class="hint">Prizes (captured ships) earn more than sinking — at port, spend doubloons to upgrade your flagship.</div>`
+      + `</div>` + (allUnlocked ? '' : `<div class="hint">Prizes (captured ships) earn more than sinking — at port, spend doubloons to upgrade your flagship.</div>`)
   }
   const story = MISSION_STORY[currentMissionId]
   const epilog = win ? story?.epilog : (story?.epilogLose ?? DEFEAT_GENERIC)
