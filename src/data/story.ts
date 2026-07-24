@@ -4,16 +4,17 @@
  */
 
 export const CAMPAIGN_INTRO: string =
-  'Souostroví Halcyon: stovka ostrovů, dva vlajkové jazyky a jedno moře, které '
-  + 'nikomu nepatří. Na západě Koruna Albionu — obchodní, opatrná, bohatá z cel '
-  + 'a přesná u děl. Na jihu Castilla — hrdá, pomalá a napřená k pokladním '
-  + 'galeonám, které dvakrát ročně vezou stříbro z kolonií domů. A mezi nimi, '
-  + 've stínu každé úžiny a závětří každého ostrova, volní piráti: kořistní '
-  + 'šalupy a látané brigy, které neuznávají vlajku a berou všechno, co plave.\n\n'
-  + 'Ty jsi kapitán Královského námořnictva Albionu. Kampaň sleduje tvou službu '
-  + 'od celní hlídky v úžinách po lov na pirátské kapitány i castillské pokladní '
-  + 'flotily. Vítr, ostrovy a bod plavby rozhodují stejně jako děla: rychlejší '
-  + 'loď si vybírá, kdy a kde se bojuje — a jestli vůbec.'
+  'The Halcyon Archipelago: a hundred islands, two flag-tongues and one sea that '
+  + 'belongs to no one. To the west, the Crown of Albion — mercantile, cautious, '
+  + 'rich on customs duties and deadly at the guns. To the south, Castilla — proud, '
+  + 'slow and set on the treasure galleons that twice a year carry silver home from '
+  + 'the colonies. And between them, in the shadow of every strait and the lee of '
+  + 'every island, the free pirates: prize sloops and patched brigs that own no flag '
+  + 'and take everything that floats.\n\n'
+  + 'You are a captain of the Royal Navy of Albion. The campaign follows your service, '
+  + 'from customs patrol in the straits to the hunt for pirate captains and Castillan '
+  + 'treasure fleets. Wind, islands and point of sail decide as much as guns do: the '
+  + 'faster ship chooses when and where the fight happens — and whether it happens at all.'
 
 export interface MissionStory {
   prolog: string
@@ -22,134 +23,154 @@ export interface MissionStory {
 }
 
 export const DEFEAT_GENERIC =
-  'Moře nepromíjí. Loď je pryč, kořist unikla — ale kapitán, který se poučí, '
-  + 'vypluje znovu.'
+  'The sea forgives nothing. The ship is gone, the prize escaped — but a captain '
+  + 'who learns his lesson puts to sea again.'
 
 export const MISSION_STORY: Record<string, MissionStory> = {
   mission01: {
     prolog:
-      'Úžina u Želvího ostrova, svítání. Vítr vane k východu, hladina se čeří. '
-      + 'Kapitanát ti předal jméno — Mořská panna — a pocit, že něco nesedí.',
+      'The strait off Turtle Island, at dawn. The wind blows to the east and the '
+      + 'water ripples. The port authority has handed you a name — Sea Maiden — and '
+      + 'a feeling that something is not right.',
     epilog:
-      'Mořská panna nebyla kupec. Pod plátnem vezla vojenský takeláž a zapečetěné '
-      + 'rozkazy s castillskou pečetí — první nit v síti, kterou někdo splétá napříč '
-      + 'Halcyonem. Kapitanát mlčí. Ty už víš, že hlídka skončila a začíná něco většího.',
+      'The Sea Maiden was no merchantman. Under her canvas she carried military '
+      + 'rigging and sealed orders bearing a Castillan seal — the first thread in a '
+      + 'net someone is weaving across Halcyon. The port authority says nothing. You '
+      + 'already know the patrol is over and something larger is beginning.',
     epilogLose:
-      'Mořská panna zmizela za bójí do volného moře i s tím, co vezla. Kapitanát '
-      + 'to zapíše jako „kontakt ztracen". Ty víš, že to byla stopa — a utekla ti.',
+      'The Sea Maiden slipped past the buoy into open water, and everything she '
+      + 'carried with her. The port authority will log it as "contact lost". You '
+      + 'know it was a trail — and it got away from you.',
   },
   mission02: {
     prolog:
-      'Soutěska mezi Kančím a Mlžným ostrovem, poledne. Dva kupci ti visí na zádi, '
-      + 'úžina se zužuje a v návětří se něco hýbe.',
+      'The Narrows between Boar Island and Mist Island, at noon. Two merchantmen '
+      + 'hang off your stern, the strait tightens, and something stirs to windward.',
     epilog:
-      'Smečka se rozprchla a konvoj prošel. V podpalubí pirátské brigy se ale našly '
-      + 'stejné zapečetěné rozkazy jako na Mořské panně — někdo platí pirátům Halcyonu, '
-      + 'aby škrtili albionský obchod. A ten někdo mluví castillsky.',
+      'The pack scattered and the convoy got through. But in the hold of the pirate '
+      + 'brig they found the same sealed orders as aboard the Sea Maiden — someone is '
+      + 'paying the pirates of Halcyon to throttle Albion trade. And that someone '
+      + 'speaks Castillan.',
     epilogLose:
-      'Konvoj zůstal na dně Soutěsky. Náklad, lodě, posádky — všechno pohltilo moře, '
-      + 'zatímco piráti mizeli do závětří ostrovů.',
+      'The convoy stayed on the bottom of the Narrows. Cargo, ships, crews — the sea '
+      + 'swallowed it all, while the pirates melted into the lee of the islands.',
   },
   mission03: {
     prolog:
-      'Kotlový ostrov, mrtvé odpoledne. Osamělý kupec bez eskorty — přesně to, před '
-      + 'čím tě admiralita varovala. Připrav boky a přibližuj se pomalu.',
+      'Cauldron Island, a dead afternoon. A lone merchantman with no escort — exactly '
+      + 'what the admiralty warned you about. Ready your sides and close in slowly.',
     epilog:
-      'Nebyl to kupec, ale castillský vlk v beránčí kůži. Z jeho paluby zazněl poprvé '
-      + 'hlas, který má za vším stát: Don Cristóbal de Vega. Past sklapla naprázdno — '
-      + 'a síť má konečně jméno.',
+      'It was no merchantman, but a Castillan wolf in sheep\'s clothing. From her deck '
+      + 'a voice sounded for the first time — the one meant to be behind it all: Don '
+      + 'Cristóbal de Vega. The trap snapped shut on empty air — and the net finally '
+      + 'has a name.',
     epilogLose:
-      'Q-loď dostala první salvu zadarmo a Fortuna ji nepřežila. De Vega si škrtl '
-      + 'jednu fregatu ze seznamu.',
+      'The Q-ship got the first broadside for free and the Fortuna did not survive it. '
+      + 'De Vega struck one frigate off his list.',
   },
   mission04: {
     prolog:
-      'Vody u Punta Negry, čerstvý vítr. Kurýr už má náskok a míří pod děla pevnosti. '
-      + 'Jestli chceš ty depeše, musíš plout líp než on.',
+      'The waters off Punta Negra, a fresh wind. The courier already has a lead and is '
+      + 'making for the guns of the fortress. If you want those dispatches, you must '
+      + 'sail better than he does.',
     epilog:
-      'Céfiro nedoplul. Z depeší se skládá obraz: de Vega odpovídá někomu výš, komusi '
-      + 's pokladní flotilou a hodností almiranteho. Stříbro a válka jsou tentýž plán.',
+      'The Céfiro never made port. From the dispatches a picture takes shape: de Vega '
+      + 'answers to someone higher, someone with a treasure fleet and the rank of '
+      + 'almirante. Silver and war are one and the same plan.',
     epilogLose:
-      'Kurýr proklouzl pod pevnost o vlásek. Depeše jsou v bezpečí Castilly — a ty '
-      + 'jsi zůstal stát v jejím dostřelu s prázdnýma rukama.',
+      'The courier slipped under the fortress by a hair. The dispatches are safe in '
+      + 'Castillan hands — and you were left standing in its range with empty hands.',
   },
   mission05: {
     prolog:
-      'Zátoka Kostivého ostrova za úsvitu. Někde v tom stínu kotví Silas Rourke — '
-      + 'pirát, kterého platí castillské stříbro. Ostříž ti kryje bok; vpluj a rozbij hnízdo.',
+      'The bay of Bone Island at dawn. Somewhere in that shadow Silas Rourke lies at '
+      + 'anchor — a pirate paid by Castillan silver. The Goshawk guards your flank; '
+      + 'sail in and smash the nest.',
     epilog:
-      'Hnízdo vyhořelo a Rourke padl — či klekl. Než zmlkl, vydal poslední kus sítě: '
-      + 'almirante Herrera a poslední stříbro míří na úžinu u Tří majáků. Tam se to rozhodne.',
+      'The nest burned and Rourke fell — or knelt. Before he fell silent, he gave up '
+      + 'the last piece of the net: almirante Herrera and the last of the silver are '
+      + 'making for the strait at the Three Beacons. That is where it will be decided.',
     epilogLose:
-      'Baterie a smečka byly nad síly dvou lodí. Fortuna zůstala v zátoce Kostivého '
-      + 'ostrova a Rourke se směje dál.',
+      'The battery and the pack were more than two ships could handle. The Fortuna '
+      + 'stayed behind in the bay of Bone Island, and Rourke laughs on.',
   },
   mission06: {
     prolog:
-      'Úžina u Tří majáků. Na obzoru castillská eskadra a s ní válka, kterou de Vega '
-      + 'chystal celou dobu. Tři tvé lodě proti řadové lodi a fregatě. Tady se to láme.',
+      'The strait at the Three Beacons. On the horizon a Castillan squadron and, with '
+      + 'it, the war de Vega has been preparing all along. Three ships of yours against '
+      + 'a ship of the line and a frigate. This is where it breaks.',
     epilog:
-      'Trueno mlčí, stříbro leží na dně úžiny a Herrerova eskadra je rozbita. Válka, '
-      + 'kterou někdo v Castille tak pečlivě splétal, se dnes u Tří majáků nekoná — '
-      + 'ale de Vega, ruka za vším, zmizel do stínu. Tohle nebyl konec. Byl to začátek '
-      + 'otevřené války.',
+      'The Trueno is silent, the silver lies on the bottom of the strait and Herrera\'s '
+      + 'squadron is broken. The war someone in Castilla wove so carefully does not come '
+      + 'to pass today at the Three Beacons — but de Vega, the hand behind it all, has '
+      + 'vanished into shadow. This was not the end. It was the beginning of open war.',
     epilogLose:
-      'Fortuna padla u Tří majáků a stříbro proplulo na úžiny. Válka, které jsi měl '
-      + 'předejít, právě začala — a ty už u ní nebudeš.',
+      'The Fortuna fell at the Three Beacons and the silver sailed on to the straits. '
+      + 'The war you were meant to prevent has just begun — and you will not be there '
+      + 'for it.',
   },
   mission07: {
     prolog:
-      'Rackův ostrov, časné ráno. Kouř nad kotvící stanicí a plachty fregat v návětří — '
-      + 'Castilla vrací úder. De Vega chce krev za Tři majáky.',
+      'Gull Island, early morning. Smoke over the anchor station and frigate sails to '
+      + 'windward — Castilla strikes back. De Vega wants blood for the Three Beacons.',
     epilog:
-      'Odveta odražena, tři castillské fregaty rozbité o Rackův ostrov. De Vega zjistil, '
-      + 'že hrubá síla proti tobě nestačí — a stáhl se plánovat něco většího. Válka se '
-      + 'přelévá k jeho břehům.',
+      'The reprisal is beaten off, three Castillan frigates broken against Gull Island. '
+      + 'De Vega has learned that brute force is not enough against you — and pulled back '
+      + 'to plan something larger. The war is spilling toward his own shores.',
     epilogLose:
-      'Stanice u Rackova ostrova hoří a s ní tvá eskadra. De Vega má svou pomstu.',
+      'The station at Gull Island burns, and your squadron with it. De Vega has his '
+      + 'revenge.',
   },
   mission08: {
     prolog:
-      'Konečně stopa přímo k němu. De Vega osobně, na rychlém kurýru, prchá k Cádizu — '
-      + 'a jeho eskorta se ti staví do cesty. Tentokrát je to osobní.',
+      'At last a trail straight to him. De Vega himself, on a fast courier, is fleeing '
+      + 'to Cádiz — and his escort stands in your way. This time it is personal.',
     epilog:
-      'Kurýr ti utekl, ale jeho štít padl: Q-loď i obě fregaty leží na dně. De Vega '
-      + 'doplul do Cádizu nahý a zavřený — a ty víš, kde ho najít. Zbývá prolomit bránu.',
+      'The courier got away from you, but his shield has fallen: the Q-ship and both '
+      + 'frigates lie on the bottom. De Vega reached Cádiz stripped and cornered — and '
+      + 'you know where to find him. All that remains is to break the gate.',
     epilogLose:
-      'De Vega i jeho eskorta zmizeli za obzorem k Cádizu. Lov skončil neúspěchem.',
+      'De Vega and his escort vanished over the horizon toward Cádiz. The hunt ended in '
+      + 'failure.',
   },
   mission09: {
     prolog:
-      'Poprvé pod tebou duní tři paluby děl: HMS Sovereign, řadová loď. Před tebou brána '
-      + 'Cádizu — pevnost a eskadra, za nimi de Vega a jeho stříbro.',
+      'For the first time three gun decks thunder beneath you: HMS Sovereign, a ship of '
+      + 'the line. Before you the gate of Cádiz — a fortress and a squadron, and behind '
+      + 'them de Vega and his silver.',
     epilog:
-      'Vnější obrana Cádizu je prolomená a de Vega zavřený uvnitř s pokladní flotilou. '
-      + 'Sovereign se ukázala jako pěst, jakou Albion potřeboval. Zbývá vzít mu stříbro — '
-      + 'a pak jeho samotného.',
+      'The outer defence of Cádiz is broken and de Vega is shut inside with the treasure '
+      + 'fleet. The Sovereign proved to be the fist Albion needed. All that remains is to '
+      + 'take his silver — and then the man himself.',
     epilogLose:
-      'Sovereign klesla pod děly Cádizu. Blokáda je zlomena a de Vega volný.',
+      'The Sovereign went down under the guns of Cádiz. The blockade is broken and de '
+      + 'Vega free.',
   },
   mission10: {
     prolog:
-      'Za pevností kotví poslední pokladní flotila Castilly — dvě galeony stříbra a jejich '
-      + 'strážci. Tohle stříbro je motor de Vegovy války. Ber ho.',
+      'Behind the fortress lies Castilla\'s last treasure fleet at anchor — two galleons '
+      + 'of silver and their guardians. This silver is the engine of de Vega\'s war. Take it.',
     epilog:
-      'Stříbrná flotila je vyřízena, galeony na dně nebo v tvých rukou. Bez stříbra '
-      + 'de Vegova válka umírá. Zbývá jediné: on sám a Corona, jeho plovoucí trůn.',
+      'The silver fleet is finished, the galleons on the bottom or in your hands. Without '
+      + 'silver, de Vega\'s war is dying. One thing remains: the man himself and Corona, '
+      + 'his floating throne.',
     epilogLose:
-      'Sovereign padla mezi galeonami a stříbro proplulo. De Vega si válku ještě zaplatí.',
+      'The Sovereign fell among the galleons and the silver sailed on. De Vega will make '
+      + 'you pay for this war yet.',
   },
   mission11: {
     prolog:
-      'Rejda Cádizu, poslední den války. Proti tvé flotile stojí Corona — čtyři paluby '
-      + 'de Vegovy pýchy — a zbytek castillské moci. Tady se rozhodne, kdo je pánem Halcyonu.',
+      'The Cádiz roadstead, the last day of the war. Against your fleet stands Corona — '
+      + 'four decks of de Vega\'s pride — and the remnant of Castillan power. Here it will '
+      + 'be decided who is master of Halcyon.',
     epilog:
-      'Corona mlčí. Castillská moc v Halcyonu je zlomená a de Vegova hra o dvě koruny '
-      + 'a jedno moře skončila. Vítr, ostrovy a stříbro patří zas těm, kdo je umí číst — '
-      + 'a to jsi dnes byl ty, kapitáne. Válce, které ses měl vyhnout, jsi nakonec '
-      + 'nepředešel; ale vyhrál jsi ji — a Halcyon si to bude pamatovat.',
+      'Corona is silent. Castillan power in Halcyon is broken and de Vega\'s game for two '
+      + 'crowns and one sea is over. The wind, the islands and the silver belong once more '
+      + 'to those who can read them — and today that was you, captain. The war you were '
+      + 'meant to avoid you did not, in the end, prevent; but you won it — and Halcyon will '
+      + 'remember.',
     epilogLose:
-      'Sovereign klesá do rejdy Cádizu a s ní albionská linie. Corona pluje dál a Halcyon '
-      + 'dostane nového pána — Dona Cristóbala de Vegu. Válka je prohraná.',
+      'The Sovereign sinks into the Cádiz roadstead, and the Albion line with it. Corona '
+      + 'sails on and Halcyon gets a new master — Don Cristóbal de Vega. The war is lost.',
   },
 }

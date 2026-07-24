@@ -17,26 +17,27 @@ const RAYO = 5
 
 export const mission06: Scenario = {
   id: 'mission06',
-  title: 'Úžina u Tří majáků',
+  title: 'The Strait of the Three Beacons',
   briefing:
-    'Tady se to rozhodne. Poslední pokladní stříbro Castilly pluje na albionské '
-    + 'úžiny pod eskadrou almiranteho Herrery — a s ním válka, kterou de Vega '
-    + 'chystal celou dobu. Zastav ho v úžině u Tří majáků.\n\n'
-    + 'Vedeš Fortunu, brigu Ostříž a šalupu Vlaštovku proti řadové lodi Trueno '
-    + 'a fregatě Rayo. Trueno má třicet děl na bok — bok po boku ji nikdo '
-    + 'neporazí. Využij úžinu a ostrovy: řadová loď se otáčí pomalu, ve větrném '
-    + 'stínu ztrácí tah a do mělčin se neodváží. Rozděl palbu, obtancuj ji '
-    + 'a rakuj do přídě a zádě, kde děla nemá.',
+    'This is where it is decided. The last of Castilla\'s treasure silver is sailing '
+    + 'for the Albion straits under the squadron of almirante Herrera — and with it, '
+    + 'the war de Vega has been preparing all along. Stop him in the strait at the '
+    + 'Three Beacons.\n\n'
+    + 'You lead the Fortuna, the brig Goshawk and the sloop Swallow against the ship '
+    + 'of the line Trueno and the frigate Rayo. The Trueno has thirty guns to a side — '
+    + 'no one beats her alongside. Use the strait and the islands: a ship of the line '
+    + 'turns slowly, loses her drive in a wind shadow and dares not enter the shoals. '
+    + 'Split your fire, dance around her and rake her bow and stern, where she has no guns.',
   seed: 17041721,
   ambient: '#0b2733',
   wind: { baseDir: 1.9, baseSpeed: 8, rotationRate: 0.0011, gustiness: 0.6 },
 
   islands: [
-    { id: 'beacon-n', name: 'Severní maják', kind: 'island', poly: circlePoly(1200, 2400, 560, 14, 0.3) },
-    { id: 'beacon-m', name: 'Prostřední maják', kind: 'island', poly: circlePoly(3000, 0, 640, 16, 0.28),
-      desc: 'Prostřední z Tří majáků — dělí úžinu na dva průplavy; klíč k celé bitvě.' },
-    { id: 'beacon-s', name: 'Jižní maják', kind: 'island', poly: circlePoly(1400, -2400, 560, 14, 0.32) },
-    { id: 'reef-w', name: 'Majákové zuby', kind: 'reef', depth: 3, poly: circlePoly(4600, 1200, 340, 10, 0.4) },
+    { id: 'beacon-n', name: 'North Beacon', kind: 'island', poly: circlePoly(1200, 2400, 560, 14, 0.3) },
+    { id: 'beacon-m', name: 'Middle Beacon', kind: 'island', poly: circlePoly(3000, 0, 640, 16, 0.28),
+      desc: 'The middle of the Three Beacons — it splits the strait into two channels; the key to the whole battle.' },
+    { id: 'beacon-s', name: 'South Beacon', kind: 'island', poly: circlePoly(1400, -2400, 560, 14, 0.32) },
+    { id: 'reef-w', name: 'Beacon Teeth', kind: 'reef', depth: 3, poly: circlePoly(4600, 1200, 340, 10, 0.4) },
   ],
 
   ships: [
@@ -46,12 +47,12 @@ export const mission06: Scenario = {
       fireControl: { mode: 'auto', shot: 'round', engaged: false },
     },
     {
-      classId: 'brig-albion', side: 'player', name: 'HMS Ostříž',
+      classId: 'brig-albion', side: 'player', name: 'HMS Goshawk',
       pos: { x: -900, y: 900 }, vel: { x: 3, y: 0 }, heading: 0, doctrine: 'raider',
       fireControl: { mode: 'auto', shot: 'round', engaged: false },
     },
     {
-      classId: 'sloop-albion', side: 'player', name: 'HMS Vlaštovka',
+      classId: 'sloop-albion', side: 'player', name: 'HMS Swallow',
       pos: { x: -900, y: -400 }, vel: { x: 3, y: 0 }, heading: 0, doctrine: 'raider',
       fireControl: { mode: 'auto', shot: 'chain', engaged: false },
     },
@@ -59,8 +60,8 @@ export const mission06: Scenario = {
       classId: 'liner-castilla', side: 'enemy', name: 'Trueno',
       pos: { x: 4600, y: 200 }, vel: { x: -2, y: 0 }, heading: Math.PI, doctrine: 'attack',
       fireControl: { mode: 'auto', shot: 'round', engaged: false },
-      desc: 'Řadová loď Trueno — vlajková loď almiranteho Herrery, tři paluby děl. '
-        + 'Pohyblivá pevnost, srdce castillského plánu.',
+      desc: 'The ship of the line Trueno — the flagship of almirante Herrera, three '
+        + 'gun decks. A moving fortress, the heart of the Castillan plan.',
     },
     {
       classId: 'frigate-castilla', side: 'enemy', name: 'Rayo',
@@ -70,8 +71,8 @@ export const mission06: Scenario = {
   ],
 
   objectives: [
-    { id: 'obj-trueno', text: 'Znič nebo zajmi řadovou loď Trueno', state: 'open' },
-    { id: 'obj-rayo', text: 'Vyřaď fregatu Rayo', state: 'open' },
+    { id: 'obj-trueno', text: 'Destroy or capture the ship of the line Trueno', state: 'open' },
+    { id: 'obj-rayo', text: 'Take out the frigate Rayo', state: 'open' },
   ],
 
   triggers: [
@@ -79,25 +80,25 @@ export const mission06: Scenario = {
       id: 'trg-brief', once: true, conditions: [{ kind: 'time', t: 4 }],
       actions: [{
         kind: 'comm', speaker: 'castilian-admiral',
-        text: 'almirante Herrera: „Tak tohle je celá albionská odpověď? Fregata a dvě '
-          + 'skořápky? Done Cristóbale, přeceňoval jste je. Trueno, kupředu."',
+        text: 'Almirante Herrera: "So this is the whole of Albion\'s answer? A frigate '
+          + 'and two eggshells? Don Cristóbal, you overrated them. Trueno, forward."',
       }],
     },
     {
       id: 'trg-tactic', once: true, conditions: [{ kind: 'time', t: 22 }],
       actions: [{
         kind: 'comm', speaker: 'mate',
-        text: 'Rusk: „Nesmíme jí dovolit srovnat boky. Rozdělíme se kolem Prostředního '
-          + 'majáku, sevřeme Trueno ze dvou stran a rakneme jí do zádi — pomalu se otáčí, '
-          + 'nedokáže krýt oba boky naráz."',
+        text: 'Rusk: "We can\'t let her bring her broadside to bear. We split around the '
+          + 'Middle Beacon, close on the Trueno from both sides and rake her stern — she '
+          + 'turns slowly and can\'t guard both flanks at once."',
       }],
     },
     {
       id: 'trg-herrera-defiant', once: true, conditions: [{ kind: 'hullBelow', shipId: TRUENO, fraction: 0.5 }],
       actions: [{
         kind: 'comm', speaker: 'castilian-admiral',
-        text: 'almirante Herrera: „Rakují nás do zádi… kdo je naučil takhle plout? '
-          + 'Držte linii! Za korunu a stříbro!"',
+        text: 'Almirante Herrera: "They\'re raking our stern… who taught them to sail '
+          + 'like this? Hold the line! For the crown and the silver!"',
       }],
     },
 
@@ -113,13 +114,14 @@ export const mission06: Scenario = {
       id: 'trg-win', once: true, conditions: [{ kind: 'flag', flag: 'trueno' }, { kind: 'flag', flag: 'rayo' }],
       actions: [{
         kind: 'winMission',
-        text: 'Herrerova eskadra rozbita, stříbro se na úžiny nedostalo. Válka, kterou '
-          + 'de Vega chystal, se dnes u Tří majáků nekoná. Halcyon dýchá — prozatím.',
+        text: 'Herrera\'s squadron is broken, the silver never reached the straits. The '
+          + 'war de Vega was preparing does not come to pass today at the Three Beacons. '
+          + 'Halcyon breathes — for now.',
       }],
     },
     {
       id: 'trg-player-lost', once: true, conditions: [{ kind: 'allDestroyed', side: 'player' }],
-      actions: [{ kind: 'loseMission', text: 'HMS Fortuna padla u Tří majáků — a s ní poslední albionská naděje úžinu udržet.' }],
+      actions: [{ kind: 'loseMission', text: 'HMS Fortuna fell at the Three Beacons — and with her Albion\'s last hope of holding the strait.' }],
     },
   ],
 }

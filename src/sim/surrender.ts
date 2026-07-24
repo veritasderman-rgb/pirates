@@ -44,7 +44,7 @@ export function demandSurrender(state: SimState, from: ShipState, targetId: numb
   } else {
     state.events.push({
       t: state.t, kind: 'comm', side: target.side, speaker: 'enemy-captain',
-      text: `${target.name} odmítá spustit vlajku!`,
+      text: `${target.name} refuses to strike her colours!`,
     })
   }
 }
@@ -60,7 +60,7 @@ export function strike(state: SimState, ship: ShipState): void {
   state.events.push({
     t: state.t, kind: 'surrender', shipId: ship.id, side: ship.side, pos: { ...ship.pos },
     slowdown: true, speaker: 'enemy-captain',
-    text: `${ship.name} spustila vlajku a vzdává se!`,
+    text: `${ship.name} has struck her colours and surrenders!`,
   })
 }
 
@@ -100,7 +100,7 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
     if (from.doctrine === 'player') {
       state.events.push({
         t: state.t, kind: 'message', shipId: from.id, side: from.side, speaker: 'mate',
-        text: 'Na boarding musíme přiléhnout bok k boku — přibliž se na ~60 m!',
+        text: 'To board we must lay alongside — close to ~60 m!',
       })
     }
     return
@@ -110,11 +110,11 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
   // ohlaš šance před vrhem háků (risk/odměna: hráč vidí, do čeho jde)
   if (from.doctrine === 'player' && !already) {
     const odds = Math.round(boardingOdds(from, target) * 100)
-    const verdict = target.surrendered ? 'vzdala se — jistá kořist'
-      : odds >= 65 ? 'převaha je naše' : odds >= 45 ? 'vyrovnané — riskantní!' : 'jsme v nevýhodě — hrozí ztráty!'
+    const verdict = target.surrendered ? 'she has struck — a sure prize'
+      : odds >= 65 ? 'the advantage is ours' : odds >= 45 ? 'even odds — risky!' : 'we\'re outmatched — expect losses!'
     state.events.push({
       t: state.t, kind: 'comm', shipId: from.id, side: from.side, speaker: 'bosun', slowdown: true,
-      text: `Háky na ${target.name}! Naše šance ~${odds} % — ${verdict}`,
+      text: `Grapples onto ${target.name}! Our odds ~${odds}% — ${verdict}`,
     })
   }
 }
@@ -152,7 +152,7 @@ export function updateBoarding(state: SimState, dt: number): void {
         if (from.doctrine === 'player') {
           state.events.push({
             t: state.t, kind: 'comm', shipId: from.id, side: from.side, speaker: 'bosun', slowdown: true,
-            text: `Výsadek zatlačen zpět — stahujeme se z ${target.name}! Změkči ji palbou.`,
+            text: `Boarding party thrown back — we're pulling off ${target.name}! Soften her with fire.`,
           })
         }
         continue
@@ -171,7 +171,7 @@ export function updateBoarding(state: SimState, dt: number): void {
       state.events.push({
         t: state.t, kind: 'board', shipId: target.id, side: from.side, pos: { ...target.pos },
         slowdown: true, speaker: 'captain',
-        text: `${target.name} obsazena! Kořist je naše.`,
+        text: `${target.name} boarded and taken! The prize is ours.`,
       })
     }
   }

@@ -28,7 +28,7 @@ const plot: Renderer = use3d ? new Plot3D(canvas) : new TacticalPlot(canvas)
 
 const rBtn = document.createElement('button')
 rBtn.textContent = use3d ? '2D' : '3D'
-rBtn.title = 'Přepnout renderer (2D Canvas ↔ 3D WebGL)'
+rBtn.title = 'Switch renderer (2D Canvas ↔ 3D WebGL)'
 rBtn.style.cssText = 'position:absolute;top:6px;right:120px;z-index:9'
 rBtn.addEventListener('click', () => {
   localStorage.setItem('r3d', use3d ? '0' : '1')
@@ -134,18 +134,18 @@ function showCampaignMap(): void {
   const next = CAMPAIGN_NODES.find(n => !cleared.has(n.id) && avail(n))
     ?? CAMPAIGN_NODES[CAMPAIGN_NODES.length - 1]
   const marker = `<g transform="translate(${next.x},${next.y - 34})" class="cm-you">`
-    + `<text class="cm-you-i" y="0">⛵</text><text class="cm-you-t" y="15">jsi tady</text></g>`
+    + `<text class="cm-you-i" y="0">⛵</text><text class="cm-you-t" y="15">you are here</text></g>`
 
   const flagName = SHIP_CLASSES[profile.flagship]?.name ?? profile.flagship
   const el = overlay(
     `<h1>PIRATES</h1>`
     + `<div class="brief story">${esc(firstSentence(CAMPAIGN_INTRO))}</div>`
-    + `<div class="cm-bar"><span>Pokladna: <b>${profile.money} 🪙</b></span>`
-    + `<span>Vlajková loď: <b>${esc(flagName)}</b></span>`
-    + `<button id="btn-port">🛠 PŘÍSTAV — loděnice &amp; výzbroj</button></div>`
+    + `<div class="cm-bar"><span>Treasury: <b>${profile.money} 🪙</b></span>`
+    + `<span>Flagship: <b>${esc(flagName)}</b></span>`
+    + `<button id="btn-port">🛠 PORT — shipyard &amp; outfitting</button></div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
-    + `<div class="fc-hint">Klikni na přístav (uzel) = vyplout na misi. Splněná mise (✔) odemkne další. `
-    + `Splněné lze opakovat (menší odměna). V přístavu kup nový trup nebo vylepši ten stávající.</div>`)
+    + `<div class="fc-hint">Click a port (node) = set sail on the mission. A cleared mission (✔) unlocks the next. `
+    + `Cleared ones can be replayed (smaller reward). At port, buy a new hull or upgrade the one you have.</div>`)
   el.querySelector('.box')!.classList.add('wide')
   el.querySelector('#btn-port')!.addEventListener('click', () => { el.remove(); showOutfitting() })
   el.querySelectorAll<SVGGElement>('g[data-mission]').forEach(g =>
@@ -164,13 +164,13 @@ function showOutfitting(): void {
       const owned = profile.fleet.includes(e.classId)
       const active = profile.flagship === e.classId
       const canBuy = !owned && profile.money >= e.price
-      const stats = stat('trup', `${def.hullPoints}`) + stat('děla/bok', `${def.gunsPerBroadside}`)
-        + stat('dostřel', `${def.gunRange} m`) + (def.canRow ? stat('vesla', 'ano') : '')
-      const action = active ? `<span class="mdesc ok">⚓ velíš této lodi</span>`
-        : owned ? `<button data-pick="${esc(e.classId)}">Velet této lodi</button>`
-        : `<button data-hull="${esc(e.classId)}" ${canBuy ? '' : 'disabled'}>Koupit — ${e.price} 🪙</button>`
+      const stats = stat('hull', `${def.hullPoints}`) + stat('guns/side', `${def.gunsPerBroadside}`)
+        + stat('range', `${def.gunRange} m`) + (def.canRow ? stat('oars', 'yes') : '')
+      const action = active ? `<span class="mdesc ok">⚓ you command this ship</span>`
+        : owned ? `<button data-pick="${esc(e.classId)}">Command this ship</button>`
+        : `<button data-hull="${esc(e.classId)}" ${canBuy ? '' : 'disabled'}>Buy — ${e.price} 🪙</button>`
       return `<div class="mrow sy-ship ${active ? 'active' : ''}">`
-        + `<div class="row"><b>${esc(def.name)}</b>${owned && !active ? ' <span class="dim">(v loděnici)</span>' : ''}</div>`
+        + `<div class="row"><b>${esc(def.name)}</b>${owned && !active ? ' <span class="dim">(in the shipyard)</span>' : ''}</div>`
         + `<div class="sy-stats">${stats}</div>`
         + `<div class="mdesc">${esc(e.blurb)}</div>${action}</div>`
     }).join('')
@@ -184,15 +184,15 @@ function showOutfitting(): void {
       return `<div class="mrow"><div class="row"><b>${esc(d.name)}</b> <span class="dim">${pips}${bonus ? ` (+${bonus}%)` : ''}</span></div>`
         + `<div class="mdesc">${esc(d.desc)}</div>`
         + (maxed ? `<div class="mdesc ok">✔ MAX</div>`
-          : `<button data-buy="${k}" ${can ? '' : 'disabled'}>Koupit lvl ${lvl + 1} — ${cost} 🪙</button>`)
+          : `<button data-buy="${k}" ${can ? '' : 'disabled'}>Buy lvl ${lvl + 1} — ${cost} 🪙</button>`)
         + `</div>`
     }).join('')
-    box.innerHTML = `<h1>PŘÍSTAV</h1>`
-      + `<div class="score"><div class="stot">Pokladna: <b>${profile.money} 🪙</b></div></div>`
-      + `<div class="hint">Utrať dublony dvěma směry: kup <b>silnější trup</b> (loděnice) nebo <b>vylepši</b> ten, kterému velíš. Upgrady platí pro aktuální vlajkovou loď a nesou se kampaní.</div>`
-      + `<h2>Loděnice — vlajková loď</h2>${ships}`
-      + `<h2>Výzbroj vlajkové lodi</h2>${rows}`
-      + `<div style="margin-top:12px"><button id="btn-back">← ZPĚT NA MAPU</button></div>`
+    box.innerHTML = `<h1>PORT</h1>`
+      + `<div class="score"><div class="stot">Treasury: <b>${profile.money} 🪙</b></div></div>`
+      + `<div class="hint">Spend doubloons two ways: buy a <b>stronger hull</b> (shipyard) or <b>upgrade</b> the one you command. Upgrades apply to your current flagship and carry through the campaign.</div>`
+      + `<h2>Shipyard — flagship</h2>${ships}`
+      + `<h2>Flagship outfitting</h2>${rows}`
+      + `<div style="margin-top:12px"><button id="btn-back">← BACK TO MAP</button></div>`
     box.querySelectorAll<HTMLButtonElement>('button[data-hull]').forEach(b =>
       b.addEventListener('click', () => {
         const c = b.dataset.hull!, e = shipEntry(c)
@@ -225,11 +225,11 @@ function showBriefing(sc: Scenario): void {
     + `<h2>${esc(sc.title)}</h2>`
     + (prolog ? `<div class="brief story">${esc(prolog)}</div>` : '')
     + `<div class="brief">${esc(sc.briefing)}</div>`
-    + `<div class="hint">Ovládání: klik na vlastní loď = výběr · klik na cíl = zaměření · `
-    + `klik na vodu = kurz · <b>tažení = posun mapy</b> · kolečko = zoom · `
-    + `<b>tlačítka vpravo (šipky/＋/－/◎) = posun, zoom a vycentrování na loď</b> · `
-    + `mezerník = pauza · W plachty · E vesla · Q/R boční salva · A auto · 1/2/3 náboj</div>`
-    + `<button id="btn-start">VYPLOUT</button>`)
+    + `<div class="hint">Controls: click your own ship = select · click a target = lock on · `
+    + `click water = set course · <b>drag = pan the map</b> · wheel = zoom · `
+    + `<b>buttons at right (arrows/＋/－/◎) = pan, zoom and centre on ship</b> · `
+    + `space = pause · W sails · E oars · Q/R broadside · A auto · 1/2/3 shot type</div>`
+    + `<button id="btn-start">SET SAIL</button>`)
   el.querySelector('#btn-start')!.addEventListener('click', () => {
     el.remove()
     audio.setMenuMode(false) // konec briefingu → adaptivní bojová hudba
@@ -262,25 +262,25 @@ function showOutcome(state: SimState): void {
     profile.money += rew.total
     if (!already) profile.cleared.push(currentMissionId)
     saveProfile(profile)
-    rewardHtml = `<div class="score"><div class="stot">Kořist: <b>+${rew.total} 🪙</b> · pokladna: ${profile.money} 🪙</div>`
+    rewardHtml = `<div class="score"><div class="stot">Plunder: <b>+${rew.total} 🪙</b> · treasury: ${profile.money} 🪙</div>`
       + rew.parts.map(p => `<div class="row"><span>${esc(p.label)}</span><span class="ok">${p.coins ? '+' + p.coins : ''}</span></div>`).join('')
-      + `</div><div class="hint">Kořist (zajaté lodě) vynáší víc než potopení — v přístavu za dublony vylepši vlajkovou loď.</div>`
+      + `</div><div class="hint">Prizes (captured ships) earn more than sinking — at port, spend doubloons to upgrade your flagship.</div>`
   }
   const story = MISSION_STORY[currentMissionId]
   const epilog = win ? story?.epilog : (story?.epilogLose ?? DEFEAT_GENERIC)
-  const scoreHtml = `<div class="score"><div class="stot">Skóre: <b>${score.total}</b></div>`
+  const scoreHtml = `<div class="score"><div class="stot">Score: <b>${score.total}</b></div>`
     + score.breakdown.map(l => `<div class="row"><span>${esc(l.label)}</span><span class="${l.points >= 0 ? 'ok' : 'bad'}">${l.points >= 0 ? '+' : ''}${l.points}</span></div>`).join('')
     + `</div>`
   const el = overlay(
-    `<h2 class="${win ? 'win' : 'lose'}">${win ? '⚓ VÍTĚZSTVÍ' : '☠ PORÁŽKA'}</h2>`
-    + `<div class="brief">Mise ukončena v čase ${fmtTime(state.t)}.</div>`
+    `<h2 class="${win ? 'win' : 'lose'}">${win ? '⚓ VICTORY' : '☠ DEFEAT'}</h2>`
+    + `<div class="brief">Mission ended at ${fmtTime(state.t)}.</div>`
     + objs
     + (win ? scoreHtml : '')
     + rewardHtml
     + (epilog ? `<div class="brief story">${esc(epilog)}</div>` : '')
-    + `<div style="margin-top:14px"><button id="btn-again">ZNOVU</button> `
-    + (win ? `<button id="btn-port">🛠 PŘÍSTAV</button> ` : '')
-    + `<button id="btn-menu">MAPA KAMPANĚ</button></div>`)
+    + `<div style="margin-top:14px"><button id="btn-again">REPLAY</button> `
+    + (win ? `<button id="btn-port">🛠 PORT</button> ` : '')
+    + `<button id="btn-menu">CAMPAIGN MAP</button></div>`)
   el.querySelector('#btn-port')?.addEventListener('click', () => { el.remove(); showOutfitting() })
   el.querySelector('#btn-again')!.addEventListener('click', () => { location.href = `${location.pathname}?mission=${encodeURIComponent(currentMissionId)}` })
   el.querySelector('#btn-menu')!.addEventListener('click', () => { location.href = location.pathname })

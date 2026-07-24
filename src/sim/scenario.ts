@@ -15,7 +15,7 @@ const fullSubsystems = (): Subsystems => ({
 /** Vytvoří kompletní ShipState z definice třídy; id v pořadí pole ships od 1. */
 export function spawnShip(state: SimState, spec: ShipSpec): ShipState {
   const def = SHIP_CLASSES[spec.classId]
-  if (!def) throw new Error(`Neznámá třída lodi: ${spec.classId}`)
+  if (!def) throw new Error(`Unknown ship class: ${spec.classId}`)
   if (spec.id !== undefined) state.nextId = Math.max(state.nextId, spec.id + 1)
 
   const ship: ShipState = {

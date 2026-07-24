@@ -7,7 +7,7 @@ import type { ShipState } from '../src/sim/types'
 describe('opravy z review PR #7', () => {
   it('mise 2: ztráta eskorty = prohra, i když kupec přežije (a vlajku nepřebere civil)', () => {
     const st = sim.create(SCENARIOS.mission02)
-    const ostriz = st.ships.find(s => s.name === 'HMS Ostříž') as ShipState
+    const ostriz = st.ships.find(s => s.name === 'HMS Goshawk') as ShipState
     ostriz.destroyed = true; ostriz.hull = 0
     sim.tick(st, SIM_DT)
     expect(st.outcome).toBe('lose')

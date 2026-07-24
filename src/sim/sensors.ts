@@ -49,7 +49,7 @@ export function updateSensors(state: SimState, dt: number): void {
         if (isNew) {
           state.events.push({
             t: state.t, kind: 'contactNew', side, pos: { ...target.pos },
-            text: side === 'player' ? `Plachta na obzoru! ${idQuality >= 1 ? target.name : 'neznámý kontakt'}.` : '',
+            text: side === 'player' ? `Sail on the horizon! ${idQuality >= 1 ? target.name : 'unknown contact'}.` : '',
             speaker: side === 'player' ? 'lookout' : undefined,
           })
         }

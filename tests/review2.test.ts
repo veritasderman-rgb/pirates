@@ -7,8 +7,8 @@ import type { ShipState } from '../src/sim/types'
 describe('opravy z review #4', () => {
   it('mise 5: potopení vlajkové lodi samo NEvyhraje, dokud žije smečka', () => {
     const st = sim.create(SCENARIOS.mission05)
-    const flag = st.ships.find(s => s.name === 'Černý příboj') as ShipState
-    const sloops = st.ships.filter(s => s.name === 'Sup' || s.name === 'Mořská saň')
+    const flag = st.ships.find(s => s.name === 'Black Surf') as ShipState
+    const sloops = st.ships.filter(s => s.name === 'Vulture' || s.name === 'Sea Serpent')
 
     flag.destroyed = true; flag.hull = 0
     sim.tick(st, SIM_DT)

@@ -20,7 +20,7 @@ describe('engine', () => {
 
   it('mise 1: runner po t=40 s prchá (mění doktrínu a napne plachty)', () => {
     const st = run(SCENARIOS.mission01, 45)
-    const runner = st.ships.find(s => s.name === 'Mořská panna') as ShipState
+    const runner = st.ships.find(s => s.name === 'Sea Maiden') as ShipState
     expect(runner.doctrine).toBe('runner')
     expect(runner.sailsUp).toBe(true)
     expect(st.flags['fleeing']).toBe(true)

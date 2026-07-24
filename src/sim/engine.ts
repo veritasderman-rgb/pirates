@@ -51,7 +51,7 @@ function updatePlayerCommand(state: SimState): void {
   flag.fireControl.mode = 'auto'
   state.events.push({
     t: state.t, kind: 'comm', speaker: 'admiral', slowdown: true,
-    text: `Vlajková loď padla — vlajku přebírá ${flag.name}! Veď nás dál, kapitáne.`,
+    text: `The flagship has fallen — ${flag.name} takes up the colours! Lead us on, Captain.`,
   })
 }
 
