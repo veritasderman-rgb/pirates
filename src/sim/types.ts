@@ -363,7 +363,7 @@ export interface ShipMods {
 }
 
 export type WorkerInMsg =
-  | { kind: 'init'; scenarioId: string; upgrades?: ShipMods }
+  | { kind: 'init'; scenarioId: string; upgrades?: ShipMods; flagshipClass?: string }
   | { kind: 'order'; order: Order }
   | { kind: 'setCompression'; factor: number }
   | { kind: 'snapshotRequest' }

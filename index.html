@@ -132,6 +132,38 @@
     .score .ok { color: #6fd06a; }
     .score .bad { color: #e0603a; }
     .dim { color: #6a8a90; }
+    /* kampaňová mapa */
+    .overlay .box.wide { max-width: 920px; }
+    .cm-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 8px 0;
+      padding: 8px 10px; border: 1px solid #1c4a55; background: #0b2a34; }
+    .cm-bar b { color: #d8c24f; }
+    .cm-bar button { margin-left: auto; }
+    .cm-wrap { border: 1px solid #245a66; border-radius: 4px; overflow: hidden; margin: 6px 0;
+      background: radial-gradient(120% 100% at 20% 100%, #123f4e 0%, #0c2c39 55%, #0a2531 100%); }
+    .cm-map { display: block; width: 100%; height: auto; }
+    .cm-isle { fill: #234b3a; stroke: #2f6b4e; stroke-width: 1.5; opacity: .55; }
+    .cm-route { stroke-width: 3; stroke-dasharray: 7 6; fill: none; }
+    .cm-route.done { stroke: #6fd06a; opacity: .8; stroke-dasharray: none; }
+    .cm-route.open { stroke: #d8c24f; opacity: .7; }
+    .cm-route.locked { stroke: #34606c; opacity: .5; }
+    .cm-node { cursor: default; }
+    .cm-node[data-mission] { cursor: pointer; }
+    .cm-c { fill: #0c2c39; stroke: #34606c; stroke-width: 2.5; }
+    .cm-node.open .cm-c { stroke: #d8c24f; fill: #14323d; }
+    .cm-node.done .cm-c { stroke: #6fd06a; fill: #123a2c; }
+    .cm-node[data-mission]:hover .cm-c { fill: #1c4a55; stroke: #7fd0e0; }
+    .cm-num { fill: #cfe6ec; font-size: 17px; font-weight: bold; text-anchor: middle; }
+    .cm-node.done .cm-num { fill: #6fd06a; }
+    .cm-node.locked .cm-num { fill: #4c6b74; }
+    .cm-title { fill: #9fb8bf; font-size: 12px; text-anchor: middle; }
+    .cm-node.locked .cm-title { fill: #43626b; }
+    .cm-you-i { font-size: 22px; text-anchor: middle; }
+    .cm-you-t { fill: #d8c24f; font-size: 10px; text-anchor: middle; }
+    /* loděnice */
+    .sy-ship.active { border: 1px solid #6fd06a; padding: 6px 8px; background: #0d3226; }
+    .sy-stats { margin: 3px 0 2px; }
+    .sy-stat { display: inline-block; font-size: 10px; color: #8fb0b8; margin-right: 10px; }
+    .sy-stat b { color: #cfe6ec; }
   </style>
 </head>
 <body>
