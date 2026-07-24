@@ -172,24 +172,33 @@ export const side02: Scenario = {
       conditions: [{ kind: 'flag', flag: 'g-out' }, { kind: 'flag', flag: 'b-out' }],
       actions: [
         { kind: 'objectiveComplete', objectiveId: 'obj-raiders' },
-        { kind: 'objectiveComplete', objectiveId: 'obj-reefs' },
         { kind: 'winMission', text: 'Both wreckers dealt with and the false light doused — Widow\'s Comb will keep an honest reckoning now.' },
       ],
     },
+    // reef objective je splněn jen když jsi vyhrál BEZ najetí na útes
+    {
+      id: 'trg-reefs-kept', once: true,
+      conditions: [{ kind: 'flag', flag: 'g-out' }, { kind: 'flag', flag: 'b-out' }, { kind: 'flagNot', flag: 'grounded' }],
+      actions: [{ kind: 'objectiveComplete', objectiveId: 'obj-reefs' }],
+    },
+    // najetí na útes = ztráta reef objective (a jen ta — ne prohra ani jiné cíle)
     {
       id: 'trg-aground', once: true,
       conditions: [{ kind: 'aground', shipId: PLAYER }],
-      actions: [{
-        kind: 'comm', speaker: 'bosun',
-        text: 'We\'re on the reef, captain! Back the sails and warp her off before the '
-          + 'wreckers close — this is exactly how they meant to have us!',
-      }],
+      actions: [
+        { kind: 'setFlag', flag: 'grounded' },
+        { kind: 'objectiveFail', objectiveId: 'obj-reefs' },
+        {
+          kind: 'comm', speaker: 'bosun',
+          text: 'We\'re on the reef, captain! Back the sails and warp her off before the '
+            + 'wreckers close — this is exactly how they meant to have us!',
+        },
+      ],
     },
     {
       id: 'trg-player-lost', once: true,
       conditions: [{ kind: 'shipDestroyed', shipId: PLAYER }],
       actions: [
-        { kind: 'objectiveFail', objectiveId: 'obj-reefs' },
         { kind: 'loseMission', text: 'HMS Goshawk breaks up on Widow\'s Comb — the wreckers have their finest prize yet.' },
       ],
     },
