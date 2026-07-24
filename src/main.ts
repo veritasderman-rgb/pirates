@@ -13,7 +13,7 @@ import { SCENARIOS } from './data/missions'
 import { CAMPAIGN_INTRO, DEFEAT_GENERIC, MISSION_STORY } from './data/story'
 import { scoreMission } from './sim/score'
 import { loadProfile, saveProfile, modsFrom, computeReward, upgradeCost, UPGRADE_DEFS, UP_ORDER, SHIPYARD, shipEntry, type UpKey } from './data/profile'
-import { CAMPAIGN_NODES, CAMPAIGN_ISLES } from './data/campaign'
+import { CAMPAIGN_NODES, CAMPAIGN_ISLES, isMissionUnlocked } from './data/campaign'
 import { SHIP_CLASSES } from './data/defs'
 import type { Scenario, SimState } from './sim/types'
 
@@ -113,7 +113,7 @@ const MISSION_SCENES: Record<string, string> = {
 function showCampaignMap(): void {
   const cleared = new Set(profile.cleared)
   const byId = new Map(CAMPAIGN_NODES.map(n => [n.id, n]))
-  const avail = (n: typeof CAMPAIGN_NODES[number]): boolean => !n.requires || cleared.has(n.requires)
+  const avail = (n: typeof CAMPAIGN_NODES[number]): boolean => isMissionUnlocked(n.id, profile.cleared)
 
   const isles = CAMPAIGN_ISLES.map(i => `<circle cx="${i.x}" cy="${i.y}" r="${i.r}" class="cm-isle"/>`).join('')
   const routes = CAMPAIGN_NODES.filter(n => n.requires).map(n => {
@@ -304,5 +304,6 @@ bridge.onSnapshot = (state, compression) => {
 
 // start: ?mission=id přeskočí menu, jinak výběr mise
 const requested = new URLSearchParams(location.search).get('mission')
-if (requested && SCENARIOS[requested]) startMission(requested)
+// přímý vstup `?mission=` respektuje postup kampaní (záložka/URL neobejde zámek)
+if (requested && SCENARIOS[requested] && isMissionUnlocked(requested, profile.cleared)) startMission(requested)
 else showCampaignMap()

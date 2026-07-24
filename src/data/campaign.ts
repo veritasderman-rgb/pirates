@@ -25,6 +25,17 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
   { id: 'mission11', x: 920, y: 80, requires: 'mission10' },
 ]
 
+/**
+ * Je mise odemčená? Uzel existuje a jeho prerekvizita je splněná (nebo žádná
+ * není). Sdílené pravidlo pro mapu i vstup přes `?mission=` URL — aby záložka
+ * ani ručně upravená adresa neobešly postup kampaní.
+ */
+export function isMissionUnlocked(missionId: string, cleared: readonly string[]): boolean {
+  const node = CAMPAIGN_NODES.find(n => n.id === missionId)
+  if (!node) return false
+  return !node.requires || cleared.includes(node.requires)
+}
+
 /** Dekorativní ostrovy na mapě (jen vizuál). */
 export const CAMPAIGN_ISLES: { x: number; y: number; r: number }[] = [
   { x: 130, y: 380, r: 34 }, { x: 360, y: 430, r: 26 }, { x: 500, y: 150, r: 30 },

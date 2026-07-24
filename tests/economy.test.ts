@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { sim } from '../src/sim/engine'
 import { applyFlagshipLoadout } from '../src/sim/loadout'
 import { SHIPYARD, shipEntry, STARTER_HULL } from '../src/data/profile'
-import { CAMPAIGN_NODES } from '../src/data/campaign'
+import { CAMPAIGN_NODES, isMissionUnlocked } from '../src/data/campaign'
 import { SHIP_CLASSES } from '../src/data/defs'
 import { SCENARIOS } from '../src/data/missions'
 import type { Scenario, ShipState } from '../src/sim/types'
@@ -63,5 +63,13 @@ describe('kampaňová mapa', () => {
   it('mapa pokrývá všechny mise kampaně', () => {
     const nodeIds = new Set(CAMPAIGN_NODES.map(n => n.id))
     for (const id of Object.keys(SCENARIOS)) expect(nodeIds.has(id)).toBe(true)
+  })
+
+  it('zámek postupu: první mise otevřená, pozdější zamčené bez prerekvizity', () => {
+    expect(isMissionUnlocked('mission01', [])).toBe(true)       // bez requires
+    expect(isMissionUnlocked('mission02', [])).toBe(false)      // vyžaduje mission01
+    expect(isMissionUnlocked('mission02', ['mission01'])).toBe(true)
+    expect(isMissionUnlocked('mission11', [])).toBe(false)      // URL/záložka neobejde
+    expect(isMissionUnlocked('neexistuje', ['mission01'])).toBe(false)
   })
 })
