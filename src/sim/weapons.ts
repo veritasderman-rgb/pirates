@@ -52,12 +52,24 @@ export function chaserDir(ship: ShipState, end: ChaseEnd): number {
   return end === 'bow' ? ship.heading : ship.heading + Math.PI
 }
 
-/** Počet stíhacích děl (na přídi i zádi). Odvozeno z třídy; pevnosti nemají. */
+/** Kapacita stíhacích děl dané třídy (na přídi i zádi). Pevnosti nemají. */
 export function chaseGunCount(ship: ShipState): number {
   const def = SHIP_CLASSES[ship.classId]
   if (!def || def.hullCode === 'FORT') return 0
   if (def.chaseGuns !== undefined) return def.chaseGuns
   return def.gunsPerBroadside >= 6 ? 2 : def.gunsPerBroadside >= 3 ? 1 : 0
+}
+
+/**
+ * Funkční stíhací děla teď — kapacita škálovaná zdravím dělových subsystémů
+ * (obsluha/lafety). Když jsou oba boky rozstřílené na nulu, umlknou i stíhací
+ * děla → drží konzistenci s `weaponsOut` (loď, co „nemá čím střílet", nestřílí).
+ */
+export function effectiveChaseGuns(ship: ShipState): number {
+  const base = chaseGunCount(ship)
+  if (base <= 0) return 0
+  const gunHealth = (ship.subsystems.gunsPort + ship.subsystems.gunsStbd) / 2
+  return Math.round(base * gunHealth)
 }
 
 /** Nese stíhací dělo (příď/záď) na cíl a je v dostřelu? Úzký kužel podél osy. */
@@ -71,7 +83,7 @@ export function canChase(ship: ShipState, end: ChaseEnd, target: ShipState): boo
 
 /** Který konec (pokud vůbec) může stíhacím dělem pálit na cíl? Přednost přídi. */
 export function bestChaser(ship: ShipState, target: ShipState): ChaseEnd | null {
-  if (chaseGunCount(ship) <= 0) return null
+  if (effectiveChaseGuns(ship) <= 0) return null
   if (canChase(ship, 'bow', target)) return 'bow'
   if (canChase(ship, 'stern', target)) return 'stern'
   return null
@@ -184,7 +196,7 @@ export function fireChaser(
   if (!def || ship.destroyed || ship.surrendered) return false
   const reload = end === 'bow' ? ship.reloadBow : ship.reloadStern
   if (reload > 0) return false
-  const guns = chaseGunCount(ship)
+  const guns = effectiveChaseGuns(ship)
   if (guns <= 0 || ship.ammo <= 0) return false
   if (!canChase(ship, end, target)) return false
 

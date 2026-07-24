@@ -7,7 +7,7 @@ import type { ShipState, SimState, SimEvent, ShotType } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
 import { offWindAngle, sailEfficiency, inNoGo } from '../sim/sail'
 import { forecastWind } from '../sim/wind'
-import { weatherGage, rakeAvailable, canChase, chaseGunCount } from '../sim/weapons'
+import { weatherGage, rakeAvailable, canChase, chaseGunCount, effectiveChaseGuns } from '../sim/weapons'
 import { boardingOdds } from '../sim/surrender'
 import { BOARD_RANGE } from '../sim/constants'
 import { dist } from '../sim/vec'
@@ -266,8 +266,9 @@ export class Panels {
   private chaserHtml(state: SimState, ui: UiState, sh: ShipState): string {
     if (chaseGunCount(sh) <= 0) return ''
     const tgt = ui.targetId !== null ? state.ships.find(s => s.id === ui.targetId) : undefined
-    const bowDis = sh.reloadBow > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'bow', tgt))
-    const sternDis = sh.reloadStern > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'stern', tgt))
+    const noGuns = effectiveChaseGuns(sh) <= 0 // děla rozstřílená → stíhací umlkla
+    const bowDis = noGuns || sh.reloadBow > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'bow', tgt))
+    const sternDis = noGuns || sh.reloadStern > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'stern', tgt))
     return `<div class="obg" title="Light chase guns fore &amp; aft — weak, but they fire along your bow/stern without turning broadside. Handy while running a ship down (the full broadside still hits far harder).">`
       + `<button data-act="fire-bow" ${bowDis ? 'disabled' : ''} title="Fire the bow chaser — target must be roughly ahead (key F)">🎯 bow gun</button>`
       + `<button data-act="fire-stern" ${sternDis ? 'disabled' : ''} title="Fire the stern chaser — target must be roughly astern (key G)">🎯 stern gun</button></div>`
