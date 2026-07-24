@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { sim } from '../src/sim/engine'
-import { weatherGage, rakeAvailable, canChase, bestChaser, chaseGunCount } from '../src/sim/weapons'
+import { weatherGage, rakeAvailable, canChase, bestChaser, chaseGunCount, effectiveChaseGuns } from '../src/sim/weapons'
 import { boardingOdds } from '../src/sim/surrender'
 import { SIM_DT } from '../src/sim/constants'
 import type { Scenario, ShipState, SimState } from '../src/sim/types'
@@ -74,6 +74,15 @@ describe('stíhací děla (příď/záď)', () => {
     expect(bestChaser(me, ship({ name: 'a', pos: { x: 400, y: 0 } }))).toBe('bow')
     expect(canChase(me, 'bow', ship({ name: 'b', pos: { x: 0, y: -400 } }))).toBe(false) // z boku
     expect(bestChaser(me, ship({ name: 's', pos: { x: -400, y: 0 } }))).toBe('stern')
+  })
+
+  it('rozstřílené boky umlčí i stíhací děla (konzistence s weaponsOut)', () => {
+    const healthy = ship({ name: 'H', pos: { x: 0, y: 0 }, classId: 'frigate-albion' })
+    const wrecked = ship({ name: 'W', pos: { x: 0, y: 0 }, heading: 0, classId: 'frigate-albion',
+      subsystems: { rigging: 1, rudder: 1, gunsPort: 0, gunsStbd: 0, crew: 1 } })
+    expect(effectiveChaseGuns(healthy)).toBeGreaterThan(0)
+    expect(effectiveChaseGuns(wrecked)).toBe(0)
+    expect(bestChaser(wrecked, ship({ name: 'a', pos: { x: 400, y: 0 } }))).toBeNull()
   })
 
   it('příďové dělo štípne cíl vpřed bez natočení boku, pak se nabíjí', () => {
