@@ -7,7 +7,7 @@ import {
   BALL_SPEED, RELOAD_TIME, GUN_SPREAD_PER_M, ACCURACY_BASE,
   CHAIN_HULL_FACTOR, CHAIN_RIG_FACTOR, GRAPE_HULL_FACTOR, GRAPE_CREW_FACTOR,
   RAKE_BONUS, RAKE_CONE, SUBSYSTEM_SHARE, MORALE_HULL_WEIGHT, MORALE_CREW_WEIGHT,
-  DAMAGE_SCALE,
+  DAMAGE_SCALE, SUBSYSTEM_DISABLED, WEATHER_GAGE_ACC,
 } from './constants'
 import { add, angleDiff, angleOf, dist, fromAngle, len, norm, scale, sub, dot } from './vec'
 import { SHIP_CLASSES } from '../data/defs'
@@ -54,6 +54,27 @@ export function bestBroadside(ship: ShipState, target: ShipState): Broadside | n
   return null
 }
 
+/**
+ * Návětrná výhoda (weather gage) 0..1: jak přesně je střelec v návětří cíle.
+ * 1 = vítr fouká přímo od střelce k cíli (kouř letí na nepřítele, čistý výhled),
+ * 0 = střelec je v závětří (kouř a spršky do očí). Pro bonus přesnosti i UI.
+ */
+export function weatherGage(from: Vec2, target: Vec2, windDir: number): number {
+  const toTarget = angleOf(sub(target, from))
+  return Math.max(0, Math.cos(angleDiff(toTarget, windDir)))
+}
+
+/**
+ * Je linie střelec→cíl podél podélné osy cíle (raking)? Čistá geometrie pro
+ * UI telegraf — neřeší, jestli zrovna nese bok. Shoduje se s testem v applyHit.
+ */
+export function rakeAvailable(from: ShipState, target: ShipState): boolean {
+  const dir = angleOf(sub(target.pos, from.pos))
+  const alongBow = Math.abs(angleDiff(dir, target.heading))
+  const alongStern = Math.abs(angleDiff(dir, target.heading + Math.PI))
+  return alongBow < RAKE_CONE || alongStern < RAKE_CONE
+}
+
 /** Iterativní lead: kam mířit, aby koule potkala pohybující se cíl. */
 function leadPoint(from: Vec2, target: ShipState): Vec2 {
   let t = dist(from, target.pos) / BALL_SPEED
@@ -82,8 +103,11 @@ export function fireBroadside(
   const d = dist(ship.pos, target.pos)
   const aim = leadPoint(ship.pos, target)
   const baseAng = angleOf(sub(aim, ship.pos))
-  // upgrady vlajkové lodi: přesnost stahuje rozptyl, děla zvyšují poškození
-  const spread = GUN_SPREAD_PER_M * d / (Math.max(0.3, def.gunnery) * (ship.mods?.acc ?? 1))
+  // upgrady vlajkové lodi: přesnost stahuje rozptyl, děla zvyšují poškození.
+  // weather gage: pálíš-li z návětří, kouř letí na nepřítele a salva sedí přesněji
+  const gage = weatherGage(ship.pos, target.pos, state.wind.dir)
+  const spread = GUN_SPREAD_PER_M * d
+    / (Math.max(0.3, def.gunnery) * (ship.mods?.acc ?? 1) * (1 + WEATHER_GAGE_ACC * gage))
   const dmgPer = def.gunDamage * (0.85 + 0.15 * ACCURACY_BASE) * (ship.mods?.gun ?? 1)
 
   const n = Math.min(guns, ship.ammo)
@@ -182,22 +206,21 @@ export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec
   const raked = alongBow < RAKE_CONE || alongStern < RAKE_CONE
   if (raked) dmg *= RAKE_BONUS
 
-  const ss = ship.subsystems
+  // zásah přiřkneme hráčovu tahu, pálil-li hráč — pak z něj plynou „hlášky"
+  const byPlayer = ball.side === 'player'
+
   let hullDmg = dmg
-  let evtText = ''
   if (ball.shot === 'chain') {
     hullDmg = dmg * CHAIN_HULL_FACTOR
-    ss.rigging = Math.max(0, ss.rigging - (dmg * CHAIN_RIG_FACTOR) / 100)
-    evtText = 'ráhnoví'
+    damageSubsystem(state, ship, 'rigging', dmg * CHAIN_RIG_FACTOR, byPlayer)
   } else if (ball.shot === 'grape') {
     hullDmg = dmg * GRAPE_HULL_FACTOR
-    ss.crew = Math.max(0, ss.crew - (dmg * GRAPE_CREW_FACTOR) / 100)
-    evtText = 'posádka'
+    damageSubsystem(state, ship, 'crew', dmg * GRAPE_CREW_FACTOR, byPlayer)
   } else {
     // round shot: většina do trupu, část do náhodného subsystému
     const toSub = dmg * SUBSYSTEM_SHARE
     hullDmg = dmg - toSub
-    hitRandomSubsystem(state, ship, toSub)
+    hitRandomSubsystem(state, ship, toSub, byPlayer)
   }
 
   const before = ship.hull
@@ -210,11 +233,28 @@ export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec
     - (before - ship.hull) / hp * MORALE_HULL_WEIGHT * 0.1
     - (ball.shot === 'grape' ? MORALE_CREW_WEIGHT * 0.02 : 0))
 
+  // vizuální zásah (kouř/tříska na plotu) — text nese samostatná hláška níže
   state.events.push({
-    t: state.t, kind: 'ballHit', shipId: ship.id, side: ball.side, pos: { ...ship.pos },
-    text: raked ? `${ship.name}: RAKING zásah do ${ball.shot === 'chain' ? 'ráhnoví' : ball.shot === 'grape' ? 'paluby' : 'trupu'}!`
-      : evtText ? `${ship.name}: zásah — ${evtText}.` : '',
+    t: state.t, kind: 'ballHit', shipId: ship.id, side: ball.side, pos: { ...ship.pos }, text: '',
   })
+
+  // raking = cílený ničivý manévr → výrazná hláška přiřknutá tomu, kdo pálil
+  if (raked) {
+    const zone = alongBow < alongStern ? 'přídě' : 'zádě'
+    if (byPlayer) {
+      state.events.push({
+        t: state.t, kind: 'comm', shipId: ship.id, side: 'player', speaker: 'gunner',
+        slowdown: true, pos: { ...ship.pos },
+        text: `RAKING! Podélná salva rozmetla ${ship.name} od ${zone} k zádi!`,
+      })
+    } else if (ship.doctrine === 'player') {
+      state.events.push({
+        t: state.t, kind: 'comm', shipId: ship.id, side: ship.side, speaker: 'mate',
+        slowdown: true, pos: { ...ship.pos },
+        text: `Nepřítel nás rakuje podélně — ${ship.name} sténá! Uhni přídí z linie.`,
+      })
+    }
+  }
 
   if (ship.hull <= 0 && !ship.destroyed) {
     ship.destroyed = true
@@ -227,16 +267,35 @@ export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec
 }
 
 /** Rozdělí subsystémové poškození do náhodně vybraného systému. */
-function hitRandomSubsystem(state: SimState, ship: ShipState, dmg: number): void {
+function hitRandomSubsystem(state: SimState, ship: ShipState, dmg: number, byPlayer: boolean): void {
   const keys: (keyof ShipState['subsystems'])[] = ['rigging', 'rudder', 'gunsPort', 'gunsStbd', 'crew']
   const k = keys[Math.floor(rand(state.rng) * keys.length)]
+  damageSubsystem(state, ship, k, dmg, byPlayer)
+}
+
+/**
+ * Ubere subsystému poškození a při překročení prahu „vyřazení" vyšle hlášku.
+ * Pálil-li hráč, hláška je hlasitá a přiřkne výsledek jeho tahu; jinak strohý
+ * `subsystemHit`. Práh se hlásí jen JEDNOU (hrana), takže žádný spam.
+ */
+function damageSubsystem(
+  state: SimState, ship: ShipState, k: keyof ShipState['subsystems'], dmg: number, byPlayer: boolean,
+): void {
   const prev = ship.subsystems[k]
+  if (prev <= 0) return
   ship.subsystems[k] = Math.max(0, prev - dmg / 100)
-  if (prev > 0.4 && ship.subsystems[k] <= 0.4) {
-    state.events.push({
-      t: state.t, kind: 'subsystemHit', shipId: ship.id, side: ship.side,
-      text: `${ship.name}: ${subName(k)} vyřazeno!`,
-    })
+  if (prev > SUBSYSTEM_DISABLED && ship.subsystems[k] <= SUBSYSTEM_DISABLED) {
+    if (byPlayer) {
+      state.events.push({
+        t: state.t, kind: 'comm', shipId: ship.id, side: 'player', speaker: 'gunner',
+        slowdown: true, pos: { ...ship.pos }, text: disableCallout(ship.name, k),
+      })
+    } else {
+      state.events.push({
+        t: state.t, kind: 'subsystemHit', shipId: ship.id, side: ship.side, pos: { ...ship.pos },
+        text: `${ship.name}: ${subName(k)} vyřazeno!`,
+      })
+    }
   }
 }
 
@@ -244,3 +303,12 @@ const subName = (k: string): string => ({
   rigging: 'ráhnoví', rudder: 'kormidlo', gunsPort: 'děla levoboku',
   gunsStbd: 'děla pravoboku', crew: 'posádka',
 }[k] ?? k)
+
+/** Hlášky přiřkující hráčovu zásahu konkrétní následek (čitelnost dopadu). */
+const disableCallout = (name: string, k: string): string => ({
+  rudder: `${name}: kormidlo vyřazeno — nepřítel už nezatáčí!`,
+  rigging: `${name}: ráhnoví v cárech — ztrácí rychlost, doháníme ji!`,
+  gunsPort: `${name}: děla levoboku umlčena!`,
+  gunsStbd: `${name}: děla pravoboku umlčena!`,
+  crew: `${name}: posádka zdecimována — teď boarding!`,
+}[k] ?? `${name}: ${subName(k)} vyřazeno!`)
