@@ -4,7 +4,7 @@
  */
 import type { Order, ShipState, ShotType, SimState, Broadside } from '../sim/types'
 import type { SimBridge } from '../worker/bridge'
-import type { TacticalPlot } from './plot'
+import type { Renderer } from './renderer'
 import type { PanelAction, Panels } from './panels'
 
 const COMP_LADDER = [0, 1, 2, 4, 8]
@@ -19,7 +19,7 @@ export class UIController {
 
   constructor(
     private bridge: SimBridge,
-    private plot: TacticalPlot,
+    private plot: Renderer,
     private panels: Panels,
     private canvas: HTMLCanvasElement,
   ) {

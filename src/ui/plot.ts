@@ -661,7 +661,8 @@ export class TacticalPlot {
         const cr = rPx * (0.09 + rnd(c, 4) * 0.05)
         for (let k = 0; k < blobs; k++) {
           const ba = rnd(c * 9 + k, 7) * 6.283, brad = rnd(c * 9 + k, 8) * cr * 1.6
-          const bx = gxc + Math.cos(ba) * brad, by = gyc + Math.sin(ba) * brad
+          const sway = Math.sin(t * 1.3 + c * 1.7 + k) * cr * 0.12  // jemné kývání ve větru
+          const bx = gxc + Math.cos(ba) * brad + sway, by = gyc + Math.sin(ba) * brad
           ctx.fillStyle = CLR.forest
           ctx.beginPath(); ctx.arc(bx, by, cr, 0, Math.PI * 2); ctx.fill()
           ctx.fillStyle = CLR.forestHi
@@ -691,6 +692,23 @@ export class TacticalPlot {
       ctx.globalAlpha = 0.85
       ctx.fillText(isl.name, cx - ctx.measureText(isl.name).width / 2, cy)
       ctx.globalAlpha = 1
+    }
+
+    // racci kroužící nad ostrovem (mávají křídly) — jen zblízka
+    if (this.scale > 0.035 && rPx > 34) {
+      ctx.strokeStyle = 'rgba(58,64,68,0.7)'; ctx.lineWidth = Math.max(0.8, rPx * 0.016)
+      for (let i = 0; i < 3; i++) {
+        const ang = t * (0.25 + i * 0.05) + i * 2.1
+        const rad = rPx * (0.52 + 0.1 * Math.sin(t * 0.7 + i))
+        const bx = cx + Math.cos(ang) * rad, by = cy + Math.sin(ang) * rad * 0.6
+        const flap = Math.sin(t * 6 + i * 1.3) * 0.5 + 0.5
+        const w = Math.max(2, rPx * 0.06) * (0.6 + flap * 0.5)
+        ctx.beginPath()
+        ctx.moveTo(bx - w, by - w * 0.4 * flap)
+        ctx.lineTo(bx, by)
+        ctx.lineTo(bx + w, by - w * 0.4 * flap)
+        ctx.stroke()
+      }
     }
   }
 
@@ -817,8 +835,10 @@ export class TacticalPlot {
     ctx.globalAlpha = surr ? 0.72 : 1
     // vodoryska (tmavší, o něco širší)
     ctx.fillStyle = shade(col, -0.45); this.hullPath(lenPx * 1.02, hb * 1.12); ctx.fill()
-    // hlavní trup
-    ctx.fillStyle = col; this.hullPath(lenPx, hb); ctx.fill()
+    // hlavní trup — gradient napříč bokem (tmavší okraje, světlý hřbet) = 3D oblina
+    const hg = ctx.createLinearGradient(0, -hb, 0, hb)
+    hg.addColorStop(0, shade(col, -0.32)); hg.addColorStop(0.5, shade(col, 0.18)); hg.addColorStop(1, shade(col, -0.32))
+    ctx.fillStyle = hg; this.hullPath(lenPx, hb); ctx.fill()
     // paluba (světlejší, užší)
     ctx.fillStyle = shade(col, 0.3); this.hullPath(lenPx * 0.78, hb * 0.5); ctx.fill()
     // dřevěná paluba: podélná prkna + záďová kajuta
@@ -871,21 +891,25 @@ export class TacticalPlot {
         ctx.strokeStyle = '#d9c9a6'; ctx.lineWidth = Math.max(0.8, lenPx * 0.06)
         ctx.beginPath(); ctx.moveTo(mx, -yh * 0.8); ctx.lineTo(mx, yh * 0.8); ctx.stroke()
       } else {
+        // v kleštích (nízká efektivita) plachty plandají — rychlý třepot místo bulení
+        const fb = eff < 0.18
+          ? { x: Math.cos(delta) * hb * 0.25 + Math.sin(t * 17 + m) * hb * 0.6, y: -Math.sin(delta) * hb * 0.25 + Math.cos(t * 15 + m) * hb * 0.5 }
+          : belly
         // plachta jako nafouklá čočka bulící po větru (k závětří)
         ctx.beginPath()
         ctx.moveTo(mx, -yh)
-        ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh)
-        ctx.quadraticCurveTo(mx + belly.x * 0.12, belly.y * 0.12, mx, -yh)
+        ctx.quadraticCurveTo(mx + fb.x, fb.y, mx, yh)
+        ctx.quadraticCurveTo(mx + fb.x * 0.12, fb.y * 0.12, mx, -yh)
         ctx.closePath()
         ctx.fillStyle = 'rgba(244,247,244,0.96)'; ctx.fill()
         ctx.fillStyle = 'rgba(84,104,116,0.22)'
         ctx.beginPath()
         ctx.moveTo(mx, -yh)
-        ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh)
-        ctx.quadraticCurveTo(mx + belly.x * 0.55, belly.y * 0.55, mx, -yh)
+        ctx.quadraticCurveTo(mx + fb.x, fb.y, mx, yh)
+        ctx.quadraticCurveTo(mx + fb.x * 0.55, fb.y * 0.55, mx, -yh)
         ctx.closePath(); ctx.fill()
         ctx.strokeStyle = 'rgba(150,165,165,0.9)'; ctx.lineWidth = Math.max(0.5, lenPx * 0.028)
-        ctx.beginPath(); ctx.moveTo(mx, -yh); ctx.quadraticCurveTo(mx + belly.x, belly.y, mx, yh); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(mx, -yh); ctx.quadraticCurveTo(mx + fb.x, fb.y, mx, yh); ctx.stroke()
       }
       // stěžeň
       ctx.fillStyle = '#2a1f14'; ctx.beginPath(); ctx.arc(mx, 0, Math.max(0.8, lenPx * 0.055), 0, Math.PI * 2); ctx.fill()
@@ -1014,8 +1038,17 @@ export class TacticalPlot {
     ctx.strokeStyle = col; ctx.globalAlpha = 0.55; ctx.lineWidth = Math.max(1, this.scale * 1.4)
     ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(s.x, s.y); ctx.stroke(); ctx.globalAlpha = 1
     const r = Math.max(1.4, Math.min(5, this.scale * 3))
+    // stín letící koule na hladině (posun ke slunci-opačně) → pocit výšky
+    if (this.scale > 0.06) {
+      ctx.globalAlpha = 0.28; ctx.fillStyle = '#03121a'
+      ctx.beginPath(); ctx.ellipse(s.x + r * 1.6, s.y + r * 2.2, r * 0.9, r * 0.6, 0, 0, Math.PI * 2); ctx.fill()
+      ctx.globalAlpha = 1
+    }
     ctx.fillStyle = col
     ctx.beginPath(); ctx.arc(s.x, s.y, r, 0, Math.PI * 2); ctx.fill()
+    // horní odlesk na kouli
+    ctx.fillStyle = 'rgba(255,255,235,0.7)'
+    ctx.beginPath(); ctx.arc(s.x - r * 0.3, s.y - r * 0.3, r * 0.4, 0, Math.PI * 2); ctx.fill()
   }
 
   private drawCourse(st: SimState): void {
