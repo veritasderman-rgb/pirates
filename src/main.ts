@@ -14,7 +14,8 @@ import { SCENARIOS } from './data/missions'
 import { CAMPAIGN_INTRO, DEFEAT_GENERIC, MISSION_STORY } from './data/story'
 import { scoreMission } from './sim/score'
 import { loadProfile, saveProfile, modsFrom, computeReward, upgradeCost, UPGRADE_DEFS, UP_ORDER, SHIPYARD, shipEntry, shipCondition, isDamaged, repairCost, type UpKey } from './data/profile'
-import { CAMPAIGN_NODES, CAMPAIGN_ISLES, isMissionUnlocked } from './data/campaign'
+import { CAMPAIGN_NODES, CAMPAIGN_ISLES, isMissionUnlocked, isPaidMission } from './data/campaign'
+import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, STORE_PRICE_LABEL, UNLOCK_PERKS } from './data/entitlement'
 import { SHIP_CLASSES } from './data/defs'
 import type { Scenario, SimState } from './sim/types'
 
@@ -67,6 +68,12 @@ const UNLOCK_KEY = 'pirates.unlockAll'
   } catch { /* ignore */ }
 }
 const allUnlocked = ((): boolean => { try { return localStorage.getItem(UNLOCK_KEY) === '1' } catch { return false } })()
+
+// paywall: jednorázové odemčení celé hry. `?own=1` je vývojářský přepínač pro
+// testování placeného obsahu bez platby (obdoba ?unlock=all). DEV odemčení misí
+// zároveň uděluje vlastnictví, ať tester může placené mise skutečně hrát.
+applyOwnDevFlag(location.search)
+const owned = (): boolean => allUnlocked || isOwned()
 
 const startMission = (id: string): void =>
   bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship))
@@ -139,20 +146,27 @@ function showCampaignMap(): void {
   const byId = new Map(CAMPAIGN_NODES.map(n => [n.id, n]))
   const avail = (n: typeof CAMPAIGN_NODES[number]): boolean =>
     allUnlocked || isMissionUnlocked(n.id, profile.cleared)
+  // stav uzlu: done → paid (postup OK, ale za paywallem) → open → locked (postup)
+  const nodeState = (n: typeof CAMPAIGN_NODES[number]): 'done' | 'paid' | 'open' | 'locked' =>
+    cleared.has(n.id) ? 'done'
+      : !avail(n) ? 'locked'
+      : isPaidMission(n.id) && !owned() ? 'paid'
+      : 'open'
 
   const isles = CAMPAIGN_ISLES.map(i => `<circle cx="${i.x}" cy="${i.y}" r="${i.r}" class="cm-isle"/>`).join('')
   const routes = CAMPAIGN_NODES.filter(n => n.requires).map(n => {
     const a = byId.get(n.requires!)!, b = n
-    const st = cleared.has(n.id) ? 'done' : avail(n) ? 'open' : 'locked'
+    const st = nodeState(n)
     return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="cm-route ${st}${n.optional ? ' opt' : ''}"/>`
   }).join('')
   let mainNo = 0
   const nodes = CAMPAIGN_NODES.map(n => {
     const sc = SCENARIOS[n.id]; if (!sc) return ''
     const num = n.optional ? '★' : `${++mainNo}`
-    const st = cleared.has(n.id) ? 'done' : avail(n) ? 'open' : 'locked'
-    const badge = cleared.has(n.id) ? '✔' : num
-    const attr = st !== 'locked' ? ` data-mission="${esc(n.id)}"` : ''
+    const st = nodeState(n)
+    const badge = cleared.has(n.id) ? '✔' : st === 'paid' ? '🔒' : num
+    // klikací jsou dostupné (open/paid); zamčené postupem ne. Paid vede do storu.
+    const attr = st !== 'locked' ? ` data-mission="${esc(n.id)}" data-paid="${st === 'paid' ? '1' : '0'}"` : ''
     return `<g class="cm-node ${st}${n.optional ? ' opt' : ''}"${attr} transform="translate(${n.x},${n.y})">`
       + `<circle r="19" class="cm-c"/><text class="cm-num" y="5">${badge}</text>`
       + `<text class="cm-title" y="37">${esc(sc.title)}</text></g>`
@@ -169,15 +183,86 @@ function showCampaignMap(): void {
     + `<div class="brief story">${esc(firstSentence(CAMPAIGN_INTRO))}</div>`
     + `<div class="cm-bar"><span>Treasury: <b>${profile.money} 🪙</b></span>`
     + `<span>Flagship: <b>${esc(flagName)}</b></span>`
-    + `<button id="btn-port">🛠 PORT — shipyard &amp; outfitting</button></div>`
+    + `<button id="btn-port">🛠 PORT — shipyard &amp; outfitting</button>`
+    + (owned() ? '' : `<button id="btn-store" class="cm-buy">🔓 Unlock full game — ${esc(STORE_PRICE_LABEL)}</button>`)
+    + `</div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
     + (allUnlocked ? `<div class="fc-hint" style="color:#e8c874">🔓 DEV: all missions unlocked (append <b>?unlock=off</b> to the URL to restore normal progression).</div>` : '')
     + `<div class="fc-hint">Click a port (node) = set sail on the mission. A cleared mission (✔) unlocks the next. `
     + `Cleared ones can be replayed (smaller reward). At port, buy a new hull or upgrade the one you have.</div>`)
   el.querySelector('.box')!.classList.add('wide')
   el.querySelector('#btn-port')!.addEventListener('click', () => { el.remove(); showOutfitting() })
+  el.querySelector('#btn-store')?.addEventListener('click', () => { el.remove(); showStore() })
   el.querySelectorAll<SVGGElement>('g[data-mission]').forEach(g =>
-    g.addEventListener('click', () => { el.remove(); startMission(g.dataset.mission!) }))
+    g.addEventListener('click', () => {
+      // placený uzel (za paywallem) vede do storu, ostatní rovnou vyplouvají
+      if (g.dataset.paid === '1') { el.remove(); showStore() }
+      else { el.remove(); startMission(g.dataset.mission!) }
+    }))
+}
+
+/**
+ * Store — jednorázové odemčení celé hry (kampaň 5+, ★ odbočky, skirmish).
+ * Buy → serverless /api/create-checkout → přesměrování na Stripe. Restore →
+ * e-mail → /api/restore. Bez /api (lokální preview) tlačítka hlásí chybu; pro
+ * test placeného obsahu lokálně použij ?own=1.
+ */
+function showStore(): void {
+  const perks = UNLOCK_PERKS.map(p => `<li>${esc(p)}</li>`).join('')
+  const el = overlay(
+    `<h1>UNLOCK THE FULL GAME</h1>`
+    + `<div class="brief story">Four missions in, the war for the Halcyon Archipelago is only beginning. One payment opens the rest of the campaign and the skirmish sandbox — forever.</div>`
+    + `<div class="store-price">${esc(STORE_PRICE_LABEL)} <span class="dim">· one-time</span></div>`
+    + `<ul class="store-perks">${perks}</ul>`
+    + (isDevOwned() ? `<div class="fc-hint" style="color:#e8c874">🔓 DEV: ownership simulated via <b>?own=1</b> (append <b>?own=off</b> to restore the paywall).</div>` : '')
+    + `<div id="store-msg" class="store-msg"></div>`
+    + `<div class="store-actions">`
+    + `<button id="btn-buy">🔓 Buy — ${esc(STORE_PRICE_LABEL)}</button>`
+    + `<button id="btn-restore">Restore purchase</button>`
+    + `<button id="btn-store-back">← Back to map</button>`
+    + `</div>`)
+  const msg = el.querySelector('#store-msg') as HTMLElement
+  const setMsg = (t: string, bad = false): void => { msg.textContent = t; msg.className = `store-msg ${bad ? 'bad' : 'ok'}` }
+
+  el.querySelector('#btn-buy')!.addEventListener('click', async () => {
+    setMsg('Opening secure checkout…')
+    try {
+      const res = await fetch('/api/create-checkout', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ origin: location.origin, path: location.pathname }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json() as { url?: string }
+      if (data.url) location.href = data.url
+      else throw new Error('no checkout url')
+    } catch {
+      setMsg('Checkout is unavailable here (needs the deployed server). Locally, append ?own=1 to test.', true)
+    }
+  })
+
+  el.querySelector('#btn-restore')!.addEventListener('click', async () => {
+    const email = prompt('Enter the email you purchased with:')?.trim()
+    if (!email) return
+    setMsg('Looking up your purchase…')
+    try {
+      const res = await fetch('/api/restore', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json() as { token?: string; error?: string }
+      if (res.ok && data.token) {
+        saveLicense({ token: data.token, email, issuedAt: Date.now() })
+        setMsg('Purchase restored — the full game is unlocked!')
+        setTimeout(() => { el.remove(); showCampaignMap() }, 900)
+      } else {
+        setMsg(data.error || 'No purchase found for that email.', true)
+      }
+    } catch {
+      setMsg('Restore is unavailable here (needs the deployed server).', true)
+    }
+  })
+
+  el.querySelector('#btn-store-back')!.addEventListener('click', () => { el.remove(); showCampaignMap() })
 }
 
 /** Přístav — nákup trvalých upgradů vlajkové lodi za dublony. */
@@ -374,8 +459,53 @@ bridge.onSnapshot = (state, compression) => {
   }
 }
 
-// start: ?mission=id přeskočí menu, jinak výběr mise
-const requested = new URLSearchParams(location.search).get('mission')
-// přímý vstup `?mission=` respektuje postup kampaní (záložka/URL neobejde zámek)
-if (requested && SCENARIOS[requested] && (allUnlocked || isMissionUnlocked(requested, profile.cleared))) startMission(requested)
-else showCampaignMap()
+/**
+ * Návrat ze Stripe checkoutu: `?purchase=success&session_id=…` ověří platbu na
+ * serveru, uloží licenci a vyčistí URL; `?purchase=cancel` otevře zpět store.
+ * Vrací true, když návrat obsloužil (a bootstrap už nespouští nic dalšího).
+ */
+async function handlePurchaseReturn(): Promise<boolean> {
+  const q = new URLSearchParams(location.search)
+  const purchase = q.get('purchase')
+  if (!purchase) return false
+  const clean = (): void => history.replaceState(null, '', location.pathname)
+  if (purchase === 'cancel') { clean(); showStore(); return true }
+  if (purchase === 'success') {
+    const sessionId = q.get('session_id')
+    clean()
+    const el = overlay(`<h1>UNLOCKING…</h1><div class="brief">Confirming your purchase with the payment provider…</div>`)
+    try {
+      const res = await fetch('/api/verify-session', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      })
+      const data = await res.json() as { token?: string; email?: string; error?: string }
+      el.remove()
+      if (res.ok && data.token) {
+        saveLicense({ token: data.token, email: data.email, issuedAt: Date.now() })
+        const ok = overlay(`<h1 class="win">⚓ THANK YOU</h1><div class="brief story">The full game is unlocked — the whole archipelago is yours to take.</div>`
+          + `<div style="margin-top:14px"><button id="btn-go">SET SAIL</button></div>`)
+        ok.querySelector('#btn-go')!.addEventListener('click', () => { ok.remove(); showCampaignMap() })
+      } else {
+        const bad = overlay(`<h1 class="lose">Payment not confirmed</h1><div class="brief">${esc(data.error || 'We could not verify the purchase.')} If you were charged, use “Restore purchase”.</div>`
+          + `<div style="margin-top:14px"><button id="btn-go">Back to map</button></div>`)
+        bad.querySelector('#btn-go')!.addEventListener('click', () => { bad.remove(); showCampaignMap() })
+      }
+    } catch {
+      el.remove(); showCampaignMap()
+    }
+    return true
+  }
+  return false
+}
+
+// start: nejdřív případný návrat z platby, pak `?mission=` (respektuje postup
+// kampaní i paywall — záložka/URL neobejde zámek), jinak kampaňová mapa
+void (async (): Promise<void> => {
+  if (await handlePurchaseReturn()) return
+  const requested = new URLSearchParams(location.search).get('mission')
+  const progressOk = requested && (allUnlocked || isMissionUnlocked(requested, profile.cleared))
+  const payOk = requested && (!isPaidMission(requested) || owned())
+  if (requested && SCENARIOS[requested] && progressOk && payOk) startMission(requested)
+  else showCampaignMap()
+})()

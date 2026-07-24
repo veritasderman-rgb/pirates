@@ -40,6 +40,22 @@ export function isMissionUnlocked(missionId: string, cleared: readonly string[])
   return !node.requires || cleared.includes(node.requires)
 }
 
+/** Kolik prvních hlavních misí je zdarma (demo). Zbytek je za jednorázový nákup. */
+export const FREE_MISSIONS = 4
+
+/**
+ * Je mise za paywallem? Zdarma jsou první FREE_MISSIONS hlavní (nevolitelné)
+ * mise; všechno další — hlavní linie od mission05 dál i bonusové ★ odbočky —
+ * je součástí placeného odemčení celé hry. Sdílené pravidlo pro mapu i URL guard.
+ */
+export function isPaidMission(missionId: string): boolean {
+  const node = CAMPAIGN_NODES.find(n => n.id === missionId)
+  if (!node) return false
+  if (node.optional) return true // bonusové odbočky jsou placený obsah
+  const mains = CAMPAIGN_NODES.filter(n => !n.optional)
+  return mains.findIndex(n => n.id === missionId) >= FREE_MISSIONS
+}
+
 /** Dekorativní ostrovy na mapě (jen vizuál). */
 export const CAMPAIGN_ISLES: { x: number; y: number; r: number }[] = [
   { x: 130, y: 380, r: 34 }, { x: 360, y: 430, r: 26 }, { x: 500, y: 150, r: 30 },
