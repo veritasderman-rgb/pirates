@@ -5,7 +5,10 @@
 import type { Order, ShipState, ShotType, SimState, Broadside } from '../sim/types'
 import type { SimBridge } from '../worker/bridge'
 import type { Renderer } from './renderer'
-import type { PanelAction, Panels } from './panels'
+import type { PanelAction, Hud } from './panels'
+import { bestBroadside } from '../sim/weapons'
+
+const SHOT_ORDER: ShotType[] = ['round', 'chain', 'grape']
 
 const COMP_LADDER = [0, 1, 2, 4, 8]
 
@@ -20,7 +23,7 @@ export class UIController {
   constructor(
     private bridge: SimBridge,
     private plot: Renderer,
-    private panels: Panels,
+    private panels: Hud,
     private canvas: HTMLCanvasElement,
   ) {
     this.bindCanvas()
@@ -115,8 +118,16 @@ export class UIController {
       case 'shot-round': this.shot = 'round'; break
       case 'shot-chain': this.shot = 'chain'; break
       case 'shot-grape': this.shot = 'grape'; break
+      case 'shot-cycle': this.shot = SHOT_ORDER[(SHOT_ORDER.indexOf(this.shot) + 1) % SHOT_ORDER.length]; break
       case 'fire-port': this.fire(sel, 'port'); break
       case 'fire-stbd': this.fire(sel, 'stbd'); break
+      case 'fire': {
+        // mobil: jedno tlačítko vypálí bok, který zrovna nese na cíl
+        if (this.targetId === null) break
+        const tgt = this.state?.ships.find(s => s.id === this.targetId)
+        if (tgt) this.fire(sel, bestBroadside(sel, tgt) ?? 'port')
+        break
+      }
       case 'toggle-auto':
         this.order({ kind: 'setFireControl', shipId: sel.id,
           fc: { mode: sel.fireControl.mode === 'auto' ? 'hold' : 'auto', shot: this.shot } })
