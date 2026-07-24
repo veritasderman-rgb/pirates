@@ -12,6 +12,7 @@ import { AudioManager } from './ui/audio'
 import { SCENARIOS } from './data/missions'
 import { CAMPAIGN_INTRO, DEFEAT_GENERIC, MISSION_STORY } from './data/story'
 import { scoreMission } from './sim/score'
+import { loadProfile, saveProfile, modsFrom, computeReward, upgradeCost, UPGRADE_DEFS, UP_ORDER, type UpKey } from './data/profile'
 import type { Scenario, SimState } from './sim/types'
 
 const canvas = document.getElementById('plot') as HTMLCanvasElement
@@ -41,6 +42,11 @@ const panels = new Panels(
   a => controller.handleAction(a),
 )
 const controller = new UIController(bridge, plot, panels, canvas)
+
+// kapitánský profil (dublony + upgrady) — nese se mezi misemi (localStorage)
+let profile = loadProfile()
+const startMission = (id: string): void => bridge.start(id, modsFrom(profile.up))
+
 const audio = new AudioManager()
 audio.setMenuMode(true)
 window.addEventListener('pointerdown', () => audio.unlock(), { once: false })
@@ -103,16 +109,55 @@ const MISSION_SCENES: Record<string, string> = {
 }
 
 function showMissionSelect(): void {
-  const rows = Object.values(SCENARIOS).map((sc, i) =>
-    `<div class="mrow"><button data-mission="${esc(sc.id)}">${i + 1}. ${esc(sc.title)}</button>`
-    + `<div class="mdesc">${esc(firstSentence(sc.briefing))}</div></div>`).join('')
+  const rows = Object.values(SCENARIOS).map((sc, i) => {
+    const done = profile.cleared.includes(sc.id) ? ' <span class="ok">✔</span>' : ''
+    return `<div class="mrow"><button data-mission="${esc(sc.id)}">${i + 1}. ${esc(sc.title)}${done}</button>`
+      + `<div class="mdesc">${esc(firstSentence(sc.briefing))}</div></div>`
+  }).join('')
   const el = overlay(
     `<img class="menu-img" src="img/scene-court.png" alt="" onerror="this.remove()">`
     + `<h1>PIRATES</h1>`
     + `<div class="brief story">${esc(CAMPAIGN_INTRO)}</div>`
+    + `<div class="score"><div class="stot">Pokladna: <b>${profile.money} 🪙</b></div>`
+    + `<div style="margin-top:6px"><button id="btn-port">🛠 PŘÍSTAV — výzbroj lodi</button></div></div>`
     + `<h2>Výběr mise</h2>${rows}`)
+  el.querySelector('#btn-port')!.addEventListener('click', () => { el.remove(); showOutfitting() })
   el.querySelectorAll<HTMLButtonElement>('button[data-mission]').forEach(b =>
-    b.addEventListener('click', () => { el.remove(); bridge.start(b.dataset.mission!) }))
+    b.addEventListener('click', () => { el.remove(); startMission(b.dataset.mission!) }))
+}
+
+/** Přístav — nákup trvalých upgradů vlajkové lodi za dublony. */
+function showOutfitting(): void {
+  const el = overlay('')
+  const box = el.querySelector('.box') as HTMLElement
+  const draw = (): void => {
+    const rows = UP_ORDER.map(k => {
+      const d = UPGRADE_DEFS[k], lvl = profile.up[k], maxed = lvl >= d.max
+      const cost = maxed ? 0 : upgradeCost(k, lvl)
+      const can = !maxed && profile.money >= cost
+      const pips = '●'.repeat(lvl) + '○'.repeat(d.max - lvl)
+      const bonus = Math.round(lvl * d.per * 100)
+      return `<div class="mrow"><div class="row"><b>${esc(d.name)}</b> <span class="dim">${pips}${bonus ? ` (+${bonus}%)` : ''}</span></div>`
+        + `<div class="mdesc">${esc(d.desc)}</div>`
+        + (maxed ? `<div class="mdesc ok">✔ MAX</div>`
+          : `<button data-buy="${k}" ${can ? '' : 'disabled'}>Koupit lvl ${lvl + 1} — ${cost} 🪙</button>`)
+        + `</div>`
+    }).join('')
+    box.innerHTML = `<h1>PŘÍSTAV</h1>`
+      + `<div class="score"><div class="stot">Pokladna: <b>${profile.money} 🪙</b></div></div>`
+      + `<div class="hint">Vylepšení se nesou celou kampaní a platí pro tvou vlajkovou loď. Vydělávej kořistí — zajímej lodě místo potápění.</div>`
+      + `<h2>Výzbroj vlajkové lodi</h2>${rows}`
+      + `<div style="margin-top:12px"><button id="btn-back">← ZPĚT NA VÝBĚR MISE</button></div>`
+    box.querySelectorAll<HTMLButtonElement>('button[data-buy]').forEach(b =>
+      b.addEventListener('click', () => {
+        const k = b.dataset.buy as UpKey, lvl = profile.up[k], cost = upgradeCost(k, lvl)
+        if (lvl < UPGRADE_DEFS[k].max && profile.money >= cost) {
+          profile.money -= cost; profile.up[k] = lvl + 1; saveProfile(profile); draw()
+        }
+      }))
+    box.querySelector('#btn-back')!.addEventListener('click', () => { el.remove(); showMissionSelect() })
+  }
+  draw()
 }
 
 function showBriefing(sc: Scenario): void {
@@ -149,6 +194,21 @@ function showOutcome(state: SimState): void {
     objectivesDone: state.objectives.filter(o => o.state === 'done').length,
     ownLosses: losses, prizesTaken: prizes, enemySunk: sunk,
   })
+  // ekonomika: odměna v dublonech (plná jen při prvním dokončení mise)
+  let rewardHtml = ''
+  if (win) {
+    const already = profile.cleared.includes(currentMissionId)
+    const rew = computeReward({
+      missionId: currentMissionId, win: true, enemySunk: sunk, prizes,
+      objectivesDone: state.objectives.filter(o => o.state === 'done').length,
+    }, already)
+    profile.money += rew.total
+    if (!already) profile.cleared.push(currentMissionId)
+    saveProfile(profile)
+    rewardHtml = `<div class="score"><div class="stot">Kořist: <b>+${rew.total} 🪙</b> · pokladna: ${profile.money} 🪙</div>`
+      + rew.parts.map(p => `<div class="row"><span>${esc(p.label)}</span><span class="ok">${p.coins ? '+' + p.coins : ''}</span></div>`).join('')
+      + `</div><div class="hint">Kořist (zajaté lodě) vynáší víc než potopení — v přístavu za dublony vylepši vlajkovou loď.</div>`
+  }
   const story = MISSION_STORY[currentMissionId]
   const epilog = win ? story?.epilog : (story?.epilogLose ?? DEFEAT_GENERIC)
   const scoreHtml = `<div class="score"><div class="stot">Skóre: <b>${score.total}</b></div>`
@@ -159,8 +219,12 @@ function showOutcome(state: SimState): void {
     + `<div class="brief">Mise ukončena v čase ${fmtTime(state.t)}.</div>`
     + objs
     + (win ? scoreHtml : '')
+    + rewardHtml
     + (epilog ? `<div class="brief story">${esc(epilog)}</div>` : '')
-    + `<div style="margin-top:14px"><button id="btn-again">ZNOVU</button> <button id="btn-menu">VÝBĚR MISE</button></div>`)
+    + `<div style="margin-top:14px"><button id="btn-again">ZNOVU</button> `
+    + (win ? `<button id="btn-port">🛠 PŘÍSTAV</button> ` : '')
+    + `<button id="btn-menu">VÝBĚR MISE</button></div>`)
+  el.querySelector('#btn-port')?.addEventListener('click', () => { el.remove(); showOutfitting() })
   el.querySelector('#btn-again')!.addEventListener('click', () => { location.href = `${location.pathname}?mission=${encodeURIComponent(currentMissionId)}` })
   el.querySelector('#btn-menu')!.addEventListener('click', () => { location.href = location.pathname })
 }
@@ -183,5 +247,5 @@ bridge.onSnapshot = (state, compression) => {
 
 // start: ?mission=id přeskočí menu, jinak výběr mise
 const requested = new URLSearchParams(location.search).get('mission')
-if (requested && SCENARIOS[requested]) bridge.start(requested)
+if (requested && SCENARIOS[requested]) startMission(requested)
 else showMissionSelect()

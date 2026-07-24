@@ -82,8 +82,9 @@ export function fireBroadside(
   const d = dist(ship.pos, target.pos)
   const aim = leadPoint(ship.pos, target)
   const baseAng = angleOf(sub(aim, ship.pos))
-  const spread = GUN_SPREAD_PER_M * d / Math.max(0.3, def.gunnery)
-  const dmgPer = def.gunDamage * (0.85 + 0.15 * ACCURACY_BASE)
+  // upgrady vlajkové lodi: přesnost stahuje rozptyl, děla zvyšují poškození
+  const spread = GUN_SPREAD_PER_M * d / (Math.max(0.3, def.gunnery) * (ship.mods?.acc ?? 1))
+  const dmgPer = def.gunDamage * (0.85 + 0.15 * ACCURACY_BASE) * (ship.mods?.gun ?? 1)
 
   const n = Math.min(guns, ship.ammo)
   for (let i = 0; i < n; i++) {

@@ -130,6 +130,10 @@ export interface ShipState {
   boardingProgress?: number
   /** AI doktrína ('player' = ovládá hráč, 'surrendered' = spustila vlajku) */
   doctrine: string
+  /** násobiče statů z upgradů (jen hráčova vlajková loď); chybí = bez úprav */
+  mods?: ShipMods
+  /** efektivní max trupu (def.hullPoints × hull mod) — pro UI ukazatel */
+  hullMax?: number
   fireControl: FireControl
   /** sim čas poslední výzvy ke kapitulaci NA tuto loď (cooldown) */
   lastSurrenderDemandAt: number
@@ -347,8 +351,17 @@ export interface SimApi {
 
 // ---------- worker bridge ----------
 
+/** Násobiče statů z upgradů vlajkové lodi (ekonomika). Chybějící = 1. */
+export interface ShipMods {
+  gun?: number      // poškození salvy
+  hull?: number     // pevnost trupu
+  speed?: number    // tah plachet (rychlost)
+  acc?: number      // přesnost (počet zásahů)
+  board?: number    // síla výsadku
+}
+
 export type WorkerInMsg =
-  | { kind: 'init'; scenarioId: string }
+  | { kind: 'init'; scenarioId: string; upgrades?: ShipMods }
   | { kind: 'order'; order: Order }
   | { kind: 'setCompression'; factor: number }
   | { kind: 'snapshotRequest' }

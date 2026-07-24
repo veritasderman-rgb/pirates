@@ -88,7 +88,7 @@ export class Panels {
     const sh = state.ships.find(s => s.id === ui.selectedId)
     if (!sh) { this.left.innerHTML = '<div class="panel"><h3>Loď</h3><div class="dim">— nevybráno —</div></div>'; return }
     const def = SHIP_CLASSES[sh.classId]
-    const hp = def?.hullPoints ?? 100
+    const hp = sh.hullMax ?? def?.hullPoints ?? 100
     const off = (offWindAngle(sh.heading, state.wind) * 180) / Math.PI
     const eff = sailEfficiency(offWindAngle(sh.heading, state.wind))
     const spd = Math.round(Math.hypot(sh.vel.x, sh.vel.y) * 1.94)
@@ -153,7 +153,7 @@ export class Panels {
       // respektuj masku: třídu i obrázek ber z classGuess (ne skutečné classId)
       const shownClass = con?.classGuess ?? tgt.classId
       const def = SHIP_CLASSES[shownClass]
-      const hp = SHIP_CLASSES[tgt.classId]?.hullPoints ?? 100
+      const hp = tgt.hullMax ?? SHIP_CLASSES[tgt.classId]?.hullPoints ?? 100
       const known = con && con.idQuality >= 1
       // živá taktická data (morálka, boarding) jen u aktuálně viditelného a
       // identifikovaného cíle — u ztraceného (memory) kontaktu senzory drží jen

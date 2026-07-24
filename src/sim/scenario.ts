@@ -34,6 +34,7 @@ export function spawnShip(state: SimState, spec: ShipSpec): ShipState {
     tack: spec.tack ?? 1,
     subsystems: spec.subsystems ? { ...fullSubsystems(), ...spec.subsystems } : fullSubsystems(),
     hull: spec.hull ?? def.hullPoints,
+    hullMax: def.hullPoints,
     ammo: spec.ammo ?? def.gunsPerBroadside * 24,
     morale: spec.morale ?? 1,
     reloadPort: 0,

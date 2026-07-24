@@ -992,7 +992,7 @@ export class TacticalPlot {
     ctx.restore()
 
     // kouř z poškození (obrazovkový rámec, unáší po větru) — jen zblízka
-    const hp = def?.hullPoints ?? 100
+    const hp = sh.hullMax ?? def?.hullPoints ?? 100
     const frac = sh.hull / hp
     if (frac < 0.55 && lenPx > 9) {
       const wd = fromAngle(st.wind.dir)
