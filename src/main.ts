@@ -55,6 +55,19 @@ if (mobile) new TouchInput(canvas, plot)
 
 // kapitánský profil (dublony + upgrady) — nese se mezi misemi (localStorage)
 let profile = loadProfile()
+
+// DEV: odemknutí všech misí pro testování. `?unlock=all` zapne (a uloží, takže
+// platí i po přenačtení), `?unlock=off` vypne. Neovlivňuje odměny ani postup.
+const UNLOCK_KEY = 'pirates.unlockAll'
+{
+  const u = new URLSearchParams(location.search).get('unlock')
+  try {
+    if (u === 'all') localStorage.setItem(UNLOCK_KEY, '1')
+    else if (u === 'off' || u === '0') localStorage.removeItem(UNLOCK_KEY)
+  } catch { /* ignore */ }
+}
+const allUnlocked = ((): boolean => { try { return localStorage.getItem(UNLOCK_KEY) === '1' } catch { return false } })()
+
 const startMission = (id: string): void =>
   bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship))
 
@@ -124,7 +137,8 @@ const MISSION_SCENES: Record<string, string> = {
 function showCampaignMap(): void {
   const cleared = new Set(profile.cleared)
   const byId = new Map(CAMPAIGN_NODES.map(n => [n.id, n]))
-  const avail = (n: typeof CAMPAIGN_NODES[number]): boolean => isMissionUnlocked(n.id, profile.cleared)
+  const avail = (n: typeof CAMPAIGN_NODES[number]): boolean =>
+    allUnlocked || isMissionUnlocked(n.id, profile.cleared)
 
   const isles = CAMPAIGN_ISLES.map(i => `<circle cx="${i.x}" cy="${i.y}" r="${i.r}" class="cm-isle"/>`).join('')
   const routes = CAMPAIGN_NODES.filter(n => n.requires).map(n => {
@@ -157,6 +171,7 @@ function showCampaignMap(): void {
     + `<span>Flagship: <b>${esc(flagName)}</b></span>`
     + `<button id="btn-port">🛠 PORT — shipyard &amp; outfitting</button></div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
+    + (allUnlocked ? `<div class="fc-hint" style="color:#e8c874">🔓 DEV: all missions unlocked (append <b>?unlock=off</b> to the URL to restore normal progression).</div>` : '')
     + `<div class="fc-hint">Click a port (node) = set sail on the mission. A cleared mission (✔) unlocks the next. `
     + `Cleared ones can be replayed (smaller reward). At port, buy a new hull or upgrade the one you have.</div>`)
   el.querySelector('.box')!.classList.add('wide')
@@ -285,8 +300,10 @@ function showOutcome(state: SimState): void {
   // trvalé opotřebení: ulož stav přeživší vlajkové lodi (bojová poškození se
   // nesou do další mise, dokud je hráč v přístavu neopraví). Padne-li loď,
   // stav se nemění — mise je prohra, hráč ji opakuje s dřívějším stavem.
+  // v DEV režimu (?unlock=all) neukládej nic do profilu — testovací běhy nesmí
+  // změnit skutečný postup, dublony ani opotřebení lodi
   const survivor = state.ships.find(s => s.doctrine === 'player' && !s.destroyed && s.classId === profile.flagship)
-  if (survivor) {
+  if (survivor && !allUnlocked) {
     const hpFull = survivor.hullMax ?? SHIP_CLASSES[survivor.classId]?.hullPoints ?? 100
     const ss = survivor.subsystems
     profile.condition[profile.flagship] = {
@@ -311,12 +328,15 @@ function showOutcome(state: SimState): void {
       missionId: currentMissionId, win: true, enemySunk: sunk, prizes,
       objectivesDone: state.objectives.filter(o => o.state === 'done').length,
     }, already)
-    profile.money += rew.total
-    if (!already) profile.cleared.push(currentMissionId)
-    saveProfile(profile)
-    rewardHtml = `<div class="score"><div class="stot">Plunder: <b>+${rew.total} 🪙</b> · treasury: ${profile.money} 🪙</div>`
+    if (!allUnlocked) {
+      profile.money += rew.total
+      if (!already) profile.cleared.push(currentMissionId)
+      saveProfile(profile)
+    }
+    rewardHtml = `<div class="score"><div class="stot">Plunder: <b>+${rew.total} 🪙</b>`
+      + (allUnlocked ? ` <span class="dim">(dev — not saved)</span>` : ` · treasury: ${profile.money} 🪙`) + `</div>`
       + rew.parts.map(p => `<div class="row"><span>${esc(p.label)}</span><span class="ok">${p.coins ? '+' + p.coins : ''}</span></div>`).join('')
-      + `</div><div class="hint">Prizes (captured ships) earn more than sinking — at port, spend doubloons to upgrade your flagship.</div>`
+      + `</div>` + (allUnlocked ? '' : `<div class="hint">Prizes (captured ships) earn more than sinking — at port, spend doubloons to upgrade your flagship.</div>`)
   }
   const story = MISSION_STORY[currentMissionId]
   const epilog = win ? story?.epilog : (story?.epilogLose ?? DEFEAT_GENERIC)
@@ -357,5 +377,5 @@ bridge.onSnapshot = (state, compression) => {
 // start: ?mission=id přeskočí menu, jinak výběr mise
 const requested = new URLSearchParams(location.search).get('mission')
 // přímý vstup `?mission=` respektuje postup kampaní (záložka/URL neobejde zámek)
-if (requested && SCENARIOS[requested] && isMissionUnlocked(requested, profile.cleared)) startMission(requested)
+if (requested && SCENARIOS[requested] && (allUnlocked || isMissionUnlocked(requested, profile.cleared))) startMission(requested)
 else showCampaignMap()
