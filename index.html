@@ -202,7 +202,8 @@
     .mh-obj.done { color: #6fd06a; } .mh-obj.failed { color: #e0603a; }
     /* vlastní loď — barevné pipy (top-left) */
     #mh-status { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 46px); left: 9px;
-      display: flex; gap: 5px; pointer-events: none; }
+      display: flex; gap: 5px; pointer-events: auto; padding: 2px 3px; border-radius: 6px; }
+    #mh-status:active { background: rgba(20,60,70,.4); }
     .mh-pip { display: flex; flex-direction: column; align-items: center; }
     .mh-pipbar { width: 8px; height: 40px; background: rgba(10,30,36,.65); border-radius: 3px;
       display: flex; align-items: flex-end; overflow: hidden; }
@@ -212,7 +213,8 @@
     #mh-target { position: absolute; left: 8px; right: 8px;
       bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
       display: flex; align-items: center; gap: 10px; pointer-events: none; }
-    .mh-t-main { flex: 1; background: rgba(10,30,36,.72); border: 1px solid #2b4a52; border-radius: 6px; padding: 5px 8px; }
+    .mh-t-main { flex: 1; background: rgba(10,30,36,.72); border: 1px solid #2b4a52; border-radius: 6px; padding: 5px 8px; pointer-events: auto; }
+    .mh-t-main:active { border-color: #4fd0e0; }
     .mh-t-name { color: #e0a0a0; font-size: 12px; margin-bottom: 3px; }
     .mh-t-bar { height: 6px; background: #2a1414; border-radius: 3px; overflow: hidden; }
     .mh-t-bar i { display: block; height: 100%; background: #e0603a; }
@@ -245,6 +247,37 @@
     .mh-toast { background: rgba(10,30,36,.92); border-left: 3px solid #7fd0e0; color: #dfeaee; font-size: 11.5px;
       padding: 5px 9px; border-radius: 4px; max-width: 100%; transition: opacity .5s; text-align: center; }
     .mh-toast.comm { border-left-color: #d8c24f; }
+    /* detailní list (bottom sheet) s plnými čísly */
+    #mh-sheet { position: absolute; inset: 0; display: none; z-index: 30; }
+    #mh-sheet.open { display: block; pointer-events: auto; }
+    .mh-sh-bd { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+    .mh-sh-card { position: absolute; left: 0; right: 0; bottom: 0;
+      background: rgba(9,26,32,.98); border-top: 1px solid #2b4a52; border-radius: 14px 14px 0 0;
+      padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 14px);
+      max-height: 74%; overflow-y: auto; animation: mh-sh-in .16s ease-out; }
+    @keyframes mh-sh-in { from { transform: translateY(30px); opacity: .4; } to { transform: none; opacity: 1; } }
+    .mh-sh-h { color: #e6eef1; font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+    .mh-sh-note { color: #8aa2a8; font-size: 12px; font-style: italic; margin-bottom: 8px; }
+    .mh-sh-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 7px; }
+    .mh-sh-l { color: #9fb8bf; font-size: 12px; }
+    .mh-sh-v { color: #e6eef1; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .mh-sh-bar { height: 4px; background: rgba(10,30,36,.9); border-radius: 2px; overflow: hidden; margin-top: 3px; }
+    .mh-sh-bar i { display: block; height: 100%; }
+    .mh-sh-x { width: 100%; margin-top: 16px; min-height: 46px; background: rgba(12,40,48,.9);
+      border: 1px solid #2b4a52; border-radius: 9px; color: #cfe6ec; font-size: 13px; }
+    /* první spuštění: legenda ikon */
+    #mh-coach { position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,.62);
+      display: flex; align-items: center; justify-content: center; padding: 18px; }
+    .mh-co-card { background: rgba(9,26,32,.99); border: 1px solid #2b4a52; border-radius: 14px;
+      padding: 18px 18px 16px; max-width: 340px; width: 100%; }
+    .mh-co-h { color: #e6eef1; font-size: 17px; font-weight: 600; }
+    .mh-co-sub { color: #9fb8bf; font-size: 12px; margin: 6px 0 14px; line-height: 1.4; }
+    .mh-co-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+    .mh-co-row { display: flex; align-items: center; gap: 8px; }
+    .mh-co-row span { font-size: 18px; width: 22px; text-align: center; }
+    .mh-co-row b { color: #cfe6ec; font-size: 12px; font-weight: 500; }
+    .mh-co-ok { width: 100%; margin-top: 18px; min-height: 48px; background: #2a6b78;
+      border: 1px solid #4fd0e0; border-radius: 9px; color: #fff; font-size: 14px; }
     /* překryvy na celou šířku telefonu */
     .mobile .overlay { padding: 8px; }
     .mobile .overlay .box, .mobile .overlay .box.wide { max-width: 100%; padding: 16px 14px; }
