@@ -39,6 +39,8 @@ export function spawnShip(state: SimState, spec: ShipSpec): ShipState {
     morale: spec.morale ?? 1,
     reloadPort: 0,
     reloadStbd: 0,
+    reloadBow: 0,
+    reloadStern: 0,
     destroyed: false,
     surrendered: false,
     boarded: false,

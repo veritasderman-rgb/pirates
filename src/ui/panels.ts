@@ -7,7 +7,7 @@ import type { ShipState, SimState, SimEvent, ShotType } from '../sim/types'
 import { SHIP_CLASSES } from '../data/defs'
 import { offWindAngle, sailEfficiency, inNoGo } from '../sim/sail'
 import { forecastWind } from '../sim/wind'
-import { weatherGage, rakeAvailable } from '../sim/weapons'
+import { weatherGage, rakeAvailable, canChase, chaseGunCount } from '../sim/weapons'
 import { boardingOdds } from '../sim/surrender'
 import { BOARD_RANGE } from '../sim/constants'
 import { dist } from '../sim/vec'
@@ -21,7 +21,7 @@ const windArrow = (dir: number): string => {
 export type PanelAction =
   | 'toggle-sails' | 'trim-up' | 'trim-down' | 'toggle-oars'
   | 'shot-round' | 'shot-chain' | 'shot-grape' | 'shot-cycle'
-  | 'fire-port' | 'fire-stbd' | 'fire' | 'toggle-auto' | 'board' | 'demand' | 'hold'
+  | 'fire-port' | 'fire-stbd' | 'fire-bow' | 'fire-stern' | 'fire' | 'toggle-auto' | 'board' | 'demand' | 'hold'
   | 'comp-0' | 'comp-1' | 'comp-2' | 'comp-4' | 'comp-8'
 
 export interface UiState {
@@ -257,8 +257,20 @@ export class Panels {
       + `<div class="obg"><button data-act="fire-port" ${sh.reloadPort > 0 ? 'disabled' : ''} title="Fire the port broadside (target must be within the arc and range)">FIRE port</button>`
       + `<button data-act="fire-stbd" ${sh.reloadStbd > 0 ? 'disabled' : ''} title="Fire the starboard broadside">FIRE stbd</button>`
       + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}" title="Toggle: AUTO = the ship fires its bearing broadside at the most-damaged enemy in range on its own. Off = holds fire, you fire manually (FIRE port/stbd, Q/R).">${auto ? 'AUTO: firing' : 'AUTO: holding fire'}</button></div>`
+      + this.chaserHtml(state, ui, sh)
       + `<div class="obg"><button data-act="demand" title="Demand the target strike her colours. Odds rise with her damage, crew losses and your superiority. Once she strikes, you can board her.">demand surrender</button>`
       + `<button data-act="board" title="Boarding: lay alongside the target at ~60 m and give the order — the boarding party then fights on its own (watch the meter). Until she strikes, it is a bloody melee: both crews lose men, the weaker more. Grape shot softens her up first. If you bleed out, the party withdraws. A captured ship = a prize (more points than sinking).">boarding</button></div>`
+  }
+
+  /** Stíhací děla (příď/záď) — jen má-li je loď; slabá palba podél osy v honičce. */
+  private chaserHtml(state: SimState, ui: UiState, sh: ShipState): string {
+    if (chaseGunCount(sh) <= 0) return ''
+    const tgt = ui.targetId !== null ? state.ships.find(s => s.id === ui.targetId) : undefined
+    const bowDis = sh.reloadBow > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'bow', tgt))
+    const sternDis = sh.reloadStern > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'stern', tgt))
+    return `<div class="obg" title="Light chase guns fore &amp; aft — weak, but they fire along your bow/stern without turning broadside. Handy while running a ship down (the full broadside still hits far harder).">`
+      + `<button data-act="fire-bow" ${bowDis ? 'disabled' : ''} title="Fire the bow chaser — target must be roughly ahead (key F)">🎯 bow gun</button>`
+      + `<button data-act="fire-stern" ${sternDis ? 'disabled' : ''} title="Fire the stern chaser — target must be roughly astern (key G)">🎯 stern gun</button></div>`
   }
 
   private renderLog(state: SimState): void {
