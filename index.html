@@ -163,6 +163,22 @@
     .cm-node.opt.open .cm-c { stroke: #e8c874; fill: #2e2410; }
     .cm-node.opt .cm-num { fill: #e8c874; }
     .cm-node.opt.done .cm-c { stroke: #6fd06a; }
+    /* placené uzly (za paywallem) — zlatý zámek, dostupné ke koupi */
+    .cm-node.paid .cm-c { stroke: #d8b24f; fill: #241c0e; stroke-dasharray: 4 3; }
+    .cm-node.paid .cm-num { fill: #e8c874; font-size: 14px; }
+    .cm-node.paid .cm-title { fill: #b79a52; }
+    .cm-route.paid { stroke: #6a5a2a; stroke-dasharray: 4 4; opacity: .5; }
+    .cm-buy { background: linear-gradient(#3a2c0c, #241c0e); border: 1px solid #d8b24f; color: #f0d890; }
+    .cm-buy:hover { background: #4a3a12; }
+    /* store overlay */
+    .store-price { font-size: 26px; color: #f0d890; font-weight: 700; margin: 10px 0 6px; }
+    .store-perks { list-style: none; padding: 0; margin: 8px 0 14px; }
+    .store-perks li { color: #cfe6ec; font-size: 13px; padding: 4px 0 4px 22px; position: relative; }
+    .store-perks li::before { content: "⚓"; position: absolute; left: 0; color: #6fd06a; }
+    .store-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    #btn-buy { background: linear-gradient(#3a2c0c, #241c0e); border: 1px solid #d8b24f; color: #f0d890; font-weight: 600; }
+    .store-msg { min-height: 18px; font-size: 12px; margin: 6px 0; }
+    .store-msg.ok { color: #6fd06a; } .store-msg.bad { color: #e0603a; }
     .cm-you-i { font-size: 22px; text-anchor: middle; }
     .cm-you-t { fill: #d8c24f; font-size: 10px; text-anchor: middle; }
     /* loděnice */
