@@ -4,10 +4,12 @@
  * aplikuje trvalé upgrady. Odděleno od workeru, aby šlo testovat.
  */
 import { SHIP_CLASSES } from '../data/defs'
-import type { ShipMods, SimState } from './types'
+import type { ShipCondition, ShipMods, SimState } from './types'
+
+const clamp01 = (v: number): number => Math.max(0, Math.min(1, v))
 
 export function applyFlagshipLoadout(
-  state: SimState, flagshipClass?: string, upgrades?: ShipMods,
+  state: SimState, flagshipClass?: string, upgrades?: ShipMods, condition?: ShipCondition,
 ): void {
   const flag = state.ships.find(s => s.doctrine === 'player')
   if (!flag) return
@@ -25,5 +27,15 @@ export function applyFlagshipLoadout(
     flag.mods = upgrades
     flag.hullMax = (flag.hullMax ?? flag.hull) * (upgrades.hull ?? 1)
     flag.hull = flag.hullMax
+  }
+  // trvalé opotřebení z minulých misí (loď vyplouvá poškozená, dokud ji hráč
+  // v přístavu neopraví) — aplikuje se úplně nakonec, na plný trup i subsystémy
+  if (condition) {
+    flag.hull = (flag.hullMax ?? flag.hull) * clamp01(condition.hull)
+    flag.subsystems.rigging = clamp01(condition.rigging)
+    flag.subsystems.rudder = clamp01(condition.rudder)
+    flag.subsystems.gunsPort = clamp01(condition.gunsPort)
+    flag.subsystems.gunsStbd = clamp01(condition.gunsStbd)
+    flag.subsystems.crew = clamp01(condition.crew)
   }
 }

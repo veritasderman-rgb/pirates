@@ -35,7 +35,7 @@ self.onmessage = (e: MessageEvent<WorkerInMsg>) => {
     case 'init': {
       const scenario = loadScenario(msg.scenarioId)
       state = sim.create(scenario)
-      applyFlagshipLoadout(state, msg.flagshipClass, msg.upgrades)
+      applyFlagshipLoadout(state, msg.flagshipClass, msg.upgrades, msg.condition)
       compression = 0
       stepAcc = 0
       post({ kind: 'ready', scenario })

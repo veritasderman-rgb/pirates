@@ -13,7 +13,7 @@ import { AudioManager } from './ui/audio'
 import { SCENARIOS } from './data/missions'
 import { CAMPAIGN_INTRO, DEFEAT_GENERIC, MISSION_STORY } from './data/story'
 import { scoreMission } from './sim/score'
-import { loadProfile, saveProfile, modsFrom, computeReward, upgradeCost, UPGRADE_DEFS, UP_ORDER, SHIPYARD, shipEntry, type UpKey } from './data/profile'
+import { loadProfile, saveProfile, modsFrom, computeReward, upgradeCost, UPGRADE_DEFS, UP_ORDER, SHIPYARD, shipEntry, shipCondition, isDamaged, repairCost, type UpKey } from './data/profile'
 import { CAMPAIGN_NODES, CAMPAIGN_ISLES, isMissionUnlocked } from './data/campaign'
 import { SHIP_CLASSES } from './data/defs'
 import type { Scenario, SimState } from './sim/types'
@@ -55,7 +55,8 @@ if (mobile) new TouchInput(canvas, plot)
 
 // kapitánský profil (dublony + upgrady) — nese se mezi misemi (localStorage)
 let profile = loadProfile()
-const startMission = (id: string): void => bridge.start(id, modsFrom(profile.up), profile.flagship)
+const startMission = (id: string): void =>
+  bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship))
 
 const audio = new AudioManager()
 audio.setMenuMode(true)
@@ -116,6 +117,8 @@ const MISSION_SCENES: Record<string, string> = {
   mission09: 'ship-frigate-albion',
   mission10: 'ship-galleon-castilla',
   mission11: 'scene-beacons',
+  side01: 'scene-ambush',
+  side02: 'scene-pirate-cove',
 }
 
 function showCampaignMap(): void {
@@ -127,14 +130,16 @@ function showCampaignMap(): void {
   const routes = CAMPAIGN_NODES.filter(n => n.requires).map(n => {
     const a = byId.get(n.requires!)!, b = n
     const st = cleared.has(n.id) ? 'done' : avail(n) ? 'open' : 'locked'
-    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="cm-route ${st}"/>`
+    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="cm-route ${st}${n.optional ? ' opt' : ''}"/>`
   }).join('')
-  const nodes = CAMPAIGN_NODES.map((n, i) => {
+  let mainNo = 0
+  const nodes = CAMPAIGN_NODES.map(n => {
     const sc = SCENARIOS[n.id]; if (!sc) return ''
+    const num = n.optional ? '★' : `${++mainNo}`
     const st = cleared.has(n.id) ? 'done' : avail(n) ? 'open' : 'locked'
-    const badge = cleared.has(n.id) ? '✔' : `${i + 1}`
+    const badge = cleared.has(n.id) ? '✔' : num
     const attr = st !== 'locked' ? ` data-mission="${esc(n.id)}"` : ''
-    return `<g class="cm-node ${st}"${attr} transform="translate(${n.x},${n.y})">`
+    return `<g class="cm-node ${st}${n.optional ? ' opt' : ''}"${attr} transform="translate(${n.x},${n.y})">`
       + `<circle r="19" class="cm-c"/><text class="cm-num" y="5">${badge}</text>`
       + `<text class="cm-title" y="37">${esc(sc.title)}</text></g>`
   }).join('')
@@ -195,10 +200,30 @@ function showOutfitting(): void {
           : `<button data-buy="${k}" ${can ? '' : 'disabled'}>Buy lvl ${lvl + 1} — ${cost} 🪙</button>`)
         + `</div>`
     }).join('')
+    // ---- oprava: vlajková loď se opotřebuje mezi misemi, tady se careenuje ----
+    const flagName = SHIP_CLASSES[profile.flagship]?.name ?? profile.flagship
+    const cond = shipCondition(profile, profile.flagship)
+    const cbar = (label: string, v: number): string => {
+      const pct = Math.round(Math.max(0, Math.min(1, v)) * 100)
+      const col = v > 0.66 ? '#5cc98a' : v > 0.33 ? '#d8b24f' : '#e0603a'
+      return `<div class="cond-row"><span>${label}</span>`
+        + `<span class="cond-bar"><i style="width:${pct}%;background:${col}"></i></span></div>`
+    }
+    const rcost = repairCost(cond)
+    const repairHtml = `<h2>Repair &amp; careen</h2>`
+      + `<div class="mrow"><div class="row"><b>${esc(flagName)}</b> — condition</div>`
+      + cbar('hull', cond.hull) + cbar('rigging', cond.rigging) + cbar('rudder', cond.rudder)
+      + cbar('port guns', cond.gunsPort) + cbar('stbd guns', cond.gunsStbd) + cbar('crew', cond.crew)
+      + (isDamaged(cond)
+        ? `<div class="mdesc">Battle damage carries between missions — patch her up before she sails again.</div>`
+          + `<button data-repair="1" ${profile.money >= rcost ? '' : 'disabled'}>Repair to full — ${rcost} 🪙</button>`
+        : `<div class="mdesc ok">✔ fully repaired — she's ready for sea</div>`)
+      + `</div>`
     box.innerHTML = `<h1>PORT</h1>`
       + `<div class="score"><div class="stot">Treasury: <b>${profile.money} 🪙</b></div></div>`
-      + `<div class="hint">Spend doubloons two ways: buy a <b>stronger hull</b> (shipyard) or <b>upgrade</b> the one you command. Upgrades apply to your current flagship and carry through the campaign.</div>`
+      + `<div class="hint">Spend doubloons on a <b>stronger hull</b> (shipyard), <b>upgrades</b> for the one you command, or <b>repairs</b> after a hard fight. Upgrades and damage both carry through the campaign.</div>`
       + `<h2>Shipyard — flagship</h2>${ships}`
+      + repairHtml
       + `<h2>Flagship outfitting</h2>${rows}`
       + `<div style="margin-top:12px"><button id="btn-back">← BACK TO MAP</button></div>`
     box.querySelectorAll<HTMLButtonElement>('button[data-hull]').forEach(b =>
@@ -220,6 +245,12 @@ function showOutfitting(): void {
           profile.money -= cost; profile.up[k] = lvl + 1; saveProfile(profile); draw()
         }
       }))
+    box.querySelector<HTMLButtonElement>('button[data-repair]')?.addEventListener('click', () => {
+      const cost = repairCost(shipCondition(profile, profile.flagship))
+      if (profile.money >= cost) {
+        profile.money -= cost; delete profile.condition[profile.flagship]; saveProfile(profile); draw()
+      }
+    })
     box.querySelector('#btn-back')!.addEventListener('click', () => { el.remove(); showCampaignMap() })
   }
   draw()
@@ -251,6 +282,19 @@ function showOutcome(state: SimState): void {
     const m = o.state === 'done' ? '■' : o.state === 'failed' ? '✗' : '□'
     return `<div class="obj ${o.state}">${m} ${esc(o.text)}</div>`
   }).join('')
+  // trvalé opotřebení: ulož stav přeživší vlajkové lodi (bojová poškození se
+  // nesou do další mise, dokud je hráč v přístavu neopraví). Padne-li loď,
+  // stav se nemění — mise je prohra, hráč ji opakuje s dřívějším stavem.
+  const survivor = state.ships.find(s => s.doctrine === 'player' && !s.destroyed && s.classId === profile.flagship)
+  if (survivor) {
+    const hpFull = survivor.hullMax ?? SHIP_CLASSES[survivor.classId]?.hullPoints ?? 100
+    const ss = survivor.subsystems
+    profile.condition[profile.flagship] = {
+      hull: Math.max(0, Math.min(1, survivor.hull / hpFull)),
+      rigging: ss.rigging, rudder: ss.rudder, gunsPort: ss.gunsPort, gunsStbd: ss.gunsStbd, crew: ss.crew,
+    }
+    saveProfile(profile)
+  }
   const prizes = state.ships.filter(s => s.boarded && s.side !== 'player').length
   const sunk = state.ships.filter(s => s.destroyed && s.side === 'enemy').length
   const losses = state.ships.filter(s => s.side === 'player' && s.destroyed).length

@@ -3,7 +3,7 @@
  * Kořist a potopení dávají dublony; za ně se kupují upgrady vlajkové lodi,
  * které si hráč nese celou kampaní. Deterministické, čistě klientské.
  */
-import type { ShipMods } from '../sim/types'
+import type { ShipMods, ShipCondition } from '../sim/types'
 
 export type UpKey = 'gun' | 'hull' | 'speed' | 'acc' | 'board'
 export type Upgrades = Record<UpKey, number>
@@ -14,6 +14,7 @@ export interface Profile {
   cleared: string[]   // id misí, které už byly poprvé dokončeny (plná odměna jen jednou)
   flagship: string    // třída aktuálně velené vlajkové lodi
   fleet: string[]     // vlastněné trupy (loděnice)
+  condition: Record<string, ShipCondition>  // opotřebení trupů (per classId), nese se mezi misemi
 }
 
 const KEY = 'pirates.profile.v1'
@@ -21,7 +22,7 @@ const KEY = 'pirates.profile.v1'
 export const STARTER_HULL = 'sloop-albion'
 const fresh = (): Profile => ({
   money: 0, up: { gun: 0, hull: 0, speed: 0, acc: 0, board: 0 }, cleared: [],
-  flagship: STARTER_HULL, fleet: [STARTER_HULL],
+  flagship: STARTER_HULL, fleet: [STARTER_HULL], condition: {},
 })
 
 export function loadProfile(): Profile {
@@ -32,8 +33,32 @@ export function loadProfile(): Profile {
     const f = fresh()
     const fleet = Array.isArray(p.fleet) && p.fleet.length ? p.fleet : f.fleet
     const flagship = p.flagship && fleet.includes(p.flagship) ? p.flagship : fleet[0]
-    return { ...f, ...p, up: { ...f.up, ...p.up }, fleet, flagship }
+    const condition = (p.condition && typeof p.condition === 'object') ? p.condition : {}
+    return { ...f, ...p, up: { ...f.up, ...p.up }, fleet, flagship, condition }
   } catch { return fresh() }
+}
+
+/** Neposkozený stav lodi. */
+export const pristineCondition = (): ShipCondition =>
+  ({ hull: 1, rigging: 1, rudder: 1, gunsPort: 1, gunsStbd: 1, crew: 1 })
+
+/** Aktuální opotřebení daného trupu (chybí = jako nová). */
+export function shipCondition(p: Profile, classId: string): ShipCondition {
+  return { ...pristineCondition(), ...p.condition[classId] }
+}
+
+/** Je loď vůbec poškozená (má smysl nabízet opravu)? */
+export function isDamaged(c: ShipCondition): boolean {
+  return c.hull < 0.999 || c.rigging < 0.999 || c.rudder < 0.999
+    || c.gunsPort < 0.999 || c.gunsStbd < 0.999 || c.crew < 0.999
+}
+
+/** Cena dublonů za opravu do plného stavu (roste s mírou poškození). */
+export const REPAIR_PER_UNIT = 80
+export function repairCost(c: ShipCondition): number {
+  const missing = (1 - c.hull) + (1 - c.rigging) + (1 - c.rudder)
+    + (1 - c.gunsPort) + (1 - c.gunsStbd) + (1 - c.crew)
+  return Math.round(missing * REPAIR_PER_UNIT)
 }
 export function saveProfile(p: Profile): void {
   try { localStorage.setItem(KEY, JSON.stringify(p)) } catch { /* ignore */ }

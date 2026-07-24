@@ -9,6 +9,7 @@ export interface CampaignNode {
   x: number
   y: number
   requires?: string   // prerekvizita (splněná mise), jinak dostupné od začátku
+  optional?: boolean  // volitelná odbočka — nic ji nevyžaduje, jen bonusová kořist
 }
 
 export const CAMPAIGN_NODES: CampaignNode[] = [
@@ -23,6 +24,9 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
   { id: 'mission09', x: 745, y: 285, requires: 'mission08' },
   { id: 'mission10', x: 850, y: 175, requires: 'mission09' },
   { id: 'mission11', x: 920, y: 80, requires: 'mission10' },
+  // volitelné odbočky (bonusová kořist) — otevřou se po dané misi, nic je nevyžaduje
+  { id: 'side01', x: 330, y: 430, requires: 'mission02', optional: true },
+  { id: 'side02', x: 640, y: 380, requires: 'mission05', optional: true },
 ]
 
 /**

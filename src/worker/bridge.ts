@@ -1,5 +1,5 @@
 /** Most UI ↔ sim worker (postMessage obal). */
-import type { Order, Scenario, ShipMods, SimState, WorkerInMsg, WorkerOutMsg } from '../sim/types'
+import type { Order, Scenario, ShipCondition, ShipMods, SimState, WorkerInMsg, WorkerOutMsg } from '../sim/types'
 
 export class SimBridge {
   private worker: Worker
@@ -15,8 +15,8 @@ export class SimBridge {
     }
   }
 
-  start(scenarioId: string, upgrades?: ShipMods, flagshipClass?: string): void {
-    this.post({ kind: 'init', scenarioId, upgrades, flagshipClass })
+  start(scenarioId: string, upgrades?: ShipMods, flagshipClass?: string, condition?: ShipCondition): void {
+    this.post({ kind: 'init', scenarioId, upgrades, flagshipClass, condition })
   }
   sendOrder(order: Order): void { this.post({ kind: 'order', order }) }
   setCompression(factor: number): void { this.post({ kind: 'setCompression', factor }) }

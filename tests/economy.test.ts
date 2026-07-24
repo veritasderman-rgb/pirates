@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { sim } from '../src/sim/engine'
 import { applyFlagshipLoadout } from '../src/sim/loadout'
-import { SHIPYARD, shipEntry, STARTER_HULL } from '../src/data/profile'
+import { SHIPYARD, shipEntry, STARTER_HULL, pristineCondition, repairCost, isDamaged } from '../src/data/profile'
 import { CAMPAIGN_NODES, isMissionUnlocked } from '../src/data/campaign'
 import { SHIP_CLASSES } from '../src/data/defs'
 import { SCENARIOS } from '../src/data/missions'
@@ -48,6 +48,31 @@ describe('ekonomika / loděnice', () => {
     applyFlagshipLoadout(st, undefined, undefined)
     const flag = st.ships.find(s => s.doctrine === 'player') as ShipState
     expect(flag.classId).toBe('sloop-albion')
+  })
+
+  it('opotřebení: loď vyplouvá poškozená a oprava stojí dublony', () => {
+    const st = sim.create(sc)
+    const cond = { ...pristineCondition(), hull: 0.5, rudder: 0.3, crew: 0.7 }
+    applyFlagshipLoadout(st, 'frigate-albion', undefined, cond)
+    const flag = st.ships.find(s => s.doctrine === 'player') as ShipState
+    // trup je půlka plné pevnosti fregaty, kormidlo a posádka odpovídají kondici
+    expect(flag.hull).toBeCloseTo(SHIP_CLASSES['frigate-albion'].hullPoints * 0.5, 5)
+    expect(flag.subsystems.rudder).toBeCloseTo(0.3, 5)
+    expect(flag.subsystems.crew).toBeCloseTo(0.7, 5)
+    // oprava: cena roste s poškozením, pristine je zdarma a „bez poškození"
+    expect(isDamaged(cond)).toBe(true)
+    expect(repairCost(cond)).toBeGreaterThan(0)
+    expect(isDamaged(pristineCondition())).toBe(false)
+    expect(repairCost(pristineCondition())).toBe(0)
+  })
+
+  it('opotřebení navrch upgradu: hull mod × pevnost × kondice', () => {
+    const st = sim.create(sc)
+    applyFlagshipLoadout(st, 'brig-albion', { hull: 1.2 }, { ...pristineCondition(), hull: 0.5 })
+    const flag = st.ships.find(s => s.doctrine === 'player') as ShipState
+    // hullMax = pevnost × 1.2 (upgrade); aktuální trup = hullMax × 0.5 (kondice)
+    expect(flag.hullMax).toBeCloseTo(SHIP_CLASSES['brig-albion'].hullPoints * 1.2, 5)
+    expect(flag.hull).toBeCloseTo(SHIP_CLASSES['brig-albion'].hullPoints * 1.2 * 0.5, 5)
   })
 })
 
