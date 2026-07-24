@@ -106,7 +106,8 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
   const localWind = windAt(state, ship.pos)
   const aSail = sailThrustAccel(ship, def, localWind)
   const aOar = oarThrustAccel(ship, def)
-  const aFwd = aSail + aOar
+  // upgrade rychlosti (měděné dno) zvyšuje tah vlajkové lodi
+  const aFwd = (aSail + aOar) * (ship.mods?.speed ?? 1)
   const fwdDir = fromAngle(ship.heading)
 
   // (4) rozklad rychlosti na dopřednou a boční složku (kýl silně brzdí boční)

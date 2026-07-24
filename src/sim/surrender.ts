@@ -88,7 +88,8 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
     return
   }
   // převaha posádky útočníka vs. obránce (vzdaná loď se skoro nebrání)
-  const atk = from.subsystems.crew * from.morale
+  // upgrade výsadku (board) zvyšuje sílu útočníkovy posádky
+  const atk = from.subsystems.crew * from.morale * (from.mods?.board ?? 1)
   const def = target.surrendered ? 0.1 : target.subsystems.crew * target.morale
   const adv = Math.max(0.05, atk - def * 0.5)
   const m = progressMap(state)

@@ -34,6 +34,15 @@ self.onmessage = (e: MessageEvent<WorkerInMsg>) => {
     case 'init': {
       const scenario = loadScenario(msg.scenarioId)
       state = sim.create(scenario)
+      if (msg.upgrades) {
+        // upgrady se aplikují na hráčovu vlajkovou loď (doctrine 'player')
+        const flag = state.ships.find(s => s.doctrine === 'player')
+        if (flag) {
+          flag.mods = msg.upgrades
+          flag.hullMax = (flag.hullMax ?? flag.hull) * (msg.upgrades.hull ?? 1)
+          flag.hull = flag.hullMax
+        }
+      }
       compression = 0
       stepAcc = 0
       post({ kind: 'ready', scenario })
