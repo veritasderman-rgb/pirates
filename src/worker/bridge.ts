@@ -15,8 +15,8 @@ export class SimBridge {
     }
   }
 
-  start(scenarioId: string, upgrades?: ShipMods, flagshipClass?: string, condition?: ShipCondition): void {
-    this.post({ kind: 'init', scenarioId, upgrades, flagshipClass, condition })
+  start(scenarioId: string, upgrades?: ShipMods, flagshipClass?: string, condition?: ShipCondition, scenario?: Scenario): void {
+    this.post({ kind: 'init', scenarioId, upgrades, flagshipClass, condition, scenario })
   }
   sendOrder(order: Order): void { this.post({ kind: 'order', order }) }
   setCompression(factor: number): void { this.post({ kind: 'setCompression', factor }) }
