@@ -154,8 +154,8 @@ export const SHIP_CLASSES: Record<string, ShipClassDef> = {
       + 'decks, gilding from keel to masthead and a crew of half a thousand men. She '
       + 'is not merely a ship, she is the floating throne of Don Cristóbal de Vega '
       + 'and the last card in his game for Halcyon. No one beats her alongside; '
-      + 'whoever means to sink her must take her apart piece by piece — and pray his '
-      + 'ships run out before her decks do.',
+      + 'whoever means to sink her must take her apart piece by piece — and pray her '
+      + 'decks give out before he runs out of ships.',
   },
   /** Q-loď: castillský pomocný křižník maskovaný za kupce — trup kupce, uvnitř děla */
   'qship-castilla': {

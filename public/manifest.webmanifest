@@ -1,7 +1,8 @@
 {
   "name": "Pirates",
   "short_name": "Pirates",
-  "description": "Taktická simulace plachetnicových bitev — dvě koruny, piráti a vítr.",
+  "description": "A tactical age-of-sail battle simulator — two crowns, pirates and the wind.",
+  "lang": "en",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a2630",
