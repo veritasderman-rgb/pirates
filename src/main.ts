@@ -15,7 +15,7 @@ import { CAMPAIGN_INTRO, DEFEAT_GENERIC, MISSION_STORY } from './data/story'
 import { scoreMission } from './sim/score'
 import { loadProfile, saveProfile, modsFrom, computeReward, upgradeCost, UPGRADE_DEFS, UP_ORDER, SHIPYARD, shipEntry, shipCondition, isDamaged, repairCost, type UpKey } from './data/profile'
 import { CAMPAIGN_NODES, CAMPAIGN_ISLES, isMissionUnlocked, isPaidMission } from './data/campaign'
-import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, STORE_PRICE_LABEL, UNLOCK_PERKS } from './data/entitlement'
+import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, PAYWALL_ENABLED, STORE_PRICE_LABEL, UNLOCK_PERKS } from './data/entitlement'
 import { buildSkirmish, SKIRMISH_PLAYER_SHIPS, SKIRMISH_ENEMY_SHIPS, WEATHER_LABEL, MAP_LABEL, type SkirmishOptions, type Weather, type SkirmishMap } from './data/skirmish'
 import { SHIP_CLASSES } from './data/defs'
 import type { Scenario, SimState } from './sim/types'
@@ -73,8 +73,10 @@ const allUnlocked = ((): boolean => { try { return localStorage.getItem(UNLOCK_K
 // paywall: jednorázové odemčení celé hry. `?own=1` je vývojářský přepínač pro
 // testování placeného obsahu bez platby (obdoba ?unlock=all). DEV odemčení misí
 // zároveň uděluje vlastnictví, ať tester může placené mise skutečně hrát.
+// Dokud je PAYWALL_ENABLED false (hra ve vývoji), je vše odemčené a skirmish
+// otevřený — žádné zámky ani store; skirmish zůstává dostupný.
 applyOwnDevFlag(location.search)
-const owned = (): boolean => allUnlocked || isOwned()
+const owned = (): boolean => !PAYWALL_ENABLED || allUnlocked || isOwned()
 
 const startMission = (id: string): void =>
   bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship))
