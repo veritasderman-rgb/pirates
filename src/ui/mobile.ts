@@ -378,18 +378,13 @@ export class MobileHud implements Hud {
 }
 
 /**
- * Dotykové gesta na plátně: prsty jsou tap (výběr/kurz — řeší controller) a
- * tažení jedním prstem (pan — řeší plot). Zde přidáváme sevření dvěma prsty =
- * zoom a dvojklep = vycentrování. Ostatní necháváme na existující vrstvě.
+ * Dotyková gesta na plátně: sevření dvěma prsty = zoom. Jednoprsté tažení (pan)
+ * i tap/dvojklep (výběr/kurz/vycentrování) řeší pointer-event vrstva plotu a
+ * controlleru — sem patří jen multitouch pinch, který přes pointer eventy jde
+ * špatně. Plot posouvá jen jedním ukazatelem, takže pinch mu pan nerozhází.
  */
 export class TouchInput {
   private pinchD = 0
-  private lastTap = 0
-  // sledování aktuálního gesta: začátek prstu, jestli se hnul, jestli byl vícedotyk
-  private startX = 0
-  private startY = 0
-  private moved = false
-  private multi = false
 
   constructor(private canvas: HTMLCanvasElement, private plot: Renderer) {
     canvas.style.touchAction = 'none'
@@ -399,34 +394,19 @@ export class TouchInput {
   }
 
   private onStart(e: TouchEvent): void {
-    if (e.touches.length === 1 && !this.multi) {
-      this.startX = e.touches[0].clientX; this.startY = e.touches[0].clientY; this.moved = false
-    }
-    if (e.touches.length >= 2) { this.multi = true; e.preventDefault(); this.pinchD = this.spread(e) }
+    if (e.touches.length >= 2) { e.preventDefault(); this.pinchD = this.spread(e) }
   }
 
   private onMove(e: TouchEvent): void {
     if (e.touches.length >= 2 && this.pinchD > 0) {
-      this.multi = true
       e.preventDefault()
       const d = this.spread(e)
       if (d > 0) { this.plot.zoomStep(d / this.pinchD); this.pinchD = d }
-    } else if (e.touches.length === 1) {
-      const t = e.touches[0]
-      if (Math.hypot(t.clientX - this.startX, t.clientY - this.startY) > 10) this.moved = true
     }
   }
 
   private onEnd(e: TouchEvent): void {
     if (e.touches.length < 2) this.pinchD = 0
-    if (e.touches.length > 0) return // gesto ještě běží (zbývá prst)
-    // dvojklep jen když gesto bylo čistý jednoprstý tap (bez tažení a bez pinche)
-    const wasTap = !this.multi && !this.moved && (e.changedTouches?.length ?? 0) === 1
-    this.multi = false; this.moved = false
-    if (!wasTap) { this.lastTap = 0; return }
-    const now = e.timeStamp || 0
-    if (now - this.lastTap < 300) { this.plot.recenter(); this.lastTap = 0 }
-    else this.lastTap = now
   }
 
   private spread(e: TouchEvent): number {
