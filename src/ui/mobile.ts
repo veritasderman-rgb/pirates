@@ -13,15 +13,25 @@ import { boardingOdds } from '../sim/surrender'
 import { BOARD_RANGE } from '../sim/constants'
 import { dist } from '../sim/vec'
 
-/** Zapnout mobilní UX? Dotykové ovládání + malá obrazovka, s ?ui override. */
-export function isMobileUX(): boolean {
+export type DeviceTier = 'phone' | 'tablet' | 'desktop'
+
+/**
+ * Vrstva UX podle zařízení. Telefon → infografický dotykový HUD; tablet (iPad)
+ * → bohaté desktopové panely, ale s dotykovou úpravou (větší terče, gesta);
+ * desktop → panely a myš. Přepínatelné přes ?ui=phone|mobile / tablet / desktop.
+ * Práh: dotykový ukazatel a kratší strana < 700 px = telefon, jinak tablet.
+ */
+export function deviceTier(): DeviceTier {
   const q = new URLSearchParams(location.search).get('ui')
-  if (q === 'mobile') return true
-  if (q === 'desktop') return false
-  const coarse = matchMedia('(pointer: coarse)').matches
-  const small = Math.min(window.innerWidth, window.innerHeight) < 820
-  return coarse && small
+  if (q === 'mobile' || q === 'phone') return 'phone'
+  if (q === 'tablet') return 'tablet'
+  if (q === 'desktop') return 'desktop'
+  if (!matchMedia('(pointer: coarse)').matches) return 'desktop'
+  return Math.min(window.innerWidth, window.innerHeight) < 700 ? 'phone' : 'tablet'
 }
+
+/** Telefon = infografický dotykový HUD (jinak panely). */
+export function isMobileUX(): boolean { return deviceTier() === 'phone' }
 
 const esc = (s: string): string =>
   s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!))

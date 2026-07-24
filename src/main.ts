@@ -7,7 +7,7 @@ import { TacticalPlot } from './ui/plot'
 import { Plot3D } from './ui/plot3d'
 import type { Renderer } from './ui/renderer'
 import { Panels, esc, fmtTime, type Hud } from './ui/panels'
-import { isMobileUX, MobileHud, TouchInput } from './ui/mobile'
+import { deviceTier, MobileHud, TouchInput } from './ui/mobile'
 import { UIController } from './ui/input'
 import { AudioManager } from './ui/audio'
 import { SCENARIOS } from './data/missions'
@@ -39,9 +39,13 @@ rBtn.addEventListener('click', () => {
   location.reload()
 })
 document.body.appendChild(rBtn)
-// na telefonu se aktivuje samostatná dotyková vrstva (infografický HUD),
-// jinak klasické desktopové panely. Sim i renderer zůstávají sdílené.
-const mobile = isMobileUX()
+// telefon → samostatný infografický dotykový HUD; tablet (iPad) → bohaté
+// desktopové panely, ale s dotykovou úpravou (.tablet: větší terče + gesta);
+// desktop → panely a myš. Sim i renderer zůstávají sdílené.
+const tier = deviceTier()
+const mobile = tier === 'phone'
+const touch = tier !== 'desktop'
+if (tier === 'tablet') document.body.classList.add('tablet')
 const hud: Hud = mobile
   ? new MobileHud(a => controller.handleAction(a))
   : new Panels(
@@ -53,7 +57,8 @@ const hud: Hud = mobile
     a => controller.handleAction(a),
   )
 const controller = new UIController(bridge, plot, hud, canvas)
-if (mobile) new TouchInput(canvas, plot)
+// dotyková gesta (pinch-zoom, dvojklep na vycentrování) na telefonu i tabletu
+if (touch) new TouchInput(canvas, plot)
 
 // kapitánský profil (dublony + upgrady) — nese se mezi misemi (localStorage)
 let profile = loadProfile()
@@ -428,10 +433,14 @@ function showBriefing(sc: Scenario): void {
     + `<h2>${esc(sc.title)}</h2>`
     + (prolog ? `<div class="brief story">${esc(prolog)}</div>` : '')
     + `<div class="brief">${esc(sc.briefing)}</div>`
-    + `<div class="hint">Controls: click your own ship = select · click a target = lock on · `
-    + `click water = set course · <b>drag = pan the map</b> · wheel = zoom · `
-    + `<b>buttons at right (arrows/＋/－/◎) = pan, zoom and centre on ship</b> · `
-    + `space = pause · W sails · E oars · Q/R broadside · A auto · 1/2/3 shot type</div>`
+    + (touch
+      ? `<div class="hint">Controls: tap your own ship = select · tap a target = lock on · `
+        + `tap water = set course · <b>drag = pan</b> · <b>pinch = zoom</b> · <b>double-tap = centre</b> · `
+        + `the buttons around the edges handle sails, oars, fire and shot type.</div>`
+      : `<div class="hint">Controls: click your own ship = select · click a target = lock on · `
+        + `click water = set course · <b>drag = pan the map</b> · wheel = zoom · `
+        + `<b>buttons at right (arrows/＋/－/◎) = pan, zoom and centre on ship</b> · `
+        + `space = pause · W sails · E oars · Q/R broadside · A auto · 1/2/3 shot type</div>`)
     + `<button id="btn-start">SET SAIL</button>`)
   el.querySelector('#btn-start')!.addEventListener('click', () => {
     el.remove()

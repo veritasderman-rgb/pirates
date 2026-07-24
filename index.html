@@ -11,7 +11,7 @@
   <style>
     html, body { margin: 0; padding: 0; height: 100%; background: #0a2630; color: #cfeef2;
       font-family: "Consolas", "Menlo", monospace; overflow: hidden; touch-action: manipulation; }
-    #app { position: relative; height: 100vh; }
+    #app { position: relative; height: 100vh; height: 100dvh; }
     #plot-container { position: absolute; inset: 0; }
     #plot { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; }
 
@@ -204,6 +204,21 @@
     .cond-row { display: grid; grid-template-columns: 68px 1fr; gap: 6px; align-items: center; font-size: 11px; color: #9fb8bf; padding: 1px 0; }
     .cond-bar { height: 7px; background: #10242b; border-radius: 3px; overflow: hidden; }
     .cond-bar i { display: block; height: 100%; }
+
+    /* ============ tablet / iPad: bohaté panely, ale touch-friendly ============ */
+    /* větší dotykové terče, vzdušnější panely, výraznější navpad; aktivní s .tablet */
+    .tablet button { padding: 8px 14px; font-size: 13px; -webkit-tap-highlight-color: transparent; }
+    .tablet #topbar { font-size: 14px; gap: 18px; }
+    .tablet .tb-comp button, .tablet #topbar button { min-height: 38px; }
+    .tablet .panel { font-size: 12px; padding: 7px 9px; }
+    .tablet #hud-left { width: 284px; } .tablet #hud-right { width: 274px; }
+    .tablet #hud-log { width: 274px; font-size: 12px; }
+    .tablet #hud-bottom { right: 288px; gap: 8px; }
+    .tablet #hud-bottom button { min-height: 46px; }
+    .tablet #navpad { grid-template-columns: repeat(3, 50px); grid-auto-rows: 50px; gap: 6px; opacity: .92; }
+    .tablet #navpad button { font-size: 22px; }
+    .tablet .mrow button, .tablet .overlay button, .tablet .cm-bar button { min-height: 46px; }
+    .tablet #r-toggle { min-height: 38px; }
 
     /* ================= mobilní UX (aktivní jen s .mobile) ================= */
     #mhud { display: none; }
