@@ -178,6 +178,28 @@ export const CS_UI: Record<string, string> = {
   '🔓 Buy — {p}': '🔓 Koupit — {p}',
   'Restore purchase': 'Obnovit nákup',
   '🔓 Unlock full game — {p}': '🔓 Odemknout celou hru — {p}',
+  // stavové hlášky nákupu a obnovy
+  'Opening secure checkout…': 'Otevírám zabezpečenou pokladnu…',
+  'Checkout is unavailable here (needs the deployed server). Locally, append ?own=1 to test.':
+    'Pokladna tady není dostupná (vyžaduje nasazený server). Lokálně přidej ?own=1 pro testování.',
+  'Enter the email you purchased with:': 'Zadej e-mail, se kterým jsi nakupoval:',
+  'Looking up your purchase…': 'Hledám tvůj nákup…',
+  'Purchase restored — the full game is unlocked!': 'Nákup obnoven — celá hra je odemčená!',
+  'No purchase found for that email.': 'Pro tento e-mail nebyl nalezen žádný dokončený nákup.',
+  'Restore is unavailable here (needs the deployed server).':
+    'Obnovení tady není dostupné (vyžaduje nasazený server).',
+  'UNLOCKING…': 'ODEMYKÁM…',
+  'Confirming your purchase with the payment provider…': 'Ověřuji tvůj nákup u platební brány…',
+  '⚓ THANK YOU': '⚓ DĚKUJEME',
+  'The full game is unlocked — the whole archipelago is yours to take.':
+    'Celá hra je odemčená — celé souostroví je tvoje.',
+  'Payment not confirmed': 'Platba nepotvrzena',
+  'We could not verify the purchase.': 'Nákup se nepodařilo ověřit.',
+  'If you were charged, use “Restore purchase”.': 'Pokud ti byly strženy peníze, použij „Obnovit nákup".',
+  'Back to map': 'Zpět na mapu',
+  // popisky kontaktů na taktickém plátně
+  'lost contact': 'ztracený kontakt',
+  '(colours struck)': '(spustila vlajku)',
 
   // ---------- mobilní HUD ----------
   'sails': 'plachty', 'FIRE': 'PAL', 'auto': 'auto', 'hold': 'drž', 'surr': 'kapit.',

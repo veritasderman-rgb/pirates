@@ -790,7 +790,7 @@ export class TacticalPlot {
       ctx.beginPath(); ctx.arc(gs.x, gs.y, 9, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([])
       if (this.scale > 0.015) {
         ctx.fillStyle = this.colorFor(sh.side, true); ctx.font = '11px monospace'
-        const nm = con.idQuality >= 1 ? sh.name : 'lost contact'
+        const nm = con.idQuality >= 1 ? sh.name : tr('lost contact')
         ctx.fillText(`${nm} (?)`, gs.x + 12, gs.y)
       }
       return
@@ -819,7 +819,7 @@ export class TacticalPlot {
     if (showName && this.scale > 0.015) {
       ctx.fillStyle = this.colorFor(sh.side)
       ctx.font = '11px monospace'
-      const label = sh.surrendered ? `${sh.name} (colours struck)` : sh.name
+      const label = sh.surrendered ? `${sh.name} ${tr('(colours struck)')}` : sh.name
       ctx.fillText(label, s.x + lenPx + 8, s.y - 4)
       if (def && (con?.idQuality === 2 || sh.side === 'player')) {
         ctx.fillStyle = '#7f97a0'

@@ -251,7 +251,7 @@ function showStore(): void {
   const setMsg = (t: string, bad = false): void => { msg.textContent = t; msg.className = `store-msg ${bad ? 'bad' : 'ok'}` }
 
   el.querySelector('#btn-buy')!.addEventListener('click', async () => {
-    setMsg('Opening secure checkout…')
+    setMsg(t('Opening secure checkout…'))
     try {
       const res = await fetch('/api/create-checkout', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -262,14 +262,14 @@ function showStore(): void {
       if (data.url) location.href = data.url
       else throw new Error('no checkout url')
     } catch {
-      setMsg('Checkout is unavailable here (needs the deployed server). Locally, append ?own=1 to test.', true)
+      setMsg(t('Checkout is unavailable here (needs the deployed server). Locally, append ?own=1 to test.'), true)
     }
   })
 
   el.querySelector('#btn-restore')!.addEventListener('click', async () => {
-    const email = prompt('Enter the email you purchased with:')?.trim()
+    const email = prompt(t('Enter the email you purchased with:'))?.trim()
     if (!email) return
-    setMsg('Looking up your purchase…')
+    setMsg(t('Looking up your purchase…'))
     try {
       const res = await fetch('/api/restore', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -278,13 +278,13 @@ function showStore(): void {
       const data = await res.json() as { token?: string; error?: string }
       if (res.ok && data.token) {
         saveLicense({ token: data.token, email, issuedAt: Date.now() })
-        setMsg('Purchase restored — the full game is unlocked!')
+        setMsg(t('Purchase restored — the full game is unlocked!'))
         setTimeout(() => { el.remove(); showCampaignMap() }, 900)
       } else {
-        setMsg(data.error || 'No purchase found for that email.', true)
+        setMsg(data.error || t('No purchase found for that email.'), true)
       }
     } catch {
-      setMsg('Restore is unavailable here (needs the deployed server).', true)
+      setMsg(t('Restore is unavailable here (needs the deployed server).'), true)
     }
   })
 
@@ -570,7 +570,7 @@ async function handlePurchaseReturn(): Promise<boolean> {
   if (purchase === 'success') {
     const sessionId = q.get('session_id')
     clean()
-    const el = overlay(`<h1>UNLOCKING…</h1><div class="brief">Confirming your purchase with the payment provider…</div>`)
+    const el = overlay(`<h1>${t('UNLOCKING…')}</h1><div class="brief">${t('Confirming your purchase with the payment provider…')}</div>`)
     try {
       const res = await fetch('/api/verify-session', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -580,12 +580,12 @@ async function handlePurchaseReturn(): Promise<boolean> {
       el.remove()
       if (res.ok && data.token) {
         saveLicense({ token: data.token, email: data.email, issuedAt: Date.now() })
-        const ok = overlay(`<h1 class="win">⚓ THANK YOU</h1><div class="brief story">The full game is unlocked — the whole archipelago is yours to take.</div>`
-          + `<div style="margin-top:14px"><button id="btn-go">SET SAIL</button></div>`)
+        const ok = overlay(`<h1 class="win">${t('⚓ THANK YOU')}</h1><div class="brief story">${t('The full game is unlocked — the whole archipelago is yours to take.')}</div>`
+          + `<div style="margin-top:14px"><button id="btn-go">${t('SET SAIL')}</button></div>`)
         ok.querySelector('#btn-go')!.addEventListener('click', () => { ok.remove(); showCampaignMap() })
       } else {
-        const bad = overlay(`<h1 class="lose">Payment not confirmed</h1><div class="brief">${esc(data.error || 'We could not verify the purchase.')} If you were charged, use “Restore purchase”.</div>`
-          + `<div style="margin-top:14px"><button id="btn-go">Back to map</button></div>`)
+        const bad = overlay(`<h1 class="lose">${t('Payment not confirmed')}</h1><div class="brief">${esc(data.error || t('We could not verify the purchase.'))} ${t('If you were charged, use “Restore purchase”.')}</div>`
+          + `<div style="margin-top:14px"><button id="btn-go">${t('Back to map')}</button></div>`)
         bad.querySelector('#btn-go')!.addEventListener('click', () => { bad.remove(); showCampaignMap() })
       }
     } catch {
