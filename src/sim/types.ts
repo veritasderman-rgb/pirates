@@ -244,6 +244,8 @@ export interface SimEvent {
   count?: number
   /** UI: událost, u které má komprese času spadnout na 1× */
   slowdown?: boolean
+  /** id namluveného klipu (public/vo/<voiceId>.mp3), u dialogových hlášek */
+  voiceId?: string
   /** světová pozice pro efekt plotu (kouř, výbuch, šplouchnutí) */
   pos?: Vec2
   /** světový úhel efektu (rad) — např. směr boku, ze kterého padla salva */

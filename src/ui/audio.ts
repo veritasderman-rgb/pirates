@@ -15,6 +15,9 @@ const MUSIC_RANK: Partial<Record<MusicState, number>> = { cruise: 0, tension: 1,
 /** hystereze: bojový stav smí KLESNOUT až po tolika ms klidu */
 const MUSIC_CALM_MS = 12_000
 const MUSIC_FADE_MS = 2500
+/** hlasitost hudby a její stažení pod mluvené slovo (dabing) */
+const MUSIC_VOL = 0.6
+const MUSIC_DUCK_VOL = 0.16
 
 export class AudioManager {
   private ctx: AudioContext | null = null
@@ -30,6 +33,13 @@ export class AudioManager {
   private unlocked = false
   private calmSince = 0
   private fadeTimer = 0
+
+  // ---------- dabing (voiceover) ----------
+  private vo: HTMLAudioElement | null = null
+  private voQueue: string[] = []
+  private voPlayed = new Set<string>()
+  private ducked = false   // hudba je stažená pod mluvené slovo
+  voiceMuted = false
 
   unlock(): void {
     if (!this.unlocked) { this.unlocked = true; this.setMusic(this.menuMode ? 'menu' : 'cruise') }
@@ -47,6 +57,52 @@ export class AudioManager {
       let seed = 12345
       for (let i = 0; i < n; i++) { seed = (seed * 1103515245 + 12345) & 0x7fffffff; d[i] = (seed / 0x3fffffff) - 1 }
     } catch { this.ctx = null }
+  }
+
+  /**
+   * Zařadí namluvenou repliku (public/vo/<id>.mp3). Repliky se nepřekrývají —
+   * hrají po sobě; každá jen jednou za misi. Chybějící klip se tiše přeskočí,
+   * takže hra funguje i bez dabingu.
+   */
+  speak(id: string | undefined, opts: { force?: boolean } = {}): void {
+    if (!id || this.muted || this.voiceMuted) return
+    if (!opts.force && this.voPlayed.has(id)) return
+    this.voPlayed.add(id)
+    this.voQueue.push(id)
+    if (!this.vo) this.pumpVoice()
+  }
+
+  /** Zastaví právě hrající repliku i frontu (např. přechod na jinou obrazovku). */
+  stopVoice(): void {
+    this.voQueue.length = 0
+    if (this.vo) { this.vo.pause(); this.vo = null }
+    this.duckMusic(false)
+  }
+
+  /** Nová mise → repliky se smí přehrát znovu. */
+  resetVoice(): void {
+    this.stopVoice()
+    this.voPlayed.clear()
+  }
+
+  private pumpVoice(): void {
+    const id = this.voQueue.shift()
+    if (id === undefined) { this.vo = null; this.duckMusic(false); return }
+    const el = new Audio(`vo/${encodeURIComponent(id)}.mp3`)
+    el.volume = 0.95
+    this.vo = el
+    this.duckMusic(true)
+    const next = (): void => { if (this.vo === el) { this.vo = null; this.pumpVoice() } }
+    el.addEventListener('ended', next)
+    el.addEventListener('error', next)   // klip chybí → jen pokračuj
+    el.play().catch(next)                // autoplay blokován → nezasekni frontu
+  }
+
+  /** Ztlumí hudbu pod mluvené slovo (a zase vrátí) — přes cíl fade smyčky. */
+  private duckMusic(on: boolean): void {
+    if (this.ducked === on) return
+    this.ducked = on
+    this.startFade()
   }
 
   private can(key: string): boolean {
@@ -103,6 +159,10 @@ export class AudioManager {
         if (this.calmSince === 0) this.calmSince = now
         if (now - this.calmSince > MUSIC_CALM_MS) { this.calmSince = 0; this.setMusic(want) }
       }
+    }
+    // dabing dialogů (nezávisí na WebAudio kontextu — vlastní <audio> element)
+    for (const e of state.events) {
+      if (e.voiceId && (e.kind === 'comm' || e.kind === 'message')) this.speak(e.voiceId)
     }
     if (!this.ctx || this.muted) return
     for (const e of state.events) {
@@ -182,11 +242,12 @@ export class AudioManager {
    */
   private startFade(): void {
     if (this.fadeTimer) return
-    const target = 0.6
     let last = performance.now()
     const loop = (): void => {
       const now = performance.now()
-      const delta = ((now - last) / MUSIC_FADE_MS) * target
+      // cíl se čte za běhu — ducking pod dabing tak umí smyčku přesměrovat
+      const target = this.ducked ? MUSIC_DUCK_VOL : MUSIC_VOL
+      const delta = ((now - last) / MUSIC_FADE_MS) * MUSIC_VOL
       last = now
       let active = false
       for (const [name, el] of Object.entries(this.tracks)) {

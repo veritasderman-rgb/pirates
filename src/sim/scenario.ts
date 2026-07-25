@@ -107,13 +107,13 @@ function condMet(state: SimState, c: TriggerCondition): boolean {
   }
 }
 
-function runAction(state: SimState, a: TriggerAction): void {
+function runAction(state: SimState, a: TriggerAction, voiceId?: string): void {
   switch (a.kind) {
     case 'message':
-      state.events.push({ t: state.t, kind: 'message', text: a.text ?? '', speaker: a.speaker, slowdown: true })
+      state.events.push({ t: state.t, kind: 'message', text: a.text ?? '', speaker: a.speaker, slowdown: true, voiceId })
       break
     case 'comm':
-      state.events.push({ t: state.t, kind: 'comm', text: a.text ?? '', speaker: a.speaker, slowdown: true })
+      state.events.push({ t: state.t, kind: 'comm', text: a.text ?? '', speaker: a.speaker, slowdown: true, voiceId })
       break
     case 'setDoctrine': {
       const s = shipById(state, a.shipId ?? -1)
@@ -169,7 +169,16 @@ export function updateTriggers(state: SimState, scenario: Scenario): void {
     if (trg.once && trg.fired) continue
     if (trg.conditions.every(c => condMet(state, c))) {
       trg.fired = true
-      for (const a of trg.actions) runAction(state, a)
+      // id namluveného klipu se odvozuje z mise + triggeru + pořadí repliky —
+      // stejné schéma jako scripts/extract-lines.mjs, takže mise nic neevidují
+      let spoken = 0
+      for (const a of trg.actions) {
+        const dialogue = a.kind === 'comm' || a.kind === 'message'
+        const voiceId = dialogue
+          ? `${scenario.id}-${trg.id}${spoken++ ? `-${spoken}` : ''}`
+          : undefined
+        runAction(state, a, voiceId)
+      }
     }
   }
 }

@@ -1,0 +1,604 @@
+{
+  "lines": [
+    {
+      "id": "brief-mission01",
+      "speaker": "narrator",
+      "text": "HMS Swallow holds the customs patrol in the strait off Turtle Island. Port Command reports a merchantman, the Sea Maiden, with a suspicious manifest — carry out an inspection: close to within 300 metres. Beware: if she has something to hide, she will crowd on sail and run for open water.\n\nTRAINING: the wind blows to the east — catch it in your sails (you sail fastest on a broad reach, with the wind on your quarter), trim to suit, and put out oars in a calm or into the wind. The island must be sailed AROUND — do not run onto the shoals.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission02",
+      "speaker": "narrator",
+      "text": "HMS Goshawk leads two merchantmen through the Narrows — the strait between Boar Island and Mist Island. Scouts warn of a pirate pack lying in wait to windward.\n\nThe merchantmen are making for the eastern entrance; your task is to keep them alive and deal with the pirates. Use the islands: in the strait big ships turn poorly and lose the wind in the lee. Slow them with chain shot, sink them with round, and thin their crews with grape before a boarding party.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission03",
+      "speaker": "narrator",
+      "text": "HMS Fortuna patrols off Cauldron Island. Port Command reports a lone merchantman, the \"Santa Rosa\", drifting in the strait with no escort — after what happened at the Narrows, suspiciously calm.\n\nCheck her over. But keep your distance and ready your sides: if it is a trap, it will spring only up close — and a Q-ship gets the first broadside for free. You break her fastest by raking her bow or stern, where she has no guns.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission04",
+      "speaker": "narrator",
+      "text": "The captured orders from the Q-ship were bound for the Castillan port of Punta Negra. Before we could act, a courier — the \"Céfiro\" — put out from there with a reply, and now she is racing back under the protection of the fortress.\n\nRun her down and seize those dispatches. The Céfiro is faster on a clean wind, but she must make for the harbor; cut off her path, hold your best point of sail and put out oars in a calm. Beware the Punta Negra Fortress — its shot carries farther than yours.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission05",
+      "speaker": "narrator",
+      "text": "The dispatches gave away the nest: the Shoal Brotherhood lies at anchor in the bay of Bone Island, sheltered by a coastal battery. It is led by Silas Rourke, \"Black Surf\" — a man on de Vega's payroll.\n\nYou sail in with the Fortuna and the allied brig Goshawk. Smash the pack and capture or sink Rourke's flagship brig. The battery at the entrance is dangerous — stay within its range only when you must, and in the narrow bay do not run onto the shoals. Split your fire with the Goshawk and rake where you can.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission06",
+      "speaker": "narrator",
+      "text": "This is where it is decided. The last of Castilla's treasure silver is sailing for the Albion straits under the squadron of almirante Herrera — and with it, the war de Vega has been preparing all along. Stop him in the strait at the Three Beacons.\n\nYou lead the Fortuna, the brig Goshawk and the sloop Swallow against the ship of the line Trueno and the frigate Rayo. The Trueno has thirty guns to a side — no one beats her alongside. Use the strait and the islands: a ship of the line turns slowly, loses her drive in a wind shadow and dares not enter the shoals. Split your fire, dance around her and rake her bow and stern, where she has no guns.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission07",
+      "speaker": "narrator",
+      "text": "The Three Beacons did not stop Castilla — it only enraged her. In reprisal, de Vega has sent a squadron of frigates against the Albion anchor station at Gull Island.\n\nYou drive them off with the Fortuna, the Goshawk and the Swallow. Three Castillan frigates have wider broadsides but worse training — trust to your mobility, split your fire and don't let them bring their broadsides to bear on you all at once.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission08",
+      "speaker": "narrator",
+      "text": "The scouts have finally fixed his position: Don Cristóbal de Vega himself, on a fast courier, is making for Cádiz under the protection of an auxiliary cruiser and two frigates.\n\nWe won't catch his courier before she slips away — but we can break his escort and strip him of his shield. You lead the Fortuna, the Goshawk and the allied frigate Valour. Deal with the Q-ship and both frigates; let the courier run.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission09",
+      "speaker": "narrator",
+      "text": "De Vega has withdrawn into Cádiz — the anchorage where Castilla is gathering her last treasure fleet. The admiralty has entrusted you with a capital ship: the ship of the line HMS Sovereign, twenty-eight guns to a side.\n\nFight your way past the coastal battery and break the Castillan squadron at the gate — two frigates and a treasure galleon. You need not raze the battery; it is enough to silence it or survive its gauntlet and deal with the ships. The Sovereign is slow and turns poorly — let her hold the line and pour out broadsides while the Fortuna and the Goshawk dance around and rake. Mind the shoals, a capital keel runs deep.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission10",
+      "speaker": "narrator",
+      "text": "Behind the fortress of Cádiz lies Castilla's last treasure fleet at anchor: two galleons full of colonial silver, guarded by a ship of the line and two frigates. That silver pays for de Vega's war — we take it from him.\n\nYou lead the Sovereign, the frigates Fortuna and Valour, the brig Goshawk and the sloop Swallow. Break the escort and sink or (better) capture both galleons. Grape on the decks, then board — a captured treasure galleon is the end of the Castillan treasury.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-mission11",
+      "speaker": "narrator",
+      "text": "This is where it ends. De Vega has played his last card — the flagship Corona, four decks of guns, the largest hull Castilla ever launched. Around her a ship of the line, two frigates and the fortress of Cádiz.\n\nYou lead the largest fleet Albion could muster: two ships of the line (Sovereign, Valiant), the frigates Fortuna, Valour and Dauntless and the brig Goshawk. You won't beat Corona alongside — hem her in, split your fire, rake her bow and stern. End de Vega's game for Halcyon.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-side01",
+      "speaker": "narrator",
+      "text": "A SIDE COMMISSION, off the campaign's main track. Revenue swears a pack of smugglers is running contraband through the Tin Cays under merchant colours — brandy, powder and worse, bound for the free ports.\n\nHMS Swallow lies across their run. Three trim little sloops sail ahead of you wearing an honest face; close on them and their disguise will not hold. Sink them if you must — but a smuggler taken with her hold full is a fat prize and a purse for the crew, so slow them with chain shot and force them to strike their colours. Mind the Cays and the Sieve reef: the sloops draw next to nothing and slip over the shoals, but the Swallow does not.",
+      "kind": "briefing"
+    },
+    {
+      "id": "brief-side02",
+      "speaker": "narrator",
+      "text": "A SIDE COMMISSION, away from the campaign's main track. For a season now ships have been lost on Widow's Comb with never a storm to blame. The truth is worse than weather: wreckers on Beacon Rock burn a false light to draw honest captains onto the reefs, then row out to plunder the wrecks and cut down any who reach the shore.\n\nHMS Goshawk is sent to end it. A corsair galley and a pirate brig lurk in the shoals — sink them or force them to strike. The galley rows where the wind fails and draws too little to fear the reefs; the brig will bleed you into the shallows and rake you when you touch. The Goshawk draws three fathoms and more: hold the deep channels, read the reefs, and do NOT run her aground.",
+      "kind": "briefing"
+    },
+    {
+      "id": "mission01-trg-flee",
+      "speaker": "narrator",
+      "text": "The Sea Maiden crowds on all sail and runs for open water!",
+      "kind": "message"
+    },
+    {
+      "id": "mission01-trg-flee-2",
+      "speaker": "lookout",
+      "text": "I knew that calm stank! Under her sails she's got military rigging — no merchantman. She's running before the wind, captain, run her down before she vanishes past the buoy!",
+      "kind": "comm"
+    },
+    {
+      "id": "mission01-trg-hail",
+      "speaker": "port",
+      "text": "Port Command hails the Swallow: \"Stop the Sea Maiden and carry out an inspection. Close to within three hundred metres of her — and keep your eyes on the masthead.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission01-trg-inspect-done",
+      "speaker": "gunner",
+      "text": "We're on her! At this range the guns will tear her rigging away — slow her with a chain-shot broadside, sink her with round shot, or force her to strike her colours and board her.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission01-trg-panna-reply",
+      "speaker": "enemy-captain",
+      "text": "Sea Maiden: \"We're carrying salt and we're behind schedule, patrol. We'll take this up with the governor — don't hold us up.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission01-trg-tack-lesson",
+      "speaker": "mate",
+      "text": "She's running before the wind, where she's fast. Hold full trim and a clean wind — and MIND Turtle Island: sail around it, don't run onto the shoals. In its lee the wind falls off and you'd lose your drive.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission01-trg-wind-lesson",
+      "speaker": "mate",
+      "text": "SAILING SCHOOL: the wind blows to the east. We sail fastest with it on our quarter (a broad reach). Dead into the wind the sails take nothing — there you must TACK (zigzag) or put out the OARS. Watch the wind rose in the corner.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission02-trg-brig-joins",
+      "speaker": "pirate",
+      "text": "Pirate brig: \"Run up the black! We take everything that floats!\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission02-trg-intro",
+      "speaker": "lookout",
+      "text": "Sails to windward! Two sloops off the islands — a pirate pack, captain. And behind them, something larger.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission03-trg-brief",
+      "speaker": "admiral",
+      "text": "Admiral Thorne: \"Fortuna, after the Narrows I trust no lone merchantman. Check that ship over — but keep your guns ready. If it is a trap, I want it to snap shut on them, not on you.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission03-trg-hint-rake",
+      "speaker": "mate",
+      "text": "Rusk: \"She's trading us broadside for broadside, captain — we won't win that. Dance around her and rake her stern, where she has no guns; once or twice and she's done.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission03-trg-qship-struck",
+      "speaker": "bosun",
+      "text": "Tarr: \"They've surrendered! In the captain's cabin, Castillan orders and a seal — de Vega. The admiralty will want to see this.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission03-trg-spring",
+      "speaker": "narrator",
+      "text": "The Santa Rosa drops her sides — GUNS! It's a Q-ship!",
+      "kind": "message"
+    },
+    {
+      "id": "mission03-trg-spring-2",
+      "speaker": "agent",
+      "text": "An unknown voice on the Castillan channel: \"Welcome, captain. Don Cristóbal de Vega sends his regards — and regrets that this voyage will be your last.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission04-trg-brief",
+      "speaker": "admiral",
+      "text": "Admiral Thorne: \"I want those dispatches whole, captain — not on the seabed. Slow her with chain shot to the sails and force her to surrender. And don't stray under the fortress any more than you must.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission04-trg-caught",
+      "speaker": "gunner",
+      "text": "Hargrove: \"In range! Chain shot to her rigging to slow her — then grape on the deck and we take her with the grapples.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission04-trg-wind-tip",
+      "speaker": "mate",
+      "text": "Rusk: \"On a clean wind she's pulling away. Cut her off by the shorter way through the Sisters and catch a broad reach — that's where we run her down.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission05-trg-brief",
+      "speaker": "admiral",
+      "text": "Admiral Thorne: \"Rourke is the key, captain. Bring him to me alive if you can — a man who takes Castillan silver knows names. The Goshawk covers your other flank.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission05-trg-flag-struck",
+      "speaker": "pirate-captain",
+      "text": "Silas Rourke: \"Enough! I strike my colours… and if you want de Vega, captain, the last of the silver is making for the strait at the Three Beacons. Almirante Herrera. That's all I know.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission05-trg-wake",
+      "speaker": "narrator",
+      "text": "The nest is waking — the pirates are setting sail and the battery is turning!",
+      "kind": "message"
+    },
+    {
+      "id": "mission05-trg-wake-2",
+      "speaker": "pirate-captain",
+      "text": "Silas Rourke: \"A king's dog in my very nest? Run up the black, lads — and let the battery sweeten him up!\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission06-trg-brief",
+      "speaker": "castilian-admiral",
+      "text": "Almirante Herrera: \"So this is the whole of Albion's answer? A frigate and two eggshells? Don Cristóbal, you overrated them. Trueno, forward.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission06-trg-herrera-defiant",
+      "speaker": "castilian-admiral",
+      "text": "Almirante Herrera: \"They're raking our stern… who taught them to sail like this? Hold the line! For the crown and the silver!\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission06-trg-tactic",
+      "speaker": "mate",
+      "text": "Rusk: \"We can't let her bring her broadside to bear. We split around the Middle Beacon, close on the Trueno from both sides and rake her stern — she turns slowly and can't guard both flanks at once.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission07-trg-brief",
+      "speaker": "admiral",
+      "text": "Admiral Thorne: \"This is de Vega's calling card, captain. Drive them from the station and show Castilla the Three Beacons was no accident.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission08-trg-brief",
+      "speaker": "agent",
+      "text": "Don Cristóbal de Vega: \"You have courage, captain, I grant you that. But courage is not a fleet. Sombra, hold them up — we'll meet at Cádiz, where Corona awaits you.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission08-trg-vega-flees",
+      "speaker": "mate",
+      "text": "Rusk: \"The courier is gone, we can't catch her. But his escort stayed — let's break it, and de Vega sails to the finale stripped bare.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission09-trg-brief",
+      "speaker": "admiral",
+      "text": "Admiral Thorne: \"The Sovereign is yours, captain — command her well. Break that defence and seal de Vega inside Cádiz. The rest we settle within.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission09-trg-liner-tip",
+      "speaker": "mate",
+      "text": "Rusk: \"The Sovereign is no sloop — she doesn't dodge, she holds the line. Let the frigates keep the frigates busy; we pour broadside after broadside into the galleon and the fortress.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission10-trg-brief",
+      "speaker": "admiral",
+      "text": "Admiral Thorne: \"This silver keeps de Vega's war afloat. Take it from him — and if a galleon can be captured rather than sunk, capture her. The crown can put silver to use just as well as Castilla.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission11-corona-struck",
+      "speaker": "agent",
+      "text": "Don Cristóbal de Vega: \"Enough… I strike my colours. You have won Halcyon, captain. Enjoy it, until someone tries to take it from you too.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission11-trg-brief",
+      "speaker": "agent",
+      "text": "Don Cristóbal de Vega: \"So you came all this way after all, captain. Admirable. But Corona will not kneel before a handful of hulls. Halcyon shall know a new master — and it will not be your crown.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission11-trg-corona-half",
+      "speaker": "agent",
+      "text": "Don Cristóbal de Vega: \"Impossible… Corona is bleeding? Keep firing, you cowards! For the silver and the crown!\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission11-trg-tactic",
+      "speaker": "mate",
+      "text": "Rusk: \"Corona has more guns than both our ships of the line together. We can't let her concentrate her fire — Valiant to port, us to starboard, the frigates rake her stern. We hem her in against Sentinel Rock.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "side01-trg-brief",
+      "speaker": "port",
+      "text": "Revenue Office: \"Three of them, Swallow, all in trader's clothing. Close the range and their manifests will not bear looking at. Bring them in with their holds full if you can — the crew will thank you for it.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "side01-trg-chase",
+      "speaker": "gunner",
+      "text": "Chain shot to bring down their spars, captain, then round to finish or grape to clear a deck for boarding. A struck sloop with her hold full is worth three sent to the bottom.",
+      "kind": "comm"
+    },
+    {
+      "id": "side01-trg-lesson",
+      "speaker": "mate",
+      "text": "They draw a fathom and a half at most and will run for the Sieve and the shoals the instant they smell us. Cut the corner, get to windward, and mind we don't pile the Swallow onto that reef ourselves.",
+      "kind": "comm"
+    },
+    {
+      "id": "side01-trg-unmask",
+      "speaker": "narrator",
+      "text": "The sloops throw off their merchant colours and scatter — smugglers, and armed!",
+      "kind": "message"
+    },
+    {
+      "id": "side01-trg-unmask-2",
+      "speaker": "enemy-captain",
+      "text": "Contrabandista: \"Colours down, lads — it's a king's dog! Zorra, Nightjar, into the shoals! I'll hold the deep water and buy you the run!\"",
+      "kind": "comm"
+    },
+    {
+      "id": "side02-b-struck",
+      "speaker": "pirate-captain",
+      "text": "From the brig: \"Enough — I strike! Put out the fire on the Rock, damn you, before it draws another soul onto the Comb.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "side02-trg-aground",
+      "speaker": "bosun",
+      "text": "We're on the reef, captain! Back the sails and warp her off before the wreckers close — this is exactly how they meant to have us!",
+      "kind": "comm"
+    },
+    {
+      "id": "side02-trg-brief",
+      "speaker": "mate",
+      "text": "There's the false light on the Rock, and there's the Santa Rosa on the Comb — poor devils. The channels run deep between the reefs; keep to them and we'll have the wreckers where they thought they were safe.",
+      "kind": "comm"
+    },
+    {
+      "id": "side02-trg-reef-warn",
+      "speaker": "lookout",
+      "text": "The galley's trying to draw us over the Grinder, captain — she draws nothing and skips clean across. Don't follow her onto the coral. Make her come to the deep water, or work the channels and rake her as she turns.",
+      "kind": "comm"
+    },
+    {
+      "id": "side02-trg-taunt",
+      "speaker": "gunner",
+      "text": "The brig's hull is soft and her gunnery worse than ours — hull her with round shot. The galley's all oars and men: grape will thin them before they can think of boarding.",
+      "kind": "comm"
+    },
+    {
+      "id": "side02-trg-wake",
+      "speaker": "narrator",
+      "text": "The wreckers rouse — the galley runs out her oars and the brig makes sail!",
+      "kind": "message"
+    },
+    {
+      "id": "side02-trg-wake-2",
+      "speaker": "pirate-captain",
+      "text": "From the brig: \"A king's frigate, is it? Then come and get us, captain — come across the Comb. The reef takes deep keels; we'll take what's left.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "story-defeat",
+      "speaker": "narrator",
+      "text": "The sea forgives nothing. The ship is gone, the prize escaped — but a captain who learns his lesson puts to sea again.",
+      "kind": "story"
+    },
+    {
+      "id": "story-intro",
+      "speaker": "narrator",
+      "text": "The Halcyon Archipelago: a hundred islands, two flag-tongues and one sea that belongs to no one. To the west, the Crown of Albion — mercantile, cautious, rich on customs duties and deadly at the guns. To the south, Castilla — proud, slow and set on the treasure galleons that twice a year carry silver home from the colonies. And between them, in the shadow of every strait and the lee of every island, the free pirates: prize sloops and patched brigs that own no flag and take everything that floats.\n\nYou are a captain of the Royal Navy of Albion. The campaign follows your service, from customs patrol in the straits to the hunt for pirate captains and Castillan treasure fleets. Wind, islands and point of sail decide as much as guns do: the faster ship chooses when and where the fight happens — and whether it happens at all.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission01-epilog",
+      "speaker": "narrator",
+      "text": "The Sea Maiden was no merchantman. Under her canvas she carried military rigging and sealed orders bearing a Castillan seal — the first thread in a net someone is weaving across Halcyon. The port authority says nothing. You already know the patrol is over and something larger is beginning.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission01-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Sea Maiden slipped past the buoy into open water, and everything she carried with her. The port authority will log it as \"contact lost\". You know it was a trail — and it got away from you.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission01-prolog",
+      "speaker": "narrator",
+      "text": "The strait off Turtle Island, at dawn. The wind blows to the east and the water ripples. The port authority has handed you a name — Sea Maiden — and a feeling that something is not right.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission02-epilog",
+      "speaker": "narrator",
+      "text": "The pack scattered and the convoy got through. But in the hold of the pirate brig they found the same sealed orders as aboard the Sea Maiden — someone is paying the pirates of Halcyon to throttle Albion trade. And that someone speaks Castillan.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission02-epilog-lose",
+      "speaker": "narrator",
+      "text": "The convoy stayed on the bottom of the Narrows. Cargo, ships, crews — the sea swallowed it all, while the pirates melted into the lee of the islands.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission02-prolog",
+      "speaker": "narrator",
+      "text": "The Narrows between Boar Island and Mist Island, at noon. Two merchantmen hang off your stern, the strait tightens, and something stirs to windward.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission03-epilog",
+      "speaker": "narrator",
+      "text": "It was no merchantman, but a Castillan wolf in sheep's clothing. From her deck a voice sounded for the first time — the one meant to be behind it all: Don Cristóbal de Vega. The trap snapped shut on empty air — and the net finally has a name.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission03-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Q-ship got the first broadside for free and the Fortuna did not survive it. De Vega struck one frigate off his list.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission03-prolog",
+      "speaker": "narrator",
+      "text": "Cauldron Island, a dead afternoon. A lone merchantman with no escort — exactly what the admiralty warned you about. Ready your sides and close in slowly.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission04-epilog",
+      "speaker": "narrator",
+      "text": "The Céfiro never made port. From the dispatches a picture takes shape: de Vega answers to someone higher, someone with a treasure fleet and the rank of almirante. Silver and war are one and the same plan.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission04-epilog-lose",
+      "speaker": "narrator",
+      "text": "The courier slipped under the fortress by a hair. The dispatches are safe in Castillan hands — and you were left standing in its range with empty hands.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission04-prolog",
+      "speaker": "narrator",
+      "text": "The waters off Punta Negra, a fresh wind. The courier already has a lead and is making for the guns of the fortress. If you want those dispatches, you must sail better than he does.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission05-epilog",
+      "speaker": "narrator",
+      "text": "The nest burned and Rourke fell — or knelt. Before he fell silent, he gave up the last piece of the net: almirante Herrera and the last of the silver are making for the strait at the Three Beacons. That is where it will be decided.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission05-epilog-lose",
+      "speaker": "narrator",
+      "text": "The battery and the pack were more than two ships could handle. The Fortuna stayed behind in the bay of Bone Island, and Rourke laughs on.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission05-prolog",
+      "speaker": "narrator",
+      "text": "The bay of Bone Island at dawn. Somewhere in that shadow Silas Rourke lies at anchor — a pirate paid by Castillan silver. The Goshawk guards your flank; sail in and smash the nest.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission06-epilog",
+      "speaker": "narrator",
+      "text": "The Trueno is silent, the silver lies on the bottom of the strait and Herrera's squadron is broken. The war someone in Castilla wove so carefully does not come to pass today at the Three Beacons — but de Vega, the hand behind it all, has vanished into shadow. This was not the end. It was the beginning of open war.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission06-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Fortuna fell at the Three Beacons and the silver sailed on to the straits. The war you were meant to prevent has just begun — and you will not be there for it.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission06-prolog",
+      "speaker": "narrator",
+      "text": "The strait at the Three Beacons. On the horizon a Castillan squadron and, with it, the war de Vega has been preparing all along. Three ships of yours against a ship of the line and a frigate. This is where it breaks.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission07-epilog",
+      "speaker": "narrator",
+      "text": "The reprisal is beaten off, three Castillan frigates broken against Gull Island. De Vega has learned that brute force is not enough against you — and pulled back to plan something larger. The war is spilling toward his own shores.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission07-epilog-lose",
+      "speaker": "narrator",
+      "text": "The station at Gull Island burns, and your squadron with it. De Vega has his revenge.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission07-prolog",
+      "speaker": "narrator",
+      "text": "Gull Island, early morning. Smoke over the anchor station and frigate sails to windward — Castilla strikes back. De Vega wants blood for the Three Beacons.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission08-epilog",
+      "speaker": "narrator",
+      "text": "The courier got away from you, but his shield has fallen: the Q-ship and both frigates lie on the bottom. De Vega reached Cádiz stripped and cornered — and you know where to find him. All that remains is to break the gate.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission08-epilog-lose",
+      "speaker": "narrator",
+      "text": "De Vega and his escort vanished over the horizon toward Cádiz. The hunt ended in failure.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission08-prolog",
+      "speaker": "narrator",
+      "text": "At last a trail straight to him. De Vega himself, on a fast courier, is fleeing to Cádiz — and his escort stands in your way. This time it is personal.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission09-epilog",
+      "speaker": "narrator",
+      "text": "The outer defence of Cádiz is broken and de Vega is shut inside with the treasure fleet. The Sovereign proved to be the fist Albion needed. All that remains is to take his silver — and then the man himself.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission09-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Sovereign went down under the guns of Cádiz. The blockade is broken and de Vega free.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission09-prolog",
+      "speaker": "narrator",
+      "text": "For the first time three gun decks thunder beneath you: HMS Sovereign, a ship of the line. Before you the gate of Cádiz — a fortress and a squadron, and behind them de Vega and his silver.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission10-epilog",
+      "speaker": "narrator",
+      "text": "The silver fleet is finished, the galleons on the bottom or in your hands. Without silver, de Vega's war is dying. One thing remains: the man himself and Corona, his floating throne.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission10-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Sovereign fell among the galleons and the silver sailed on. De Vega will make you pay for this war yet.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission10-prolog",
+      "speaker": "narrator",
+      "text": "Behind the fortress lies Castilla's last treasure fleet at anchor — two galleons of silver and their guardians. This silver is the engine of de Vega's war. Take it.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission11-epilog",
+      "speaker": "narrator",
+      "text": "Corona is silent. Castillan power in Halcyon is broken and de Vega's game for two crowns and one sea is over. The wind, the islands and the silver belong once more to those who can read them — and today that was you, captain. The war you were meant to avoid you did not, in the end, prevent; but you won it — and Halcyon will remember.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission11-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Sovereign sinks into the Cádiz roadstead, and the Albion line with it. Corona sails on and Halcyon gets a new master — Don Cristóbal de Vega. The war is lost.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission11-prolog",
+      "speaker": "narrator",
+      "text": "The Cádiz roadstead, the last day of the war. Against your fleet stands Corona — four decks of de Vega's pride — and the remnant of Castillan power. Here it will be decided who is master of Halcyon.",
+      "kind": "story"
+    },
+    {
+      "id": "story-side01-epilog",
+      "speaker": "narrator",
+      "text": "The smugglers' run is broken. Whatever came out of their holds — brandy and powder, and manifests that named no honest port — will not reach the free ports now. It was no part of the war against de Vega, but the crew have their prize money and the Cays are quiet, and a captain takes his easy days where the sea offers them.",
+      "kind": "story"
+    },
+    {
+      "id": "story-side01-epilog-lose",
+      "speaker": "narrator",
+      "text": "The sloops scattered into the shoals where the Swallow could not follow, and took their cargo with them. The Revenue Office logs it as \"contact lost\". A small failure, in the scale of the war — but the free ports will drink to it.",
+      "kind": "story"
+    },
+    {
+      "id": "story-side01-prolog",
+      "speaker": "narrator",
+      "text": "The Tin Cays, a bright forenoon and a steady wind. No fleet action here, no Castillan seal — only the Revenue Office, a tip-off, and three trim sloops wearing an honest face that will not survive a second look. HMS Swallow lies across their run; the rest is chase and gunnery.",
+      "kind": "story"
+    },
+    {
+      "id": "story-side02-epilog",
+      "speaker": "narrator",
+      "text": "The false light is out and the wreckers are finished — sunk or struck and bound for a rope ashore. No silver in it, no seal, no thread of the great net: only a stretch of reef that honest men may cross again without a lie to drown them. Some victories are worth more than the war remembers.",
+      "kind": "story"
+    },
+    {
+      "id": "story-side02-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Goshawk found the coral the wreckers meant her to find, and Widow's Comb took a frigate for its tally. The false light still burns on Beacon Rock, and the next ship down the channel will trust it just as the Santa Rosa did.",
+      "kind": "story"
+    },
+    {
+      "id": "story-side02-prolog",
+      "speaker": "narrator",
+      "text": "Widow's Comb, in the last of the light. This is no campaign against a crown, but a reckoning owed to every captain lost on these reefs to a lantern that lied. The false light burns on Beacon Rock; the Santa Rosa lies broken on the coral; and somewhere in the shoals the wreckers wait. HMS Goshawk draws deep — sail carefully, and settle the account.",
+      "kind": "story"
+    }
+  ]
+}
