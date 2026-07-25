@@ -442,8 +442,13 @@ function showBriefing(sc: Scenario): void {
         + `<b>buttons at right (arrows/＋/－/◎) = pan, zoom and centre on ship</b> · `
         + `space = pause · W sails · E oars · Q/R broadside · A auto · 1/2/3 shot type</div>`)
     + `<button id="btn-start">SET SAIL</button>`)
+  // dabing: prolog a briefing namluví vypravěč hned po otevření obrazovky
+  audio.resetVoice()
+  audio.speak(`story-${sc.id}-prolog`)
+  audio.speak(`brief-${sc.id}`)
   el.querySelector('#btn-start')!.addEventListener('click', () => {
     el.remove()
+    audio.stopVoice()        // vyplouváme — nedomluvený briefing utni
     audio.setMenuMode(false) // konec briefingu → adaptivní bojová hudba
     controller.setCompression(1)
   })
@@ -513,8 +518,14 @@ function showOutcome(state: SimState): void {
     + `<div style="margin-top:14px"><button id="btn-again">REPLAY</button> `
     + (isSkirmish ? `<button id="btn-newsk">⚔ NEW SKIRMISH</button> ` : (win ? `<button id="btn-port">🛠 PORT</button> ` : ''))
     + `<button id="btn-menu">CAMPAIGN MAP</button></div>`)
-  el.querySelector('#btn-port')?.addEventListener('click', () => { el.remove(); showOutfitting() })
-  el.querySelector('#btn-newsk')?.addEventListener('click', () => { el.remove(); showSkirmish() })
+  // dabing: vypravěč přečte epilog mise (skirmish žádný nemá). Vítěznou hlášku
+  // z téhož snapshotu (např. „strikes her colours") nechá dohrát — epilog se
+  // zařadí ZA ni, ne přes ni.
+  if (!isSkirmish) {
+    audio.speak(win ? `story-${currentMissionId}-epilog` : `story-${currentMissionId}-epilog-lose`, { force: true })
+  }
+  el.querySelector('#btn-port')?.addEventListener('click', () => { audio.stopVoice(); el.remove(); showOutfitting() })
+  el.querySelector('#btn-newsk')?.addEventListener('click', () => { audio.stopVoice(); el.remove(); showSkirmish() })
   el.querySelector('#btn-again')!.addEventListener('click', () => {
     // skirmish přehraj v místě (stejný scénář, deterministicky); kampaň přes URL
     if (isSkirmish && lastSkirmish) { el.remove(); outcomeShown = false; startSkirmish(lastSkirmish) }

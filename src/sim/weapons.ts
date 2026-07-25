@@ -3,6 +3,7 @@
  * (round/chain/grape) mapují na subsystémy. Palba podél osy cíle = raking.
  */
 import type { Ball, Broadside, ShipState, ShotType, SimState, Vec2 } from './types'
+import { disableBark } from '../data/barks'
 import {
   BALL_SPEED, RELOAD_TIME, GUN_SPREAD_PER_M, ACCURACY_BASE,
   CHAIN_HULL_FACTOR, CHAIN_RIG_FACTOR, GRAPE_HULL_FACTOR, GRAPE_CREW_FACTOR,
@@ -341,12 +342,14 @@ export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec
         t: state.t, kind: 'comm', shipId: ship.id, side: 'player', speaker: 'gunner',
         slowdown: true, pos: { ...ship.pos },
         text: `RAKING! A raking broadside tore ${ship.name} from ${zone} to stern!`,
+        voiceId: 'bark-raking-dealt',
       })
     } else if (ship.doctrine === 'player') {
       state.events.push({
         t: state.t, kind: 'comm', shipId: ship.id, side: ship.side, speaker: 'mate',
         slowdown: true, pos: { ...ship.pos },
         text: `They're raking us end to end — ${ship.name} is groaning! Turn your bow out of the line.`,
+        voiceId: 'bark-raking-taken',
       })
     }
   }
@@ -384,6 +387,7 @@ function damageSubsystem(
       state.events.push({
         t: state.t, kind: 'comm', shipId: ship.id, side: 'player', speaker: 'gunner',
         slowdown: true, pos: { ...ship.pos }, text: disableCallout(ship.name, k),
+        voiceId: disableBark(k),
       })
     } else {
       state.events.push({
