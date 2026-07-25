@@ -518,9 +518,10 @@ function showOutcome(state: SimState): void {
     + `<div style="margin-top:14px"><button id="btn-again">REPLAY</button> `
     + (isSkirmish ? `<button id="btn-newsk">⚔ NEW SKIRMISH</button> ` : (win ? `<button id="btn-port">🛠 PORT</button> ` : ''))
     + `<button id="btn-menu">CAMPAIGN MAP</button></div>`)
-  // dabing: vypravěč přečte epilog mise (skirmish žádný nemá)
+  // dabing: vypravěč přečte epilog mise (skirmish žádný nemá). Vítěznou hlášku
+  // z téhož snapshotu (např. „strikes her colours") nechá dohrát — epilog se
+  // zařadí ZA ni, ne přes ni.
   if (!isSkirmish) {
-    audio.stopVoice()
     audio.speak(win ? `story-${currentMissionId}-epilog` : `story-${currentMissionId}-epilog-lose`, { force: true })
   }
   el.querySelector('#btn-port')?.addEventListener('click', () => { audio.stopVoice(); el.remove(); showOutfitting() })

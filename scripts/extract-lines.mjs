@@ -21,7 +21,7 @@ await build({
   entryPoints: [resolve(root, 'scripts/_lines-entry.ts')],
   outfile: tmp, bundle: true, format: 'esm', platform: 'node', logLevel: 'error',
 })
-const { SCENARIOS, MISSION_STORY, CAMPAIGN_INTRO, DEFEAT_GENERIC } = await import(`file://${tmp}?t=${Date.now()}`)
+const { SCENARIOS, MISSION_STORY, CAMPAIGN_INTRO, DEFEAT_GENERIC, BARKS } = await import(`file://${tmp}?t=${Date.now()}`)
 
 /** Repliky: { id, speaker, text, kind } */
 const lines = []
@@ -55,6 +55,9 @@ for (const [missionId, st] of Object.entries(MISSION_STORY ?? {})) {
 }
 push('story-intro', 'narrator', CAMPAIGN_INTRO, 'story')
 push('story-defeat', 'narrator', DEFEAT_GENERIC, 'story')
+
+// bojové výkřiky ze simulace (generická namluvená varianta k dynamickému textu)
+for (const [id, b] of Object.entries(BARKS ?? {})) push(id, b.speaker, b.text, 'bark')
 
 lines.sort((a, b) => a.id.localeCompare(b.id))
 

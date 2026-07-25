@@ -1,9 +1,22 @@
 # Voiceovers (English)
 
-Every spoken line in the game is voiced: mission briefings, story prologues and
-epilogues, and in-mission radio chatter. Audio lives in `public/vo/<id>.mp3` and
-is generated with ElevenLabs from the game's own text — the TypeScript mission
-and story files remain the single source of truth.
+Every spoken line is voiced: mission briefings, story prologues and epilogues,
+scripted mission dialogue, and the combat chatter the simulation itself emits.
+Audio lives in `public/vo/<id>.mp3` and is generated with ElevenLabs from the
+game's own text — the TypeScript mission and story files remain the single
+source of truth.
+
+Two kinds of line, because they behave differently:
+
+- **Scripted lines** (briefings, story, trigger dialogue) — the recorded audio
+  matches the on-screen text word for word, and each plays once per mission.
+- **Combat barks** (`bark-*`, from `src/data/barks.ts`) — raking, silenced guns,
+  boarding and so on. Their on-screen text is *dynamic* (`${ship.name}`, odds,
+  hit zone), so it cannot be pre-rendered; the voice line is a **generic**
+  version of the same beat. The spoken line carries the emotion, the text
+  carries the specifics. Barks may repeat (25 s cooldown per line) and are
+  dropped rather than queued if something else is already speaking — a bark
+  arriving after a 40 s briefing would be stale.
 
 ## One character = one voice
 
@@ -34,6 +47,7 @@ IDs are derived, never hand-written, so missions carry no audio bookkeeping:
 - `story-<missionId>-prolog` / `-epilog` / `-epilog-lose`
 - `<missionId>-<triggerId>` — first spoken line of a trigger;
   second and later get `-2`, `-3`, …
+- `bark-<name>` — combat barks, keyed by hand in `src/data/barks.ts`
 
 `updateTriggers()` in `src/sim/scenario.ts` computes the same ID and puts it on
 the emitted event as `voiceId`; `scripts/extract-lines.mjs` uses the identical
@@ -61,5 +75,16 @@ suite will still pass, so re-record deliberately).
 ## Playback
 
 `AudioManager.speak(id)` queues clips so lines never overlap, ducks the music
-under speech, and plays each line once per mission. A missing clip is skipped
-silently, so the game runs fine without any audio present.
+under speech, and plays each scripted line once per mission. A missing clip is
+skipped silently, so the game runs fine without any audio present.
+
+Two details worth knowing:
+
+- **Autoplay.** Entering a mission straight from `?mission=…` (bookmarks, the
+  REPLAY button) means narration is queued before any user gesture, and the
+  browser rejects `play()`. The queue is *held*, not dropped, and `unlock()`
+  starts it on the first click — so the briefing is never silently lost.
+- **The epilogue never cuts a line.** A trigger can fire dialogue and
+  `winMission` in the same snapshot (e.g. mission 3's Q-ship surrender). The
+  outcome screen queues the epilogue behind whatever is speaking instead of
+  stopping it.

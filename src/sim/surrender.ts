@@ -45,6 +45,7 @@ export function demandSurrender(state: SimState, from: ShipState, targetId: numb
     state.events.push({
       t: state.t, kind: 'comm', side: target.side, speaker: 'enemy-captain',
       text: `${target.name} refuses to strike her colours!`,
+      voiceId: 'bark-refuse-strike',
     })
   }
 }
@@ -101,6 +102,7 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
       state.events.push({
         t: state.t, kind: 'message', shipId: from.id, side: from.side, speaker: 'mate',
         text: 'To board we must lay alongside — close to ~60 m!',
+        voiceId: 'bark-board-range',
       })
     }
     return
@@ -115,6 +117,7 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
     state.events.push({
       t: state.t, kind: 'comm', shipId: from.id, side: from.side, speaker: 'bosun', slowdown: true,
       text: `Grapples onto ${target.name}! Our odds ~${odds}% — ${verdict}`,
+      voiceId: 'bark-grapples',
     })
   }
 }
@@ -153,6 +156,7 @@ export function updateBoarding(state: SimState, dt: number): void {
           state.events.push({
             t: state.t, kind: 'comm', shipId: from.id, side: from.side, speaker: 'bosun', slowdown: true,
             text: `Boarding party thrown back — we're pulling off ${target.name}! Soften her with fire.`,
+            voiceId: 'bark-boarding-repulsed',
           })
         }
         continue

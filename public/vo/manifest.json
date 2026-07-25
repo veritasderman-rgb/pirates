@@ -1,6 +1,78 @@
 {
   "lines": [
     {
+      "id": "bark-board-range",
+      "speaker": "mate",
+      "text": "To board we must lay alongside — close to sixty metres!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-boarding-repulsed",
+      "speaker": "bosun",
+      "text": "Boarding party thrown back! Soften her with fire first!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-disable-crew",
+      "speaker": "gunner",
+      "text": "Her crew is decimated — board her now!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-disable-gunsPort",
+      "speaker": "gunner",
+      "text": "Her port guns are silenced!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-disable-gunsStbd",
+      "speaker": "gunner",
+      "text": "Her starboard guns are silenced!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-disable-rigging",
+      "speaker": "gunner",
+      "text": "Her rigging is in tatters — she is losing speed!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-disable-rudder",
+      "speaker": "gunner",
+      "text": "Her rudder is shot away — she cannot steer!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-flagship-fallen",
+      "speaker": "admiral",
+      "text": "The flagship has fallen! Take up the colours — lead us on, Captain!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-grapples",
+      "speaker": "bosun",
+      "text": "Grapples away! Boarders, with me!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-raking-dealt",
+      "speaker": "gunner",
+      "text": "Raking broadside! We tore her stem to stern!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-raking-taken",
+      "speaker": "mate",
+      "text": "They are raking us end to end! Turn your bow out of the line!",
+      "kind": "bark"
+    },
+    {
+      "id": "bark-refuse-strike",
+      "speaker": "enemy-captain",
+      "text": "We will not strike our colours!",
+      "kind": "bark"
+    },
+    {
       "id": "brief-mission01",
       "speaker": "narrator",
       "text": "HMS Swallow holds the customs patrol in the strait off Turtle Island. Port Command reports a merchantman, the Sea Maiden, with a suspicious manifest — carry out an inspection: close to within 300 metres. Beware: if she has something to hide, she will crowd on sail and run for open water.\n\nTRAINING: the wind blows to the east — catch it in your sails (you sail fastest on a broad reach, with the wind on your quarter), trim to suit, and put out oars in a calm or into the wind. The island must be sailed AROUND — do not run onto the shoals.",

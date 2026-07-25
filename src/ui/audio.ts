@@ -18,6 +18,8 @@ const MUSIC_FADE_MS = 2500
 /** hlasitost hudby a její stažení pod mluvené slovo (dabing) */
 const MUSIC_VOL = 0.6
 const MUSIC_DUCK_VOL = 0.16
+/** stejný bojový výkřik nejdřív takhle po sobě (ať se neopakuje dokola) */
+const BARK_COOLDOWN_MS = 25_000
 
 export class AudioManager {
   private ctx: AudioContext | null = null
@@ -39,10 +41,14 @@ export class AudioManager {
   private voQueue: string[] = []
   private voPlayed = new Set<string>()
   private ducked = false   // hudba je stažená pod mluvené slovo
+  private barkAt: Record<string, number> = {}
+  private voBlocked = false  // autoplay zakázán → čeká se na gesto uživatele
   voiceMuted = false
 
   unlock(): void {
     if (!this.unlocked) { this.unlocked = true; this.setMusic(this.menuMode ? 'menu' : 'cruise') }
+    // dabing čekal na gesto (autoplay) — teď ho rozjeď od zadržené repliky
+    if (this.voBlocked && !this.vo && this.voQueue.length) { this.voBlocked = false; this.pumpVoice() }
     if (this.ctx) return
     try {
       const Ctor = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)
@@ -64,10 +70,19 @@ export class AudioManager {
    * hrají po sobě; každá jen jednou za misi. Chybějící klip se tiše přeskočí,
    * takže hra funguje i bez dabingu.
    */
-  speak(id: string | undefined, opts: { force?: boolean } = {}): void {
+  speak(id: string | undefined, opts: { force?: boolean; bark?: boolean } = {}): void {
     if (!id || this.muted || this.voiceMuted) return
-    if (!opts.force && this.voPlayed.has(id)) return
-    this.voPlayed.add(id)
+    if (opts.bark) {
+      // bojový výkřik: smí se opakovat (s odstupem), ale NEČEKÁ ve frontě —
+      // za dlouhým briefingem by dohrál až dávno po situaci, tak radši mlčí
+      const now = performance.now()
+      if (this.vo || this.voQueue.length) return
+      if (now - (this.barkAt[id] ?? -Infinity) < BARK_COOLDOWN_MS) return
+      this.barkAt[id] = now
+    } else {
+      if (!opts.force && this.voPlayed.has(id)) return
+      this.voPlayed.add(id)
+    }
     this.voQueue.push(id)
     if (!this.vo) this.pumpVoice()
   }
@@ -86,16 +101,27 @@ export class AudioManager {
   }
 
   private pumpVoice(): void {
-    const id = this.voQueue.shift()
+    const id = this.voQueue[0]
     if (id === undefined) { this.vo = null; this.duckMusic(false); return }
     const el = new Audio(`vo/${encodeURIComponent(id)}.mp3`)
     el.volume = 0.95
     this.vo = el
     this.duckMusic(true)
-    const next = (): void => { if (this.vo === el) { this.vo = null; this.pumpVoice() } }
+    const next = (): void => {
+      if (this.vo !== el) return
+      this.voQueue.shift()   // tuhle repliku máme odbytou (dohrála / chybí)
+      this.vo = null
+      this.pumpVoice()
+    }
     el.addEventListener('ended', next)
     el.addEventListener('error', next)   // klip chybí → jen pokračuj
-    el.play().catch(next)                // autoplay blokován → nezasekni frontu
+    el.play().then(() => { this.voBlocked = false }).catch((err: unknown) => {
+      // autoplay zakázán (vstup přes ?mission= před prvním gestem): NEZAHazuj
+      // frontu — nech ji čekat a rozjeď ji, až uživatel klikne (viz unlock())
+      if ((err as { name?: string })?.name === 'NotAllowedError') {
+        if (this.vo === el) { this.vo = null; this.voBlocked = true; this.duckMusic(false) }
+      } else next()
+    })
   }
 
   /** Ztlumí hudbu pod mluvené slovo (a zase vrátí) — přes cíl fade smyčky. */
@@ -160,9 +186,12 @@ export class AudioManager {
         if (now - this.calmSince > MUSIC_CALM_MS) { this.calmSince = 0; this.setMusic(want) }
       }
     }
-    // dabing dialogů (nezávisí na WebAudio kontextu — vlastní <audio> element)
+    // dabing dialogů (nezávisí na WebAudio kontextu — vlastní <audio> element).
+    // Scénářové repliky hrají jednou za misi; bojové výkřiky (bark-*) se smí
+    // opakovat s odstupem, ale nikdy nečekají ve frontě.
     for (const e of state.events) {
-      if (e.voiceId && (e.kind === 'comm' || e.kind === 'message')) this.speak(e.voiceId)
+      if (!e.voiceId || (e.kind !== 'comm' && e.kind !== 'message')) continue
+      this.speak(e.voiceId, e.voiceId.startsWith('bark-') ? { bark: true } : {})
     }
     if (!this.ctx || this.muted) return
     for (const e of state.events) {

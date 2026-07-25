@@ -52,6 +52,7 @@ function updatePlayerCommand(state: SimState): void {
   state.events.push({
     t: state.t, kind: 'comm', speaker: 'admiral', slowdown: true,
     text: `The flagship has fallen — ${flag.name} takes up the colours! Lead us on, Captain.`,
+    voiceId: 'bark-flagship-fallen',
   })
 }
 

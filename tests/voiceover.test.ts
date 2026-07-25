@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { SCENARIOS } from '../src/data/missions'
 import { MISSION_STORY } from '../src/data/story'
+import { BARKS } from '../src/data/barks'
 import { sim } from '../src/sim/engine'
 import { SIM_DT } from '../src/sim/constants'
 import type { SimEvent } from '../src/sim/types'
@@ -44,6 +45,27 @@ describe('dabing — manifest a klipy', () => {
       }
     }
     expect(missing).toEqual([])
+  })
+
+  it('každý bojový výkřik ze simulace je namluvený', () => {
+    for (const id of Object.keys(BARKS)) {
+      expect(ids.has(id), `manifest missing ${id}`).toBe(true)
+      expect(existsSync(resolve(voDir, `${id}.mp3`)), `no clip for ${id}`).toBe(true)
+    }
+  })
+
+  it('každá hláška se speakerem mimo triggery má voiceId (jinak by mlčela)', () => {
+    // hlídá regresi: kdo přidá comm/message se speakerem do simulace, musí
+    // doplnit i bark — jinak se replika zobrazí, ale nikdo ji neřekne
+    const srcs = ['weapons.ts', 'surrender.ts', 'engine.ts']
+      .map(f => readFileSync(resolve(__dirname, '../src/sim', f), 'utf8'))
+      .join('\n')
+    const emits = srcs.split(/state\.events\.push\(\{/).slice(1)
+    const spoken = emits.filter(e => /kind: '(comm|message)'/.test(e.slice(0, 400)) && /speaker:/.test(e.slice(0, 400)))
+    expect(spoken.length).toBeGreaterThan(0)
+    for (const e of spoken) {
+      expect(/voiceId:/.test(e.slice(0, 500)), `spoken event without voiceId: ${e.slice(0, 90)}`).toBe(true)
+    }
   })
 
   it('voiceId vydaný enginem odpovídá existujícímu klipu (schéma se nerozešlo)', () => {
