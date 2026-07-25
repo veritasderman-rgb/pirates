@@ -4,6 +4,7 @@
  * kontakt zůstává jako paměťový pin (memory) s poslední známou polohou.
  */
 import type { Contact, ShipState, SimState } from './types'
+import { TXT } from './text'
 import { dist } from './vec'
 import { SHIP_CLASSES } from '../data/defs'
 import { SENSOR_UPDATE_INTERVAL } from './constants'
@@ -49,7 +50,7 @@ export function updateSensors(state: SimState, dt: number): void {
         if (isNew) {
           state.events.push({
             t: state.t, kind: 'contactNew', side, pos: { ...target.pos },
-            text: side === 'player' ? `Sail on the horizon! ${idQuality >= 1 ? target.name : 'unknown contact'}.` : '',
+            text: side === 'player' ? TXT.sailHo(idQuality >= 1 ? target.name : null) : '',
             speaker: side === 'player' ? 'lookout' : undefined,
           })
         }

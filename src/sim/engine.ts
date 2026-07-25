@@ -4,6 +4,7 @@
  *   kapitulace → posádka → triggery → čas.
  */
 import type { Order, Scenario, ShipState, SimApi, SimState } from './types'
+import { TXT } from './text'
 import { globalWind, updateWind } from './wind'
 import { updateShipPhysics } from './physics'
 import { updateBalls, fireBroadside, fireChaser } from './weapons'
@@ -51,7 +52,7 @@ function updatePlayerCommand(state: SimState): void {
   flag.fireControl.mode = 'auto'
   state.events.push({
     t: state.t, kind: 'comm', speaker: 'admiral', slowdown: true,
-    text: `The flagship has fallen — ${flag.name} takes up the colours! Lead us on, Captain.`,
+    text: TXT.flagshipFallen(flag.name),
     voiceId: 'bark-flagship-fallen',
   })
 }

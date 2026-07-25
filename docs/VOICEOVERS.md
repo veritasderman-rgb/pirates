@@ -1,4 +1,18 @@
-# Voiceovers (English)
+# Voiceovers (English + Czech)
+
+The game is fully bilingual (EN/CS — see the 🌐 toggle on the campaign map, or
+`?lang=cs|en`). Every line exists in **both** languages with the **same cast**:
+English clips live in `public/vo/<id>.mp3`, Czech in `public/vo/cs/<id>.mp3`
+(the multilingual ElevenLabs model speaks Czech with the same voices). Czech
+line text comes from the translation dictionary in `src/i18n/` — the manifest
+carries `text` (EN) and `textCs`, and `--lang cs` refuses to run if any Czech
+translation is missing, so the Czech build can never silently speak English.
+
+```bash
+ELEVENLABS_API_KEY=... npm run vo:gen              # English clips
+ELEVENLABS_API_KEY=... npm run vo:gen -- --lang cs # Czech clips
+```
+
 
 Every spoken line is voiced: mission briefings, story prologues and epilogues,
 scripted mission dialogue, and the combat chatter the simulation itself emits.

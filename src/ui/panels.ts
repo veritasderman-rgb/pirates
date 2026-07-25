@@ -11,6 +11,7 @@ import { weatherGage, rakeAvailable, canChase, chaseGunCount, effectiveChaseGuns
 import { boardingOdds } from '../sim/surrender'
 import { BOARD_RANGE } from '../sim/constants'
 import { dist } from '../sim/vec'
+import { t, tp } from '../i18n/core'
 
 /** Šipka směru větru (kam vane) — 8 světových stran. */
 const windArrow = (dir: number): string => {
@@ -47,9 +48,9 @@ export const fmtTime = (t: number): string => {
 const bar = (v: number, col = '#4fd0e0'): string =>
   `<span class="bar"><i style="width:${Math.round(Math.max(0, Math.min(1, v)) * 100)}%;background:${col}"></i></span>`
 
-const POS_NAME = (offDeg: number): string =>
+const POS_NAME = (offDeg: number): string => t(
   offDeg < 45 ? 'in irons (no-go)' : offDeg < 60 ? 'close-hauled'
-    : offDeg < 100 ? 'beam reach' : offDeg < 150 ? 'broad reach (best)' : 'running'
+    : offDeg < 100 ? 'beam reach' : offDeg < 150 ? 'broad reach (best)' : 'running')
 
 export class Panels {
   private log: HTMLElement
@@ -84,18 +85,18 @@ export class Panels {
     const btns = comps.map(c =>
       `<button data-act="comp-${c}" class="${ui.compression === c ? 'active' : ''}">${c === 0 ? '❚❚' : c + '×'}</button>`).join('')
     const kn = Math.round(state.wind.speed * 1.94)
-    const label = kn < 5 ? 'calm' : kn < 11 ? 'light breeze' : kn < 16 ? 'moderate wind'
-      : kn < 22 ? 'fresh breeze' : kn < 28 ? 'gale' : 'storm'
+    const label = t(kn < 5 ? 'calm' : kn < 11 ? 'light breeze' : kn < 16 ? 'moderate wind'
+      : kn < 22 ? 'fresh breeze' : kn < 28 ? 'gale' : 'storm')
     const icon = kn < 5 ? '🌤' : kn < 22 ? '🧭' : '🌩'
     this.topbar.innerHTML =
       `<span class="tb-time">⏱ ${fmtTime(state.t)}</span>`
       + `<span class="tb-comp">${btns}</span>`
-      + `<span class="tb-wind">${icon} wind ${kn} kn · ${label}</span>`
+      + `<span class="tb-wind">${icon} ${tp('wind {kn} kn', { kn })} · ${label}</span>`
   }
 
   private renderLeft(state: SimState, ui: UiState): void {
     const sh = state.ships.find(s => s.id === ui.selectedId)
-    if (!sh) { this.left.innerHTML = '<div class="panel"><h3>Ship</h3><div class="dim">— none selected —</div></div>'; return }
+    if (!sh) { this.left.innerHTML = `<div class="panel"><h3>${t('Ship')}</h3><div class="dim">${t('— none selected —')}</div></div>`; return }
     const def = SHIP_CLASSES[sh.classId]
     const hp = sh.hullMax ?? def?.hullPoints ?? 100
     const off = (offWindAngle(sh.heading, state.wind) * 180) / Math.PI
@@ -108,22 +109,22 @@ export class Panels {
     this.left.innerHTML =
       `<div class="panel"><h3>${esc(sh.name)}</h3>`
       + `<img class="ship-img" src="img/ship-${esc(sh.classId)}.png" alt="" onerror="this.style.display='none'">`
-      + `<div class="row"><span>${esc(def?.name ?? sh.classId)}</span></div>`
-      + `<div class="row"><span>hull</span>${bar(sh.hull / hp, '#4fd0e0')}</div>`
-      + `<div class="row"><span>morale</span>${bar(sh.morale, '#d8c24f')}</div>`
+      + `<div class="row"><span>${esc(t(def?.name ?? sh.classId))}</span></div>`
+      + `<div class="row"><span>${t('hull')}</span>${bar(sh.hull / hp, '#4fd0e0')}</div>`
+      + `<div class="row"><span>${t('morale')}</span>${bar(sh.morale, '#d8c24f')}</div>`
       + `<div class="subs">`
-      + `<div>rigging ${bar(ss.rigging)}</div><div>rudder ${bar(ss.rudder)}</div>`
-      + `<div>guns P ${bar(ss.gunsPort)}</div><div>guns S ${bar(ss.gunsStbd)}</div>`
-      + `<div>crew ${bar(ss.crew)}</div>`
+      + `<div>${t('rigging')} ${bar(ss.rigging)}</div><div>${t('rudder')} ${bar(ss.rudder)}</div>`
+      + `<div>${t('guns P')} ${bar(ss.gunsPort)}</div><div>${t('guns S')} ${bar(ss.gunsStbd)}</div>`
+      + `<div>${t('crew')} ${bar(ss.crew)}</div>`
       + `</div>`
-      + `<div class="row2"><span>sails: <b>${sh.sailsUp ? 'set' : 'furled'}</b></span>`
-      + `<span>trim: <b>${Math.round(sh.trim * 100)}%</b></span></div>`
-      + `<div class="row2"><span>oars: <b>${def?.canRow ? (sh.oaring ? 'YES' : 'no') : '—'}</b></span>`
-      + `<span>stamina: ${bar(sh.oarStamina, '#8ad0a0')}</span></div>`
-      + `<div class="row2"><span>speed: <b>${spd} kn</b></span><span>ammo: <b>${sh.ammo}</b></span></div>`
-      + `<div class="row2"><span>guns ready: <b>P ${gunsL} · S ${gunsR}</b> of ${gpb}</span></div>`
+      + `<div class="row2"><span>${t('sails:')} <b>${t(sh.sailsUp ? 'set' : 'furled')}</b></span>`
+      + `<span>${t('trim:')} <b>${Math.round(sh.trim * 100)}%</b></span></div>`
+      + `<div class="row2"><span>${t('oars:')} <b>${def?.canRow ? t(sh.oaring ? 'YES' : 'no') : '—'}</b></span>`
+      + `<span>${t('stamina:')} ${bar(sh.oarStamina, '#8ad0a0')}</span></div>`
+      + `<div class="row2"><span>${t('speed:')} <b>${spd} kn</b></span><span>${t('ammo:')} <b>${sh.ammo}</b></span></div>`
+      + `<div class="row2"><span>${tp('guns ready: P {l} · S {s} of {g}', { l: `<b>${gunsL}`, s: `${gunsR}</b>`, g: gpb })}</span></div>`
       + `<div class="pos ${inNoGo(offWindAngle(sh.heading, state.wind)) ? 'nogo' : eff > 0.85 ? 'good' : ''}">`
-      + `point of sail: ${POS_NAME(off)} (${Math.round(eff * 100)}%)</div>`
+      + `${t('point of sail:')} ${POS_NAME(off)} (${Math.round(eff * 100)}%)</div>`
       + `</div>`
       + this.forecastHtml(state, sh)
   }
@@ -131,7 +132,7 @@ export class Panels {
   /** Předpověď počasí: nyní / +5 / +10 / +15 min + trend pro vybranou loď. */
   private forecastHtml(state: SimState, sh: ShipState | undefined): string {
     const nowEff = sh ? sailEfficiency(offWindAngle(sh.heading, state.wind)) : 0
-    const steps: [string, number][] = [['now', 0], ['+5 min', 300], ['+10 min', 600], ['+15 min', 900]]
+    const steps: [string, number][] = [[t('now'), 0], ['+5 min', 300], ['+10 min', 600], ['+15 min', 900]]
     const rows = steps.map(([label, dt]) => {
       const w = dt === 0 ? state.wind : forecastWind(state, dt)
       const kn = Math.round(w.speed * 1.94)
@@ -140,22 +141,22 @@ export class Panels {
         const eff = sailEfficiency(offWindAngle(sh.heading, w))
         const d = eff - nowEff
         trend = Math.abs(d) < 0.06 ? '<span class="dim">=</span>'
-          : d > 0 ? '<span class="ok">▲ better</span>' : '<span class="bad">▼ worse</span>'
+          : d > 0 ? `<span class="ok">${t('▲ better')}</span>` : `<span class="bad">${t('▼ worse')}</span>`
       }
       return `<div class="fc-row"><span class="fc-t">${label}</span>`
         + `<span class="fc-a">${windArrow(w.dir)}</span><span class="fc-k">${kn} kn</span>`
         + `<span class="fc-tr">${trend}</span></div>`
     }).join('')
-    return `<div class="panel fc"><h3>Weather — forecast</h3>${rows}`
-      + `<div class="fc-hint">arrow = where it blows · ▲/▼ = your point of sail on this heading gets better/worse</div></div>`
+    return `<div class="panel fc"><h3>${t('Weather — forecast')}</h3>${rows}`
+      + `<div class="fc-hint">${t('arrow = where it blows · ▲/▼ = your point of sail on this heading gets better/worse')}</div></div>`
   }
 
   private renderRight(state: SimState, ui: UiState): void {
     // cíl
-    let tHtml = '<div class="dim">— no target —</div>'
-      + '<div class="fc-hint">Select an enemy on the map = target it (for manual FIRE port/stbd, '
+    let tHtml = `<div class="dim">${t('— no target —')}</div>`
+      + `<div class="fc-hint">${t('Select an enemy on the map = target it (for manual FIRE port/stbd, '
       + 'surrender demand and boarding). Empty water = course for the selected ship. '
-      + 'AUTO fires on its own at the most-damaged enemy in range — it ignores your target.</div>'
+      + 'AUTO fires on its own at the most-damaged enemy in range — it ignores your target.')}</div>`
     const tgt = state.ships.find(s => s.id === ui.targetId)
     if (tgt) {
       const con = state.contacts.player.find(c => c.shipId === tgt.id)
@@ -168,27 +169,27 @@ export class Panels {
       // identifikovaného cíle — u ztraceného (memory) kontaktu senzory drží jen
       // poslední známou polohu, ne aktuální stav, tak ho nesmíme prozrazovat
       const liveId = !!(con && con.idQuality >= 1 && !con.memory)
-      const cls = known ? esc(def?.name ?? shownClass) : 'unknown class'
+      const cls = known ? esc(t(def?.name ?? shownClass)) : t('unknown class')
       const nearSurr = liveId && !tgt.surrendered && !tgt.boarded && tgt.morale < 0.35 && tgt.side !== 'player'
       tHtml = `<div class="row"><b>${esc(tgt.name)}</b> ${tgt.boarded ? '⚓' : tgt.surrendered ? '⚑' : ''}</div>`
         + (known ? `<img class="ship-img" src="img/ship-${esc(shownClass)}.png" alt="" onerror="this.style.display='none'">` : '')
         + `<div class="row"><span>${cls}</span></div>`
-        + `<div class="row"><span>hull</span>${bar(tgt.hull / hp, '#e0603a')}</div>`
-        + (liveId ? `<div class="row"><span>morale</span>${bar(tgt.morale, '#d8c24f')}</div>` : '')
-        + (tgt.boarded ? `<div class="hintline ok">⚓ boarded — prize secured</div>`
-          : tgt.surrendered ? `<div class="hintline ok">⚑ struck her colours — close to ~60 m and give the "boarding" order</div>`
-          : nearSurr ? `<div class="hintline">morale is cracking — try the "demand surrender"</div>` : '')
+        + `<div class="row"><span>${t('hull')}</span>${bar(tgt.hull / hp, '#e0603a')}</div>`
+        + (liveId ? `<div class="row"><span>${t('morale')}</span>${bar(tgt.morale, '#d8c24f')}</div>` : '')
+        + (tgt.boarded ? `<div class="hintline ok">${t('⚓ boarded — prize secured')}</div>`
+          : tgt.surrendered ? `<div class="hintline ok">${t('⚑ struck her colours — close to ~60 m and give the "boarding" order')}</div>`
+          : nearSurr ? `<div class="hintline">${t('morale is cracking — try the "demand surrender"')}</div>` : '')
         + (liveId && tgt.boardingProgress && tgt.boardingProgress < 1 && !tgt.boarded
-          ? `<div class="row"><span>boarding</span>${bar(tgt.boardingProgress, '#8ad0a0')}</div>` : '')
+          ? `<div class="row"><span>${t('boarding')}</span>${bar(tgt.boardingProgress, '#8ad0a0')}</div>` : '')
         + this.tacticsHtml(state, tgt, liveId)
     }
     // kontakty
     const contacts = state.contacts.player.map(c => {
       const sh = state.ships.find(s => s.id === c.shipId)
       if (!sh || sh.destroyed) return ''
-      const nm = c.idQuality >= 1 ? sh.name : 'unknown'
+      const nm = c.idQuality >= 1 ? sh.name : t('unknown')
       const side = sh.side === 'enemy' ? '✗' : '•'
-      return `<div class="ct ${sh.side}">${side} ${esc(nm)}${c.memory ? ' (lost)' : ''}</div>`
+      return `<div class="ct ${sh.side}">${side} ${esc(nm)}${c.memory ? t(' (lost)') : ''}</div>`
     }).join('')
     // cíle mise
     const objs = state.objectives.map(o => {
@@ -196,9 +197,9 @@ export class Panels {
       return `<div class="obj ${o.state}">${m} ${esc(o.text)}</div>`
     }).join('')
     this.right.innerHTML =
-      `<div class="panel"><h3>Target</h3>${tHtml}</div>`
-      + `<div class="panel"><h3>Contacts</h3>${contacts || '<div class="dim">calm seas</div>'}</div>`
-      + `<div class="panel"><h3>Mission</h3>${objs}</div>`
+      `<div class="panel"><h3>${t('Target')}</h3>${tHtml}</div>`
+      + `<div class="panel"><h3>${t('Contacts')}</h3>${contacts || `<div class="dim">${t('calm seas')}</div>`}</div>`
+      + `<div class="panel"><h3>${t('Mission')}</h3>${objs}</div>`
   }
 
   /**
@@ -214,22 +215,22 @@ export class Panels {
     const rows: string[] = []
     // weather gage
     const gage = weatherGage(flag.pos, tgt.pos, state.wind.dir)
-    const gLabel = gage > 0.55 ? '<span class="ok">windward ✓ (tighter broadside)</span>'
-      : gage < 0.3 ? '<span class="bad">leeward ✗ (smoke in your eyes)</span>'
-      : '<span class="dim">abeam of wind</span>'
-    rows.push(`<div class="tac-row"><span>⚑ gage</span>${gLabel}</div>`)
+    const gLabel = gage > 0.55 ? `<span class="ok">${t('windward ✓ (tighter broadside)')}</span>`
+      : gage < 0.3 ? `<span class="bad">${t('leeward ✗ (smoke in your eyes)')}</span>`
+      : `<span class="dim">${t('abeam of wind')}</span>`
+    rows.push(`<div class="tac-row"><span>${t('⚑ gage')}</span>${gLabel}</div>`)
     // raking
     const rk = rakeAvailable(flag, tgt)
-    rows.push(`<div class="tac-row"><span>🎯 raking</span>${rk
-      ? '<span class="ok">lined on bow/stern — 2× devastating broadside!</span>'
-      : '<span class="dim">line up on the target\'s bow/stern</span>'}</div>`)
+    rows.push(`<div class="tac-row"><span>${t('🎯 raking')}</span>${rk
+      ? `<span class="ok">${t('lined on bow/stern — 2× devastating broadside!')}</span>`
+      : `<span class="dim">${t('line up on the target\'s bow/stern')}</span>`}</div>`)
     // boarding odds (only for a live-identified target)
     if (liveId && !tgt.surrendered) {
       const odds = Math.round(boardingOdds(flag, tgt) * 100)
       const near = dist(flag.pos, tgt.pos) <= BOARD_RANGE
       const cls = odds >= 60 ? 'ok' : odds >= 45 ? '' : 'bad'
-      rows.push(`<div class="tac-row"><span>⚓ boarding</span>`
-        + `<span class="${cls}">odds ~${odds}%${near ? ' · in range!' : ''}</span></div>`)
+      rows.push(`<div class="tac-row"><span>${t('⚓ boarding')}</span>`
+        + `<span class="${cls}">${tp('odds ~{o}%', { o: odds })}${near ? t(' · in range!') : ''}</span></div>`)
     }
     return `<div class="tactics">${rows.join('')}</div>`
   }
@@ -238,28 +239,28 @@ export class Panels {
     const sh = state.ships.find(s => s.id === ui.selectedId)
     if (!sh || sh.side !== 'player') { this.bottom.innerHTML = ''; return }
     const shotTip: Record<ShotType, string> = {
-      round: 'Round shot — tears the HULL. The path to sinking the enemy.',
-      chain: 'Chain shot — tears SAILS and rigging. Slows the prize (to catch it / turn to a boarding).',
-      grape: 'Grape shot — mows down the CREW. Breaks morale and sets up a boarding.',
+      round: t('Round shot — tears the HULL. The path to sinking the enemy.'),
+      chain: t('Chain shot — tears SAILS and rigging. Slows the prize (to catch it / turn to a boarding).'),
+      grape: t('Grape shot — mows down the CREW. Breaks morale and sets up a boarding.'),
     }
     const shotDesc: Record<ShotType, string> = {
-      round: 'round → hull (sink)', chain: 'chain → sails (slow)', grape: 'grape → crew (boarding)',
+      round: t('round → hull (sink)'), chain: t('chain → sails (slow)'), grape: t('grape → crew (boarding)'),
     }
     const shotBtn = (s: ShotType, label: string): string =>
       `<button data-act="shot-${s}" class="${ui.shot === s ? 'active' : ''}" title="${esc(shotTip[s])}">${label}</button>`
     const auto = sh.fireControl.mode === 'auto'
     this.bottom.innerHTML =
-      `<div class="obg"><button data-act="toggle-sails" class="${sh.sailsUp ? 'active' : ''}" title="Set/furl sails (without them the ship gets no drive from the wind)">⛵ sails</button>`
-      + `<button data-act="trim-down" title="Reduce sail (slower)">trim −</button><button data-act="trim-up" title="Add sail (faster)">trim +</button>`
-      + `<button data-act="toggle-oars" class="${sh.oaring ? 'active' : ''}" ${SHIP_CLASSES[sh.classId]?.canRow ? '' : 'disabled'} title="Oars — a small drive independent of the wind (even upwind), but it tires the crew. Only some ships.">🚣 oars</button></div>`
-      + `<div class="obg" title="Shot type for the broadside">shot: ${shotBtn('round', 'round')}${shotBtn('chain', 'chain')}${shotBtn('grape', 'grape')}`
+      `<div class="obg"><button data-act="toggle-sails" class="${sh.sailsUp ? 'active' : ''}" title="${esc(t('Set/furl sails (without them the ship gets no drive from the wind)'))}">${t('⛵ sails')}</button>`
+      + `<button data-act="trim-down" title="${esc(t('Reduce sail (slower)'))}">trim −</button><button data-act="trim-up" title="${esc(t('Add sail (faster)'))}">trim +</button>`
+      + `<button data-act="toggle-oars" class="${sh.oaring ? 'active' : ''}" ${SHIP_CLASSES[sh.classId]?.canRow ? '' : 'disabled'} title="${esc(t('Oars — a small drive independent of the wind (even upwind), but it tires the crew. Only some ships.'))}">${t('🚣 oars')}</button></div>`
+      + `<div class="obg" title="${esc(t('Shot type for the broadside'))}">${t('shot:')} ${shotBtn('round', t('round'))}${shotBtn('chain', t('chain'))}${shotBtn('grape', t('grape'))}`
       + `<span class="shot-desc">${esc(shotDesc[ui.shot])}</span></div>`
-      + `<div class="obg"><button data-act="fire-port" ${sh.reloadPort > 0 ? 'disabled' : ''} title="Fire the port broadside (target must be within the arc and range)">FIRE port</button>`
-      + `<button data-act="fire-stbd" ${sh.reloadStbd > 0 ? 'disabled' : ''} title="Fire the starboard broadside">FIRE stbd</button>`
-      + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}" title="Toggle: AUTO = the ship fires its bearing broadside at the most-damaged enemy in range on its own. Off = holds fire, you fire manually (FIRE port/stbd, Q/R).">${auto ? 'AUTO: firing' : 'AUTO: holding fire'}</button></div>`
+      + `<div class="obg"><button data-act="fire-port" ${sh.reloadPort > 0 ? 'disabled' : ''} title="${esc(t('Fire the port broadside (target must be within the arc and range)'))}">${t('FIRE port')}</button>`
+      + `<button data-act="fire-stbd" ${sh.reloadStbd > 0 ? 'disabled' : ''} title="${esc(t('Fire the starboard broadside'))}">${t('FIRE stbd')}</button>`
+      + `<button data-act="toggle-auto" class="${auto ? 'active' : ''}" title="${esc(t('Toggle: AUTO = the ship fires its bearing broadside at the most-damaged enemy in range on its own. Off = holds fire, you fire manually (FIRE port/stbd, Q/R).'))}">${t(auto ? 'AUTO: firing' : 'AUTO: holding fire')}</button></div>`
       + this.chaserHtml(state, ui, sh)
-      + `<div class="obg"><button data-act="demand" title="Demand the target strike her colours. Odds rise with her damage, crew losses and your superiority. Once she strikes, you can board her.">demand surrender</button>`
-      + `<button data-act="board" title="Boarding: lay alongside the target at ~60 m and give the order — the boarding party then fights on its own (watch the meter). Until she strikes, it is a bloody melee: both crews lose men, the weaker more. Grape shot softens her up first. If you bleed out, the party withdraws. A captured ship = a prize (more points than sinking).">boarding</button></div>`
+      + `<div class="obg"><button data-act="demand" title="${esc(t('Demand the target strike her colours. Odds rise with her damage, crew losses and your superiority. Once she strikes, you can board her.'))}">${t('demand surrender')}</button>`
+      + `<button data-act="board" title="${esc(t('Boarding: lay alongside the target at ~60 m and give the order — the boarding party then fights on its own (watch the meter). Until she strikes, it is a bloody melee: both crews lose men, the weaker more. Grape shot softens her up first. If you bleed out, the party withdraws. A captured ship = a prize (more points than sinking).'))}">${t('boarding')}</button></div>`
   }
 
   /** Stíhací děla (příď/záď) — jen má-li je loď; slabá palba podél osy v honičce. */
@@ -269,9 +270,9 @@ export class Panels {
     const noGuns = effectiveChaseGuns(sh) <= 0 // děla rozstřílená → stíhací umlkla
     const bowDis = noGuns || sh.reloadBow > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'bow', tgt))
     const sternDis = noGuns || sh.reloadStern > 0 || !(tgt && !tgt.destroyed && canChase(sh, 'stern', tgt))
-    return `<div class="obg" title="Light chase guns fore &amp; aft — weak, but they fire along your bow/stern without turning broadside. Handy while running a ship down (the full broadside still hits far harder).">`
-      + `<button data-act="fire-bow" ${bowDis ? 'disabled' : ''} title="Fire the bow chaser — target must be roughly ahead (key F)">🎯 bow gun</button>`
-      + `<button data-act="fire-stern" ${sternDis ? 'disabled' : ''} title="Fire the stern chaser — target must be roughly astern (key G)">🎯 stern gun</button></div>`
+    return `<div class="obg" title="${esc(t('Light chase guns fore & aft — weak, but they fire along your bow/stern without turning broadside. Handy while running a ship down (the full broadside still hits far harder).'))}">`
+      + `<button data-act="fire-bow" ${bowDis ? 'disabled' : ''} title="${esc(t('Fire the bow chaser — target must be roughly ahead (key F)'))}">${t('🎯 bow gun')}</button>`
+      + `<button data-act="fire-stern" ${sternDis ? 'disabled' : ''} title="${esc(t('Fire the stern chaser — target must be roughly astern (key G)'))}">${t('🎯 stern gun')}</button></div>`
   }
 
   private renderLog(state: SimState): void {
@@ -292,10 +293,10 @@ export class Panels {
   }
 }
 
-const speakerName = (s: string): string => ({
+export const speakerName = (s: string): string => t(({
   captain: 'Captain', mate: 'Rusk (First Mate)', gunner: 'Hargrove (Master Gunner)',
   lookout: 'Pip (Lookout)', bosun: 'Tarr (Bosun)', 'enemy-captain': 'Enemy',
   pirate: 'Pirate', port: 'Capt. Vane (Port Authority)', governor: 'Governor',
   admiral: 'Admiral Thorne', agent: 'Don Cristóbal de Vega',
   'pirate-captain': 'Silas Rourke "Black Surf"', 'castilian-admiral': 'Almirante Herrera',
-}[s] ?? s)
+} as Record<string, string>)[s] ?? s)

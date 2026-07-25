@@ -4,6 +4,7 @@
  * kolečkem. Kreslí vodu, vítr (proudnice + růžice), ostrovy, lodě, koule.
  */
 import type { Ball, Contact, Island, ShipClassDef, ShipState, SimState, Vec2 } from '../sim/types'
+import { t as tr } from '../i18n/core'
 import { SHIP_CLASSES } from '../data/defs'
 import { windAt, storminess } from '../sim/wind'
 import { offWindAngle, sailEfficiency } from '../sim/sail'
@@ -822,7 +823,7 @@ export class TacticalPlot {
       ctx.fillText(label, s.x + lenPx + 8, s.y - 4)
       if (def && (con?.idQuality === 2 || sh.side === 'player')) {
         ctx.fillStyle = '#7f97a0'
-        ctx.fillText(def.name, s.x + lenPx + 8, s.y + 8)
+        ctx.fillText(tr(def.name), s.x + lenPx + 8, s.y + 8)
       }
     }
   }

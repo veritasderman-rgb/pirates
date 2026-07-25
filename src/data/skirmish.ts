@@ -7,6 +7,7 @@
 import type { Scenario, ShipSpec, Island, WindConfig } from '../sim/types'
 import { circlePoly } from '../sim/geom'
 import { SHIP_CLASSES } from './defs'
+import { t, activeLang } from '../i18n/core'
 
 export type Weather = 'calm' | 'breeze' | 'storm'
 export type SkirmishMap = 'open' | 'islands' | 'reef'
@@ -66,8 +67,8 @@ function seedFrom(o: SkirmishOptions): number {
 export function buildSkirmish(o: SkirmishOptions): Scenario {
   const count = Math.max(1, Math.min(4, Math.round(o.enemyCount)))
   const w = WEATHER_WIND[o.weather]
-  const pName = SHIP_CLASSES[o.playerClass]?.name ?? o.playerClass
-  const eName = SHIP_CLASSES[o.enemyClass]?.name ?? o.enemyClass
+  const pName = t(SHIP_CLASSES[o.playerClass]?.name ?? o.playerClass)
+  const eName = t(SHIP_CLASSES[o.enemyClass]?.name ?? o.enemyClass)
 
   const ships: ShipSpec[] = [
     {
@@ -89,9 +90,13 @@ export function buildSkirmish(o: SkirmishOptions): Scenario {
   return {
     id: 'skirmish',
     title: 'Skirmish',
-    briefing: `A free engagement off the Halcyon shoals — no orders, no quarter asked.\n\n`
-      + `You command the ${pName} against ${count}× ${eName}. Weather: ${WEATHER_LABEL[o.weather].toLowerCase()}. `
-      + `Ground: ${MAP_LABEL[o.map].toLowerCase()}. Sink or take the lot — and keep your own hull off the bottom.`,
+    briefing: activeLang() === 'cs'
+      ? `Volné střetnutí u halcyonských mělčin — žádné rozkazy, žádné pardon.\n\n`
+        + `Velíš lodi ${pName} proti ${count}× ${eName}. Počasí: ${t(WEATHER_LABEL[o.weather]).toLowerCase()}. `
+        + `Bojiště: ${t(MAP_LABEL[o.map]).toLowerCase()}. Potop, nebo zajmi všechny — a vlastní trup udrž nad vodou.`
+      : `A free engagement off the Halcyon shoals — no orders, no quarter asked.\n\n`
+        + `You command the ${pName} against ${count}× ${eName}. Weather: ${WEATHER_LABEL[o.weather].toLowerCase()}. `
+        + `Ground: ${MAP_LABEL[o.map].toLowerCase()}. Sink or take the lot — and keep your own hull off the bottom.`,
     seed: seedFrom(o),
     ambient: w.ambient,
     wind: w.wind,

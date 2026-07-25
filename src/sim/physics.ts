@@ -4,6 +4,7 @@
  * a kolize s terénem. Jednotky m, s, m/s. Úhly rad.
  */
 import type { ShipState, SimState, Vec2 } from './types'
+import { TXT } from './text'
 import {
   ARRIVE_DIST, ARRIVE_SPEED, DEFAULT_HULL_DRAG, LATERAL_DRAG, SHIP_MAX_SPEED,
   STEER_MIN_FACTOR, STEER_SPEED, TACK_ANGLE_DEG, NO_GO_DEG,
@@ -139,7 +140,7 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
       state.events.push({
         t: state.t, kind: 'shipDestroyed', shipId: ship.id, side: ship.side,
         pos: { ...ship.pos }, slowdown: true,
-        text: `${ship.name} has been wrecked on the ${isl.kind === 'reef' ? 'reef' : 'shoals'}!`,
+        text: TXT.wrecked(ship.name, isl.kind === 'reef'),
       })
       return
     }
@@ -151,8 +152,8 @@ export function updateShipPhysics(state: SimState, ship: ShipState, dt: number):
         pos: { ...ship.pos }, slowdown: ship.doctrine === 'player',
         speaker: ship.doctrine === 'player' ? 'bosun' : undefined,
         text: ship.doctrine === 'player'
-          ? `We've run onto ${isl.kind === 'reef' ? 'a reef' : 'a shoal'}! Back the sails, get us off it!`
-          : `${ship.name} has run aground.`,
+          ? TXT.agroundPlayer(isl.kind === 'reef')
+          : TXT.agroundOther(ship.name),
       })
     }
   } else {
