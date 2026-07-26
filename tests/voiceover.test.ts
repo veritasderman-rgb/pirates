@@ -20,6 +20,13 @@ describe('dabing — manifest a klipy', () => {
     expect(missing).toEqual([])
   })
 
+  it('každá replika má i ČESKÝ klip (public/vo/cs) a český text', () => {
+    const noClip = manifest.lines.filter(l => !existsSync(resolve(voDir, 'cs', `${l.id}.mp3`))).map(l => l.id)
+    const noText = manifest.lines.filter(l => !(l as { textCs?: string }).textCs).map(l => l.id)
+    expect(noClip).toEqual([])
+    expect(noText).toEqual([])
+  })
+
   it('každá mise má namluvený briefing', () => {
     for (const id of Object.keys(SCENARIOS)) expect(ids.has(`brief-${id}`)).toBe(true)
   })

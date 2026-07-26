@@ -12,6 +12,7 @@ import { weatherGage, rakeAvailable, bestBroadside, bestChaser } from '../sim/we
 import { boardingOdds } from '../sim/surrender'
 import { BOARD_RANGE } from '../sim/constants'
 import { dist } from '../sim/vec'
+import { t, tp } from '../i18n/core'
 
 export type DeviceTier = 'phone' | 'tablet' | 'desktop'
 
@@ -40,7 +41,7 @@ const esc = (s: string): string =>
 const gaugeCol = (v: number): string => v > 0.66 ? '#5cc98a' : v > 0.33 ? '#d8b24f' : '#e0603a'
 
 const SHOT_ICON: Record<ShotType, string> = { round: '⚫', chain: '⛓', grape: '🔴' }
-const SHOT_TAG: Record<ShotType, string> = { round: 'hull', chain: 'sails', grape: 'crew' }
+const SHOT_TAG: Record<ShotType, string> = { round: 'hull', chain: 'sails', grape: 'crew' } // t() při renderu
 
 /** Malý svislý ukazatel: ikona + barevný sloupec (bez textu). */
 function pip(icon: string, v: number, title: string): string {
@@ -160,8 +161,8 @@ export class MobileHud implements Hud {
     const ss = sh.subsystems
     const guns = (ss.gunsPort + ss.gunsStbd) / 2
     this.status.innerHTML =
-      pip('🛡', sh.hull / hp, 'hull') + pip('⛵', ss.rigging, 'rigging') + pip('🧭', ss.rudder, 'rudder')
-      + pip('💥', guns, 'guns') + pip('👥', ss.crew, 'crew') + pip('🚩', sh.morale, 'morale')
+      pip('🛡', sh.hull / hp, t('hull')) + pip('⛵', ss.rigging, t('rigging')) + pip('🧭', ss.rudder, t('rudder'))
+      + pip('💥', guns, t('Guns')) + pip('👥', ss.crew, t('crew')) + pip('🚩', sh.morale, t('morale'))
   }
 
   private renderTarget(state: SimState, ui: UiState): void {
@@ -189,9 +190,9 @@ export class MobileHud implements Hud {
     const body = live
       ? `<div class="mh-t-bar"><i style="width:${Math.round(Math.max(0, tgt.hull / hp) * 100)}%"></i></div>`
         + `<div class="mh-t-ics">${bits.join('')}</div>`
-      : `<div class="mh-t-lost">${con?.memory ? 'contact lost' : 'unidentified'}</div>`
+      : `<div class="mh-t-lost">${t(con?.memory ? 'contact lost' : 'unidentified')}</div>`
     this.target.innerHTML =
-      `<div class="mh-t-main"><div class="mh-t-name">${esc(known ? tgt.name : 'Unknown contact')} ${badge}</div>`
+      `<div class="mh-t-main"><div class="mh-t-name">${esc(known ? tgt.name : t('Unknown contact'))} ${badge}</div>`
       + body + `</div>`
       + oddsRing
   }
@@ -215,14 +216,14 @@ export class MobileHud implements Hud {
       `<button data-act="${act}" class="mh-btn ${on ? 'on' : ''}" ${dis ? 'disabled' : ''}>`
       + `<span class="mh-bi">${icon}</span><span class="mh-bl">${label}</span></button>`
     const ctx = tgt && tgt.side !== 'player' && !tgt.destroyed
-      ? (!tgt.surrendered ? btn('demand', '⚑', 'surr') : '') + btn('board', '⚓', 'board')
+      ? (!tgt.surrendered ? btn('demand', '⚑', t('surr')) : '') + btn('board', '⚓', t('Board').toLowerCase())
       : ''
     this.actions.innerHTML =
-      btn('toggle-sails', '⛵', 'sails', sh.sailsUp)
-      + btn('toggle-oars', '🚣', 'oars', sh.oaring, !def?.canRow)
-      + btn('shot-cycle', SHOT_ICON[ui.shot], SHOT_TAG[ui.shot])
-      + btn('fire', '🔥', 'FIRE', false, !canFire)
-      + btn('toggle-auto', auto ? '🎯' : '✋', auto ? 'auto' : 'hold', auto)
+      btn('toggle-sails', '⛵', t('sails'), sh.sailsUp)
+      + btn('toggle-oars', '🚣', t('oars'), sh.oaring, !def?.canRow)
+      + btn('shot-cycle', SHOT_ICON[ui.shot], t(SHOT_TAG[ui.shot]))
+      + btn('fire', '🔥', t('FIRE'), false, !canFire)
+      + btn('toggle-auto', auto ? '🎯' : '✋', t(auto ? 'auto' : 'hold'), auto)
       + ctx
   }
 
@@ -233,7 +234,7 @@ export class MobileHud implements Hud {
     this.sheet.innerHTML =
       `<div class="mh-sh-bd" data-sheet="close"></div>`
       + `<div class="mh-sh-card"><div class="mh-sh-body"></div>`
-      + `<button class="mh-sh-x" data-sheet="close">Close</button></div>`
+      + `<button class="mh-sh-x" data-sheet="close">${t('Close')}</button></div>`
     this.sheet.classList.add('open')
     if (this.lastState && this.lastUi) this.renderSheet(this.lastState, this.lastUi)
   }
@@ -264,50 +265,50 @@ export class MobileHud implements Hud {
 
   private buildOwnSheet(state: SimState, ui: UiState): string {
     const sh = state.ships.find(s => s.id === ui.selectedId)
-    if (!sh) return `<div class="mh-sh-h">No ship</div>`
+    if (!sh) return `<div class="mh-sh-h">${t('No ship')}</div>`
     const def = SHIP_CLASSES[sh.classId]
     const hp = sh.hullMax ?? def?.hullPoints ?? 100
     const ss = sh.subsystems
     const kn = Math.round(Math.hypot(sh.vel.x, sh.vel.y) * 1.94)
     const pct = (v: number): string => `${Math.round(v * 100)}%`
-    return `<div class="mh-sh-h">${esc(def?.name ?? sh.name)}</div>`
-      + this.row('Hull', `${Math.round(sh.hull)} / ${Math.round(hp)}`, sh.hull / hp)
-      + this.row('Rigging', pct(ss.rigging), ss.rigging)
-      + this.row('Rudder', pct(ss.rudder), ss.rudder)
-      + this.row('Guns (port)', pct(ss.gunsPort), ss.gunsPort)
-      + this.row('Guns (stbd)', pct(ss.gunsStbd), ss.gunsStbd)
-      + this.row('Crew', pct(ss.crew), ss.crew)
-      + this.row('Morale', pct(sh.morale), sh.morale)
-      + this.row('Ammo', `${sh.ammo}`)
-      + this.row('Speed', `${kn} kn`)
-      + this.row('Sails', sh.sailsUp ? 'set' : 'furled')
-      + (def?.canRow ? this.row('Oars', sh.oaring ? 'out' : 'shipped') : '')
+    return `<div class="mh-sh-h">${esc(t(def?.name ?? sh.name))}</div>`
+      + this.row(t('Hull'), `${Math.round(sh.hull)} / ${Math.round(hp)}`, sh.hull / hp)
+      + this.row(t('Rigging'), pct(ss.rigging), ss.rigging)
+      + this.row(t('Rudder'), pct(ss.rudder), ss.rudder)
+      + this.row(t('Guns (port)'), pct(ss.gunsPort), ss.gunsPort)
+      + this.row(t('Guns (stbd)'), pct(ss.gunsStbd), ss.gunsStbd)
+      + this.row(t('Crew'), pct(ss.crew), ss.crew)
+      + this.row(t('Morale'), pct(sh.morale), sh.morale)
+      + this.row(t('Ammo'), `${sh.ammo}`)
+      + this.row(t('Speed'), `${kn} kn`)
+      + this.row(t('Sails'), t(sh.sailsUp ? 'set' : 'furled'))
+      + (def?.canRow ? this.row(t('Oars'), t(sh.oaring ? 'out' : 'shipped')) : '')
   }
 
   private buildTargetSheet(state: SimState, ui: UiState): string {
     const tgt = ui.targetId !== null ? state.ships.find(s => s.id === ui.targetId) : undefined
-    if (!tgt) return `<div class="mh-sh-h">No target</div>`
+    if (!tgt) return `<div class="mh-sh-h">${t('No target')}</div>`
     const con = state.contacts.player.find(c => c.shipId === tgt.id)
     const known = !!(con && con.idQuality >= 1)
     const live = !!(con && con.idQuality >= 1 && !con.memory) && tgt.side !== 'player'
     const def = SHIP_CLASSES[tgt.classId]
     const hp = tgt.hullMax ?? def?.hullPoints ?? 100
     const flag = state.ships.find(s => s.doctrine === 'player' && !s.destroyed)
-    const head = `<div class="mh-sh-h">${esc(known ? tgt.name : 'Unknown contact')}</div>`
+    const head = `<div class="mh-sh-h">${esc(known ? tgt.name : t('Unknown contact'))}</div>`
     if (!live) {
-      return head + `<div class="mh-sh-note">${con?.memory ? 'Contact lost — last known position only.' : 'Not yet identified.'}</div>`
+      return head + `<div class="mh-sh-note">${t(con?.memory ? 'Contact lost — last known position only.' : 'Not yet identified.')}</div>`
     }
     const gage = flag ? weatherGage(flag.pos, tgt.pos, state.wind.dir) : 0
     const rng = flag ? Math.round(dist(flag.pos, tgt.pos)) : 0
     const odds = flag && !tgt.surrendered ? boardingOdds(flag, tgt) : 0
     return head
-      + (known ? this.row('Class', def?.name ?? tgt.classId) : '')
-      + this.row('Hull', `${Math.round(Math.max(0, tgt.hull / hp) * 100)}%`, tgt.hull / hp)
-      + this.row('Range', `${rng} m`)
-      + (flag ? this.row('Weather gage', `${Math.round(gage * 100)}%`, gage) : '')
-      + (flag ? this.row('Raking', rakeAvailable(flag, tgt) ? 'yes — aligned' : 'no') : '')
-      + (flag && !tgt.surrendered ? this.row('Boarding odds', `${Math.round(odds * 100)}%`, odds) : '')
-      + (tgt.surrendered ? this.row('Status', 'surrendered') : '')
+      + (known ? this.row(t('Class'), t(def?.name ?? tgt.classId)) : '')
+      + this.row(t('Hull'), `${Math.round(Math.max(0, tgt.hull / hp) * 100)}%`, tgt.hull / hp)
+      + this.row(t('Range'), `${rng} m`)
+      + (flag ? this.row(t('Weather gage'), `${Math.round(gage * 100)}%`, gage) : '')
+      + (flag ? this.row(t('Raking'), t(rakeAvailable(flag, tgt) ? 'yes — aligned' : 'no')) : '')
+      + (flag && !tgt.surrendered ? this.row(t('Boarding odds'), `${Math.round(odds * 100)}%`, odds) : '')
+      + (tgt.surrendered ? this.row(t('Status'), t('surrendered')) : '')
   }
 
   /** První spuštění na telefonu → jednorázová legenda ikon. Vrací true, když se zobrazila. */
@@ -316,18 +317,18 @@ export class MobileHud implements Hud {
     try { seen = localStorage.getItem(COACH_KEY) === '1' } catch { /* private mode */ }
     if (seen) return false
     const legend: [string, string][] = [
-      ['🛡', 'Hull'], ['⛵', 'Rigging / sails'], ['🧭', 'Rudder'], ['💥', 'Guns'],
-      ['👥', 'Crew'], ['🚩', 'Morale'], ['⚑', 'Weather gage'], ['🎯', 'Raking line'],
-      ['🔥', 'Fire the ready guns'], ['⚓', 'Board'],
+      ['🛡', t('Hull')], ['⛵', t('Rigging / sails')], ['🧭', t('Rudder')], ['💥', t('Guns')],
+      ['👥', t('Crew')], ['🚩', t('Morale')], ['⚑', t('Weather gage')], ['🎯', t('Raking line')],
+      ['🔥', t('Fire the ready guns')], ['⚓', t('Board')],
     ]
     const rows = legend.map(([i, t]) => `<div class="mh-co-row"><span>${i}</span><b>${esc(t)}</b></div>`).join('')
     const el = document.createElement('div')
     el.id = 'mh-coach'
     el.innerHTML =
-      `<div class="mh-co-card"><div class="mh-co-h">Quick guide</div>`
-      + `<div class="mh-co-sub">Bars fill green→red as things break. Tap your bars or the target to see full numbers.</div>`
+      `<div class="mh-co-card"><div class="mh-co-h">${t('Quick guide')}</div>`
+      + `<div class="mh-co-sub">${t('Bars fill green→red as things break. Tap your bars or the target to see full numbers.')}</div>`
       + `<div class="mh-co-grid">${rows}</div>`
-      + `<button class="mh-co-ok">Got it</button></div>`
+      + `<button class="mh-co-ok">${t('Got it')}</button></div>`
     el.querySelector('.mh-co-ok')!.addEventListener('pointerdown', e => {
       e.preventDefault()
       try { localStorage.setItem(COACH_KEY, '1') } catch { /* ignore */ }

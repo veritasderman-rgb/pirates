@@ -1,4 +1,5 @@
 /** Skóre mise — deterministické z průběhu. */
+import { t, tp } from '../i18n/core'
 
 export interface ScoreInput {
   missionId: string
@@ -15,13 +16,13 @@ export interface ScoreResult { total: number; breakdown: ScoreLine[] }
 
 export function scoreMission(inp: ScoreInput): ScoreResult {
   const b: ScoreLine[] = []
-  if (inp.outcome === 'win') b.push({ label: 'Victory', points: 1000 })
-  b.push({ label: `Objectives met ×${inp.objectivesDone}`, points: inp.objectivesDone * 250 })
-  b.push({ label: `Ships captured ×${inp.prizesTaken}`, points: inp.prizesTaken * 300 })
-  b.push({ label: `Enemies sunk ×${inp.enemySunk}`, points: inp.enemySunk * 120 })
+  if (inp.outcome === 'win') b.push({ label: t('Victory'), points: 1000 })
+  b.push({ label: tp('Objectives met ×{n}', { n: inp.objectivesDone }), points: inp.objectivesDone * 250 })
+  b.push({ label: tp('Ships captured ×{n}', { n: inp.prizesTaken }), points: inp.prizesTaken * 300 })
+  b.push({ label: tp('Enemies sunk ×{n}', { n: inp.enemySunk }), points: inp.enemySunk * 120 })
   const timeBonus = Math.max(0, 600 - Math.round(inp.t))
-  b.push({ label: 'Speed', points: timeBonus })
-  b.push({ label: `Own losses ×${inp.ownLosses}`, points: -inp.ownLosses * 400 })
+  b.push({ label: t('Speed'), points: timeBonus })
+  b.push({ label: tp('Own losses ×{n}', { n: inp.ownLosses }), points: -inp.ownLosses * 400 })
   const total = Math.max(0, b.reduce((s, l) => s + l.points, 0))
   return { total, breakdown: b }
 }

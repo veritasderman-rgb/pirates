@@ -4,6 +4,7 @@
  */
 import type { Ball, Broadside, ShipState, ShotType, SimState, Vec2 } from './types'
 import { disableBark } from '../data/barks'
+import { TXT } from './text'
 import {
   BALL_SPEED, RELOAD_TIME, GUN_SPREAD_PER_M, ACCURACY_BASE,
   CHAIN_HULL_FACTOR, CHAIN_RIG_FACTOR, GRAPE_HULL_FACTOR, GRAPE_CREW_FACTOR,
@@ -176,14 +177,12 @@ export function fireBroadside(
     pos: { ...ship.pos }, dir: broadsideDir(ship, side),
     speaker: ship.doctrine === 'player' ? 'gunner' : undefined,
     text: ship.doctrine === 'player'
-      ? `${side === 'port' ? 'Port' : 'Starboard'} — FIRE! (${n} guns, ${shotName(shot)})`
-      : `${ship.name} fires a broadside.`,
+      ? TXT.broadsideFirePlayer(side, n, shot)
+      : TXT.broadsideFireOther(ship.name),
   })
   return true
 }
 
-const shotName = (s: ShotType): string =>
-  s === 'round' ? 'round shot' : s === 'chain' ? 'chain shot' : 'grape shot'
 
 /**
  * Stíhací dělo (příď/záď): pár lehkých děl mířících podél osy. Slabé oproti
@@ -229,7 +228,7 @@ export function fireChaser(
     pos: { ...ship.pos }, dir,
     speaker: ship.doctrine === 'player' ? 'gunner' : undefined,
     text: ship.doctrine === 'player'
-      ? `${end === 'bow' ? 'Bow' : 'Stern'} chaser — fire! (${n} guns, ${shotName(shot)})`
+      ? TXT.chaserFirePlayer(end, n, shot)
       : '',
   })
   return true
@@ -341,14 +340,14 @@ export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec
       state.events.push({
         t: state.t, kind: 'comm', shipId: ship.id, side: 'player', speaker: 'gunner',
         slowdown: true, pos: { ...ship.pos },
-        text: `RAKING! A raking broadside tore ${ship.name} from ${zone} to stern!`,
+        text: TXT.rakingDealt(ship.name, zone as 'bow' | 'stern'),
         voiceId: 'bark-raking-dealt',
       })
     } else if (ship.doctrine === 'player') {
       state.events.push({
         t: state.t, kind: 'comm', shipId: ship.id, side: ship.side, speaker: 'mate',
         slowdown: true, pos: { ...ship.pos },
-        text: `They're raking us end to end — ${ship.name} is groaning! Turn your bow out of the line.`,
+        text: TXT.rakingTaken(ship.name),
         voiceId: 'bark-raking-taken',
       })
     }
@@ -359,7 +358,7 @@ export function applyHit(state: SimState, ship: ShipState, ball: Ball, from: Vec
     state.events.push({
       t: state.t, kind: 'shipDestroyed', shipId: ship.id, side: ship.side, pos: { ...ship.pos },
       slowdown: true,
-      text: `${ship.name} is going down!`,
+      text: TXT.sinking(ship.name),
     })
   }
 }
@@ -386,28 +385,16 @@ function damageSubsystem(
     if (byPlayer) {
       state.events.push({
         t: state.t, kind: 'comm', shipId: ship.id, side: 'player', speaker: 'gunner',
-        slowdown: true, pos: { ...ship.pos }, text: disableCallout(ship.name, k),
+        slowdown: true, pos: { ...ship.pos }, text: TXT.disableCallout(ship.name, k),
         voiceId: disableBark(k),
       })
     } else {
       state.events.push({
         t: state.t, kind: 'subsystemHit', shipId: ship.id, side: ship.side, pos: { ...ship.pos },
-        text: `${ship.name}: ${subName(k)} knocked out!`,
+        text: TXT.subsystemHit(ship.name, k),
       })
     }
   }
 }
 
-const subName = (k: string): string => ({
-  rigging: 'rigging', rudder: 'rudder', gunsPort: 'port guns',
-  gunsStbd: 'starboard guns', crew: 'crew',
-}[k] ?? k)
 
-/** Callouts crediting the player's hit with a concrete consequence (legibility). */
-const disableCallout = (name: string, k: string): string => ({
-  rudder: `${name}: rudder shot away — she can't steer any more!`,
-  rigging: `${name}: rigging in tatters — she's losing speed, we're catching her!`,
-  gunsPort: `${name}: port guns silenced!`,
-  gunsStbd: `${name}: starboard guns silenced!`,
-  crew: `${name}: crew decimated — board her now!`,
-}[k] ?? `${name}: ${subName(k)} knocked out!`)

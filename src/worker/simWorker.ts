@@ -6,6 +6,8 @@ import { sim } from '../sim/engine'
 import { SIM_DT } from '../sim/constants'
 import { SCENARIOS } from '../data/missions'
 import { applyFlagshipLoadout } from '../sim/loadout'
+import { setActiveLang } from '../i18n/core'
+import { localizeScenario } from '../i18n/scenario'
 import type { Scenario, SimState, WorkerInMsg, WorkerOutMsg } from '../sim/types'
 
 const TICK_MS = 50
@@ -33,8 +35,12 @@ self.onmessage = (e: MessageEvent<WorkerInMsg>) => {
   const msg = e.data
   switch (msg.kind) {
     case 'init': {
-      // skirmish posílá hotový scénář přímo (není v SCENARIOS); kampaň jen id
-      const scenario = msg.scenario ?? loadScenario(msg.scenarioId)
+      // jazyk ze zprávy (worker nemá localStorage) — PŘED lokalizací scénáře
+      setActiveLang(msg.lang ?? 'en')
+      // skirmish posílá hotový scénář přímo (není v SCENARIOS); kampaň jen id.
+      // Lokalizace vrací hlubokou kopii → texty v aktivním jazyce a modulové
+      // objekty misí zůstávají nedotčené (trigger.fired se nepropisuje zpět).
+      const scenario = localizeScenario(msg.scenario ?? loadScenario(msg.scenarioId))
       state = sim.create(scenario)
       applyFlagshipLoadout(state, msg.flagshipClass, msg.upgrades, msg.condition)
       compression = 0

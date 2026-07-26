@@ -4,672 +4,784 @@
       "id": "bark-board-range",
       "speaker": "mate",
       "text": "To board we must lay alongside — close to sixty metres!",
+      "textCs": "Na boarding musíme přiléhnout bok k boku — na šedesát metrů!",
       "kind": "bark"
     },
     {
       "id": "bark-boarding-repulsed",
       "speaker": "bosun",
       "text": "Boarding party thrown back! Soften her with fire first!",
+      "textCs": "Výsadek odražen! Nejdřív ji změkčete palbou!",
       "kind": "bark"
     },
     {
       "id": "bark-disable-crew",
       "speaker": "gunner",
       "text": "Her crew is decimated — board her now!",
+      "textCs": "Posádka zdecimována — teď boarding!",
       "kind": "bark"
     },
     {
       "id": "bark-disable-gunsPort",
       "speaker": "gunner",
       "text": "Her port guns are silenced!",
+      "textCs": "Děla levoboku umlčena!",
       "kind": "bark"
     },
     {
       "id": "bark-disable-gunsStbd",
       "speaker": "gunner",
       "text": "Her starboard guns are silenced!",
+      "textCs": "Děla pravoboku umlčena!",
       "kind": "bark"
     },
     {
       "id": "bark-disable-rigging",
       "speaker": "gunner",
       "text": "Her rigging is in tatters — she is losing speed!",
+      "textCs": "Ráhnoví má v cárech — ztrácí rychlost!",
       "kind": "bark"
     },
     {
       "id": "bark-disable-rudder",
       "speaker": "gunner",
       "text": "Her rudder is shot away — she cannot steer!",
+      "textCs": "Kormidlo má ustřelené — nemůže zatáčet!",
       "kind": "bark"
     },
     {
       "id": "bark-flagship-fallen",
       "speaker": "admiral",
       "text": "The flagship has fallen! Take up the colours — lead us on, Captain!",
+      "textCs": "Vlajková loď padla! Převezměte vlajku — veďte nás, kapitáne!",
       "kind": "bark"
     },
     {
       "id": "bark-grapples",
       "speaker": "bosun",
       "text": "Grapples away! Boarders, with me!",
+      "textCs": "Háky vpřed! Výsadek, za mnou!",
       "kind": "bark"
     },
     {
       "id": "bark-raking-dealt",
       "speaker": "gunner",
       "text": "Raking broadside! We tore her stem to stern!",
+      "textCs": "Podélná salva! Rozpárali jsme ji od přídě k zádi!",
       "kind": "bark"
     },
     {
       "id": "bark-raking-taken",
       "speaker": "mate",
       "text": "They are raking us end to end! Turn your bow out of the line!",
+      "textCs": "Rakují nás podélně! Uhněte přídí z linie!",
       "kind": "bark"
     },
     {
       "id": "bark-refuse-strike",
       "speaker": "enemy-captain",
       "text": "We will not strike our colours!",
+      "textCs": "Vlajku nespustíme!",
       "kind": "bark"
     },
     {
       "id": "brief-mission01",
       "speaker": "narrator",
       "text": "HMS Swallow holds the customs patrol in the strait off Turtle Island. Port Command reports a merchantman, the Sea Maiden, with a suspicious manifest — carry out an inspection: close to within 300 metres. Beware: if she has something to hide, she will crowd on sail and run for open water.\n\nTRAINING: the wind blows to the east — catch it in your sails (you sail fastest on a broad reach, with the wind on your quarter), trim to suit, and put out oars in a calm or into the wind. The island must be sailed AROUND — do not run onto the shoals.",
+      "textCs": "HMS Vlaštovka drží celní hlídku v úžině u Želvího ostrova. Přístavní kapitanát hlásí kupeckou loď Mořská panna s podezřelým manifestem — proveďte kontrolu: přibližte se na 300 metrů. Pozor: jestli má co skrývat, napne plachty a poběží na volné moře.\n\nVÝCVIK: vítr vane k východu — chytněte ho do plachet (nejrychleji plujete na zadoboční vítr, tzv. broad reach), doladíte trim, a do bezvětří nebo proti větru nasadíte vesla. Ostrov se musí OBEPLOUT — na mělčinu nenajíždějte.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission02",
       "speaker": "narrator",
       "text": "HMS Goshawk leads two merchantmen through the Narrows — the strait between Boar Island and Mist Island. Scouts warn of a pirate pack lying in wait to windward.\n\nThe merchantmen are making for the eastern entrance; your task is to keep them alive and deal with the pirates. Use the islands: in the strait big ships turn poorly and lose the wind in the lee. Slow them with chain shot, sink them with round, and thin their crews with grape before a boarding party.",
+      "textCs": "HMS Ostříž vede dva kupce Soutěskou — úžinou mezi Kančím a Mlžným ostrovem. Rozvědka varuje před pirátskou smečkou, která tu číhá v návětří.\n\nKupci plují k východnímu vjezdu; tvým úkolem je udržet je naživu a vyřídit piráty. Využij ostrovy: v úžině se velké lodě špatně otáčejí a v závětří ztrácejí vítr. Řetězovou salvou zpomal, plnou potop, kartáčem proděravěj posádku před výsadkem.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission03",
       "speaker": "narrator",
       "text": "HMS Fortuna patrols off Cauldron Island. Port Command reports a lone merchantman, the \"Santa Rosa\", drifting in the strait with no escort — after what happened at the Narrows, suspiciously calm.\n\nCheck her over. But keep your distance and ready your sides: if it is a trap, it will spring only up close — and a Q-ship gets the first broadside for free. You break her fastest by raking her bow or stern, where she has no guns.",
+      "textCs": "HMS Fortuna hlídkuje u Kotlového ostrova. Kapitanát hlásí osamělou kupeckou loď „Santa Rosa\", která bez eskorty drifuje v úžině — po událostech u Soutěsky až podezřele klidně.\n\nPrověř ji. Ale drž si odstup a připrav boky: jestli je to past, odhalí se až zblízka — a Q-loď má první salvu zadarmo. Nejrychleji ji zlomíš rakem do přídě nebo zádě, kde nemá děla.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission04",
       "speaker": "narrator",
       "text": "The captured orders from the Q-ship were bound for the Castillan port of Punta Negra. Before we could act, a courier — the \"Céfiro\" — put out from there with a reply, and now she is racing back under the protection of the fortress.\n\nRun her down and seize those dispatches. The Céfiro is faster on a clean wind, but she must make for the harbor; cut off her path, hold your best point of sail and put out oars in a calm. Beware the Punta Negra Fortress — its shot carries farther than yours.",
+      "textCs": "Zajaté rozkazy z Q-lodi mířily do castillského přístavu Punta Negra. Než jsme stačili zasáhnout, vyplul odtud kurýr „Céfiro\" s odpovědí — a teď pádí zpátky pod ochranu pevnosti.\n\nDostihni ho a zajmi ty depeše. Céfiro je rychlejší na čistém větru, ale musí k přístavu; uřízni mu cestu, drž nejlepší bod plavby a do bezvětří nasaď vesla. Pozor na pevnost Punta Negra — její koule dolétnou dál než tvoje.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission05",
       "speaker": "narrator",
       "text": "The dispatches gave away the nest: the Shoal Brotherhood lies at anchor in the bay of Bone Island, sheltered by a coastal battery. It is led by Silas Rourke, \"Black Surf\" — a man on de Vega's payroll.\n\nYou sail in with the Fortuna and the allied brig Goshawk. Smash the pack and capture or sink Rourke's flagship brig. The battery at the entrance is dangerous — stay within its range only when you must, and in the narrow bay do not run onto the shoals. Split your fire with the Goshawk and rake where you can.",
+      "textCs": "Depeše prozradily hnízdo: Bratrstvo Mělčiny kotví v zátoce Kostivého ostrova, kryté pobřežní baterií. Velí mu Silas Rourke „Černý příboj\" — muž, kterého platí de Vega.\n\nVplouváš s Fortunou a spojeneckou brigou Ostříž. Rozbij smečku a zajmi nebo potop Rourkovu vlajkovou brigu. Baterie u vjezdu je nebezpečná — drž se jejího dostřelu jen, když musíš, a v úzké zátoce nenajížděj na mělčiny. Rozděl s Ostřížem palbu a rakuj, kde se dá.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission06",
       "speaker": "narrator",
       "text": "This is where it is decided. The last of Castilla's treasure silver is sailing for the Albion straits under the squadron of almirante Herrera — and with it, the war de Vega has been preparing all along. Stop him in the strait at the Three Beacons.\n\nYou lead the Fortuna, the brig Goshawk and the sloop Swallow against the ship of the line Trueno and the frigate Rayo. The Trueno has thirty guns to a side — no one beats her alongside. Use the strait and the islands: a ship of the line turns slowly, loses her drive in a wind shadow and dares not enter the shoals. Split your fire, dance around her and rake her bow and stern, where she has no guns.",
+      "textCs": "Tady se to rozhodne. Poslední pokladní stříbro Castilly pluje na albionské úžiny pod eskadrou almiranteho Herrery — a s ním válka, kterou de Vega chystal celou dobu. Zastav ho v úžině u Tří majáků.\n\nVedeš Fortunu, brigu Ostříž a šalupu Vlaštovku proti řadové lodi Trueno a fregatě Rayo. Trueno má třicet děl na bok — bok po boku ji nikdo neporazí. Využij úžinu a ostrovy: řadová loď se otáčí pomalu, ve větrném stínu ztrácí tah a do mělčin se neodváží. Rozděl palbu, obtancuj ji a rakuj do přídě a zádě, kde děla nemá.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission07",
       "speaker": "narrator",
       "text": "The Three Beacons did not stop Castilla — it only enraged her. In reprisal, de Vega has sent a squadron of frigates against the Albion anchor station at Gull Island.\n\nYou drive them off with the Fortuna, the Goshawk and the Swallow. Three Castillan frigates have wider broadsides but worse training — trust to your mobility, split your fire and don't let them bring their broadsides to bear on you all at once.",
+      "textCs": "Tři majáky Castillu nezastavily — jen rozzuřily. De Vega poslal v odvetě eskadru fregat na albionskou kotvící stanici u Rackova ostrova.\n\nZaženeš je s Fortunou, Ostřížem a Vlaštovkou. Tři castillské fregaty mají širší salvy, ale horší výcvik — drž se pohyblivosti, rozděl palbu a nedej jim srovnat boky všem naráz.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission08",
       "speaker": "narrator",
       "text": "The scouts have finally fixed his position: Don Cristóbal de Vega himself, on a fast courier, is making for Cádiz under the protection of an auxiliary cruiser and two frigates.\n\nWe won't catch his courier before she slips away — but we can break his escort and strip him of his shield. You lead the Fortuna, the Goshawk and the allied frigate Valour. Deal with the Q-ship and both frigates; let the courier run.",
+      "textCs": "Zpravodajové ho konečně zaměřili: Don Cristóbal de Vega osobně, na rychlém kurýru, míří k Cádizu pod ochranou pomocného křižníku a dvou fregat.\n\nNedostihneme jeho kurýr dřív, než proklouzne — ale můžeme mu rozbít eskortu a připravit ho o štít. Vedeš Fortunu, Ostříž a spojeneckou fregatu Odvahu. Vyřiď Q-loď a obě fregaty; kurýr ať si běží.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission09",
       "speaker": "narrator",
       "text": "De Vega has withdrawn into Cádiz — the anchorage where Castilla is gathering her last treasure fleet. The admiralty has entrusted you with a capital ship: the ship of the line HMS Sovereign, twenty-eight guns to a side.\n\nFight your way past the coastal battery and break the Castillan squadron at the gate — two frigates and a treasure galleon. You need not raze the battery; it is enough to silence it or survive its gauntlet and deal with the ships. The Sovereign is slow and turns poorly — let her hold the line and pour out broadsides while the Fortuna and the Goshawk dance around and rake. Mind the shoals, a capital keel runs deep.",
+      "textCs": "De Vega se stáhl do Cádizu — kotviště, kde Castilla shromažďuje poslední pokladní flotilu. Admiralita ti svěřila kapitální loď: řadovou loď HMS Sovereign, dvacet osm děl na bok.\n\nProber se kolem pobřežní baterie a rozbij castillskou eskadru u brány — dvě fregaty a pokladní galeonu. Baterii nemusíš srovnat se zemí; stačí ji umlčet nebo přežít její gauntlet a vyřídit lodě. Sovereign je pomalá a špatně se otáčí — nech ji držet linii a sypat salvy, zatímco Fortuna a Ostříž tančí kolem a rakují. Pozor na mělčiny, kapitální kýl je hluboký.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission10",
       "speaker": "narrator",
       "text": "Behind the fortress of Cádiz lies Castilla's last treasure fleet at anchor: two galleons full of colonial silver, guarded by a ship of the line and two frigates. That silver pays for de Vega's war — we take it from him.\n\nYou lead the Sovereign, the frigates Fortuna and Valour, the brig Goshawk and the sloop Swallow. Break the escort and sink or (better) capture both galleons. Grape on the decks, then board — a captured treasure galleon is the end of the Castillan treasury.",
+      "textCs": "Za pevností Cádizu kotví poslední pokladní flotila Castilly: dvě galeony plné koloniálního stříbra, kryté řadovou lodí a dvěma fregatami. To stříbro platí de Vegovu válku — vezmeme mu ho.\n\nVedeš Sovereign, fregaty Fortunu a Odvahu, brigu Ostříž a šalupu Vlaštovku. Rozbij eskortu a obě galeony potop nebo (lépe) zajmi. Kartáč na paluby, pak boarding — zajatá pokladní galeona je konec castillské pokladny.",
       "kind": "briefing"
     },
     {
       "id": "brief-mission11",
       "speaker": "narrator",
       "text": "This is where it ends. De Vega has played his last card — the flagship Corona, four decks of guns, the largest hull Castilla ever launched. Around her a ship of the line, two frigates and the fortress of Cádiz.\n\nYou lead the largest fleet Albion could muster: two ships of the line (Sovereign, Valiant), the frigates Fortuna, Valour and Dauntless and the brig Goshawk. You won't beat Corona alongside — hem her in, split your fire, rake her bow and stern. End de Vega's game for Halcyon.",
+      "textCs": "Tady to končí. De Vega vytáhl poslední kartu — vlajkovou loď Corona, čtyři paluby děl, největší trup, jaký kdy Castilla spustila. Kolem ní řadová loď, dvě fregaty a pevnost Cádizu.\n\nVedeš největší flotilu, jakou Albion sebral: dvě řadové lodi (Sovereign, Valiant), fregaty Fortunu, Odvahu a Neohroženou a brigu Ostříž. Coronu bok po boku neporazíš — sevři ji, rozděl palbu, rakuj do přídě a zádě. Ukonči de Vegovu hru o Halcyon.",
       "kind": "briefing"
     },
     {
       "id": "brief-side01",
       "speaker": "narrator",
       "text": "A SIDE COMMISSION, off the campaign's main track. Revenue swears a pack of smugglers is running contraband through the Tin Cays under merchant colours — brandy, powder and worse, bound for the free ports.\n\nHMS Swallow lies across their run. Three trim little sloops sail ahead of you wearing an honest face; close on them and their disguise will not hold. Sink them if you must — but a smuggler taken with her hold full is a fat prize and a purse for the crew, so slow them with chain shot and force them to strike their colours. Mind the Cays and the Sieve reef: the sloops draw next to nothing and slip over the shoals, but the Swallow does not.",
+      "textCs": "VEDLEJŠÍ ZAKÁZKA, stranou hlavní linie kampaně. Celní úřad přísahá, že přes Cínové ostrůvky proudí pod kupeckou vlajkou kontraband — brandy, střelný prach a horší věci, vše do svobodných přístavů.\n\nHMS Vlaštovka jim leží napříč trasou. Před tebou plují tři úhledné šalupy s poctivou tváří; přibliž se, a jejich maska nevydrží. Potop je, když musíš — ale pašerák zajatý s plným podpalubím je tučná kořist a prémie pro posádku, tak je zpomal řetězovými a přinuť je spustit vlajku. Pozor na ostrůvky a útes Cedník: šalupy neponoří skoro nic a přes mělčiny proklouznou, Vlaštovka ne.",
       "kind": "briefing"
     },
     {
       "id": "brief-side02",
       "speaker": "narrator",
       "text": "A SIDE COMMISSION, away from the campaign's main track. For a season now ships have been lost on Widow's Comb with never a storm to blame. The truth is worse than weather: wreckers on Beacon Rock burn a false light to draw honest captains onto the reefs, then row out to plunder the wrecks and cut down any who reach the shore.\n\nHMS Goshawk is sent to end it. A corsair galley and a pirate brig lurk in the shoals — sink them or force them to strike. The galley rows where the wind fails and draws too little to fear the reefs; the brig will bleed you into the shallows and rake you when you touch. The Goshawk draws three fathoms and more: hold the deep channels, read the reefs, and do NOT run her aground.",
+      "textCs": "VEDLEJŠÍ ZAKÁZKA, stranou hlavní linie kampaně. Už celou sezónu se na Vdovině hřebeni ztrácejí lodě, a bouři z toho vinit nelze. Pravda je horší než počasí: vraci na Majákové skále pálí falešné světlo, lákají poctivé kapitány na útesy — a pak vyplouvají obrat vraky a pobít každého, kdo dosáhne břehu.\n\nHMS Krahujec pluje s tím skoncovat. V mělčinách číhá korzárský koráb a pirátská briga — potop je, nebo je přinuť spustit vlajku. Koráb vesluje tam, kde vítr selže, a ponoří tak málo, že se útesů bát nemusí; briga tě bude vykrvácet do mělčin a rakovat, jakmile škrtneš o dno. Krahujec ponoří tři sáhy i víc: drž se hlubokých kanálů, čti útesy a NENAJEĎ s ním na mělčinu.",
       "kind": "briefing"
     },
     {
       "id": "mission01-trg-flee",
       "speaker": "narrator",
       "text": "The Sea Maiden crowds on all sail and runs for open water!",
+      "textCs": "Mořská panna napíná všechny plachty a prchá k volnému moři!",
       "kind": "message"
     },
     {
       "id": "mission01-trg-flee-2",
       "speaker": "lookout",
       "text": "I knew that calm stank! Under her sails she's got military rigging — no merchantman. She's running before the wind, captain, run her down before she vanishes past the buoy!",
+      "textCs": "Věděl jsem, že ten klid smrdí! Pod plachtami má vojenský takeláž — žádný kupec. Prchá po větru, kapitáne, dožeňte ji, než zmizí za bójí!",
       "kind": "comm"
     },
     {
       "id": "mission01-trg-hail",
       "speaker": "port",
       "text": "Port Command hails the Swallow: \"Stop the Sea Maiden and carry out an inspection. Close to within three hundred metres of her — and keep your eyes on the masthead.\"",
+      "textCs": "Kapitanát volá Vlaštovku: „Zastavte Mořskou pannu a proveďte kontrolu. Přibližte se k ní na tři sta metrů — a mějte oči na stěžni.\"",
       "kind": "comm"
     },
     {
       "id": "mission01-trg-inspect-done",
       "speaker": "gunner",
       "text": "We're on her! At this range the guns will tear her rigging away — slow her with a chain-shot broadside, sink her with round shot, or force her to strike her colours and board her.",
+      "textCs": "Jsme u ní! Na tuhle vzdálenost jí děla utrhnou ráhnoví — řetězovou salvou ji zpomal, plnou koulí potop, nebo ji přinuť spustit vlajku a obsaď ji.",
       "kind": "comm"
     },
     {
       "id": "mission01-trg-panna-reply",
       "speaker": "enemy-captain",
       "text": "Sea Maiden: \"We're carrying salt and we're behind schedule, patrol. We'll take this up with the governor — don't hold us up.\"",
+      "textCs": "Mořská panna: „Vezeme sůl a máme skluz, hlídko. Tohle si vyřídíme s guvernérem — nezdržujte nás.\"",
       "kind": "comm"
     },
     {
       "id": "mission01-trg-tack-lesson",
       "speaker": "mate",
       "text": "She's running before the wind, where she's fast. Hold full trim and a clean wind — and MIND Turtle Island: sail around it, don't run onto the shoals. In its lee the wind falls off and you'd lose your drive.",
+      "textCs": "Běží po větru, tam je rychlá. Drž plný trim a čistý vítr — a POZOR na Želví ostrov: obepluj ho, na mělčinu nenajížděj. V jeho závětří vítr slábne, tam bys ztratil tah.",
       "kind": "comm"
     },
     {
       "id": "mission01-trg-wind-lesson",
       "speaker": "mate",
       "text": "SAILING SCHOOL: the wind blows to the east. We sail fastest with it on our quarter (a broad reach). Dead into the wind the sails take nothing — there you must TACK (zigzag) or put out the OARS. Watch the wind rose in the corner.",
+      "textCs": "ŠKOLA PLAVBY: vítr vane k východu. Nejrychleji plujeme, když ho máme zezadu z boku (zadoboční vítr). Přímo proti větru plachty neberou — tam se musí KŘIŽOVAT (cik-cak) nebo nasadit VESLA. Sleduj růžici větru v rohu.",
       "kind": "comm"
     },
     {
       "id": "mission02-trg-brig-joins",
       "speaker": "pirate",
       "text": "Pirate brig: \"Run up the black! We take everything that floats!\"",
+      "textCs": "Pirátská briga: „Vztyčte černou! Berem všechno, co plave!\"",
       "kind": "comm"
     },
     {
       "id": "mission02-trg-intro",
       "speaker": "lookout",
       "text": "Sails to windward! Two sloops off the islands — a pirate pack, captain. And behind them, something larger.",
+      "textCs": "Plachty v návětří! Dvě šalupy od ostrovů — pirátská smečka, kapitáne. A za nimi něco většího.",
       "kind": "comm"
     },
     {
       "id": "mission03-trg-brief",
       "speaker": "admiral",
       "text": "Admiral Thorne: \"Fortuna, after the Narrows I trust no lone merchantman. Check that ship over — but keep your guns ready. If it is a trap, I want it to snap shut on them, not on you.\"",
+      "textCs": "admirál Thorne: „Fortuno, po Soutěsce nevěřím žádnému osamělému kupci. Prověřte tu loď — ale mějte děla připravená. Jestli je to past, chci, aby sklapla na ně, ne na vás.\"",
       "kind": "comm"
     },
     {
       "id": "mission03-trg-hint-rake",
       "speaker": "mate",
       "text": "Rusk: \"She's trading us broadside for broadside, captain — we won't win that. Dance around her and rake her stern, where she has no guns; once or twice and she's done.\"",
+      "textCs": "Rusk: „Bere nás bok za bok, kapitáne — to nevyhrajeme. Obtančit ji a raknout do zádi, kde děla nemá; jednou dvakrát a je po ní.\"",
       "kind": "comm"
     },
     {
       "id": "mission03-trg-qship-struck",
       "speaker": "bosun",
       "text": "Tarr: \"They've surrendered! In the captain's cabin, Castillan orders and a seal — de Vega. The admiralty will want to see this.\"",
+      "textCs": "Tarr: „Vzdali se! V kajutě kapitána castillské rozkazy a pečeť — de Vega. Admiralita tohle bude chtít vidět.\"",
       "kind": "comm"
     },
     {
       "id": "mission03-trg-spring",
       "speaker": "narrator",
       "text": "The Santa Rosa drops her sides — GUNS! It's a Q-ship!",
+      "textCs": "Santa Rosa odklápí boky — DĚLA! Je to Q-loď!",
       "kind": "message"
     },
     {
       "id": "mission03-trg-spring-2",
       "speaker": "agent",
       "text": "An unknown voice on the Castillan channel: \"Welcome, captain. Don Cristóbal de Vega sends his regards — and regrets that this voyage will be your last.\"",
+      "textCs": "Neznámý hlas na castillské frekvenci: „Vítejte, kapitáne. Don Cristóbal de Vega vás zdraví — a lituje, že tahle plavba bude vaše poslední.\"",
       "kind": "comm"
     },
     {
       "id": "mission04-trg-brief",
       "speaker": "admiral",
       "text": "Admiral Thorne: \"I want those dispatches whole, captain — not on the seabed. Slow her with chain shot to the sails and force her to surrender. And don't stray under the fortress any more than you must.\"",
+      "textCs": "admirál Thorne: „Ty depeše chci celé, kapitáne — ne na dně. Zpomalte ho řetězovými do plachet a přinuťte ke kapitulaci. A nepleťte se pod pevnost víc, než musíte.\"",
       "kind": "comm"
     },
     {
       "id": "mission04-trg-caught",
       "speaker": "gunner",
       "text": "Hargrove: \"In range! Chain shot to her rigging to slow her — then grape on the deck and we take her with the grapples.\"",
+      "textCs": "Hargrove: „Na dostřel! Řetězovou mu do ráhnoví, ať zpomalí — pak kartáč na palubu a bereme ho do háku.\"",
       "kind": "comm"
     },
     {
       "id": "mission04-trg-wind-tip",
       "speaker": "mate",
       "text": "Rusk: \"On a clean wind she's pulling away. Cut her off by the shorter way through the Sisters and catch a broad reach — that's where we run her down.\"",
+      "textCs": "Rusk: „Na čistém větru nám ujíždí. Uřízni mu to zkratší cestou přes Sestry a chyť si zadoboční vítr — tam ho doženeme.\"",
       "kind": "comm"
     },
     {
       "id": "mission05-trg-brief",
       "speaker": "admiral",
       "text": "Admiral Thorne: \"Rourke is the key, captain. Bring him to me alive if you can — a man who takes Castillan silver knows names. The Goshawk covers your other flank.\"",
+      "textCs": "admirál Thorne: „Rourke je klíč, kapitáne. Přiveďte mi ho živého, jestli to půjde — muž, který bere castillské stříbro, ví jména. Ostříž kryje váš druhý bok.\"",
       "kind": "comm"
     },
     {
       "id": "mission05-trg-flag-struck",
       "speaker": "pirate-captain",
       "text": "Silas Rourke: \"Enough! I strike my colours… and if you want de Vega, captain, the last of the silver is making for the strait at the Three Beacons. Almirante Herrera. That's all I know.\"",
+      "textCs": "Silas Rourke: „Dost! Spouštím vlajku… a jestli chcete de Vegu, kapitáne, poslední stříbro míří na úžinu u Tří majáků. Almirante Herrera. Víc nevím.\"",
       "kind": "comm"
     },
     {
       "id": "mission05-trg-wake",
       "speaker": "narrator",
       "text": "The nest is waking — the pirates are setting sail and the battery is turning!",
+      "textCs": "Hnízdo se probouzí — piráti zvedají plachty a baterie se otáčí!",
       "kind": "message"
     },
     {
       "id": "mission05-trg-wake-2",
       "speaker": "pirate-captain",
       "text": "Silas Rourke: \"A king's dog in my very nest? Run up the black, lads — and let the battery sweeten him up!\"",
+      "textCs": "Silas Rourke: „Královský pes až v mém hnízdě? Vztyčte černou, chlapi — a ať si ho baterie osladí!\"",
       "kind": "comm"
     },
     {
       "id": "mission06-trg-brief",
       "speaker": "castilian-admiral",
       "text": "Almirante Herrera: \"So this is the whole of Albion's answer? A frigate and two eggshells? Don Cristóbal, you overrated them. Trueno, forward.\"",
+      "textCs": "almirante Herrera: „Tak tohle je celá albionská odpověď? Fregata a dvě skořápky? Done Cristóbale, přeceňoval jste je. Trueno, kupředu.\"",
       "kind": "comm"
     },
     {
       "id": "mission06-trg-herrera-defiant",
       "speaker": "castilian-admiral",
       "text": "Almirante Herrera: \"They're raking our stern… who taught them to sail like this? Hold the line! For the crown and the silver!\"",
+      "textCs": "almirante Herrera: „Rakují nás do zádi… kdo je naučil takhle plout? Držte linii! Za korunu a stříbro!\"",
       "kind": "comm"
     },
     {
       "id": "mission06-trg-tactic",
       "speaker": "mate",
       "text": "Rusk: \"We can't let her bring her broadside to bear. We split around the Middle Beacon, close on the Trueno from both sides and rake her stern — she turns slowly and can't guard both flanks at once.\"",
+      "textCs": "Rusk: „Nesmíme jí dovolit srovnat boky. Rozdělíme se kolem Prostředního majáku, sevřeme Trueno ze dvou stran a rakneme jí do zádi — pomalu se otáčí, nedokáže krýt oba boky naráz.\"",
       "kind": "comm"
     },
     {
       "id": "mission07-trg-brief",
       "speaker": "admiral",
       "text": "Admiral Thorne: \"This is de Vega's calling card, captain. Drive them from the station and show Castilla the Three Beacons was no accident.\"",
+      "textCs": "admirál Thorne: „Tohle je de Vegova vizitka, kapitáne. Zažeňte je od stanice a ukažte Castille, že Tři majáky nebyly náhoda.\"",
       "kind": "comm"
     },
     {
       "id": "mission08-trg-brief",
       "speaker": "agent",
       "text": "Don Cristóbal de Vega: \"You have courage, captain, I grant you that. But courage is not a fleet. Sombra, hold them up — we'll meet at Cádiz, where Corona awaits you.\"",
+      "textCs": "Don Cristóbal de Vega: „Máte odvahu, kapitáne, to přiznávám. Ale odvaha není flotila. Sombro, zdrž je — sejdeme se u Cádizu, kde na vás čeká Corona.\"",
       "kind": "comm"
     },
     {
       "id": "mission08-trg-vega-flees",
       "speaker": "mate",
       "text": "Rusk: \"The courier is gone, we can't catch her. But his escort stayed — let's break it, and de Vega sails to the finale stripped bare.\"",
+      "textCs": "Rusk: „Kurýr je pryč, na ten nemáme. Ale jeho eskorta zůstala — rozbijme ji a de Vega poplyne do finále nahý.\"",
       "kind": "comm"
     },
     {
       "id": "mission09-trg-brief",
       "speaker": "admiral",
       "text": "Admiral Thorne: \"The Sovereign is yours, captain — command her well. Break that defence and seal de Vega inside Cádiz. The rest we settle within.\"",
+      "textCs": "admirál Thorne: „Sovereign je vaše, kapitáne — velte jí dobře. Prolomte tu obranu a zavřete de Vegu v Cádizu. Zbytek dořešíme uvnitř.\"",
       "kind": "comm"
     },
     {
       "id": "mission09-trg-liner-tip",
       "speaker": "mate",
       "text": "Rusk: \"The Sovereign is no sloop — she doesn't dodge, she holds the line. Let the frigates keep the frigates busy; we pour broadside after broadside into the galleon and the fortress.\"",
+      "textCs": "Rusk: „Sovereign není šalupa — neuhýbá, drží linii. Nech fregaty, ať zaměstnají fregaty; my stypem salvu za salvou do galeony a pevnosti.\"",
       "kind": "comm"
     },
     {
       "id": "mission10-trg-brief",
       "speaker": "admiral",
       "text": "Admiral Thorne: \"This silver keeps de Vega's war afloat. Take it from him — and if a galleon can be captured rather than sunk, capture her. The crown can put silver to use just as well as Castilla.\"",
+      "textCs": "admirál Thorne: „Tohle stříbro drží de Vegovu válku nad vodou. Vezměte mu ho — a jestli jde galeonu zajmout místo potopit, zajměte. Koruna umí stříbro použít stejně dobře jako Castilla.\"",
       "kind": "comm"
     },
     {
       "id": "mission11-corona-struck",
       "speaker": "agent",
       "text": "Don Cristóbal de Vega: \"Enough… I strike my colours. You have won Halcyon, captain. Enjoy it, until someone tries to take it from you too.\"",
+      "textCs": "Don Cristóbal de Vega: „Dost… spouštím vlajku. Vyhrál jste Halcyon, kapitáne. Užijte si ho, dokud vám ho někdo taky nezkusí vzít.\"",
       "kind": "comm"
     },
     {
       "id": "mission11-trg-brief",
       "speaker": "agent",
       "text": "Don Cristóbal de Vega: \"So you came all this way after all, captain. Admirable. But Corona will not kneel before a handful of hulls. Halcyon shall know a new master — and it will not be your crown.\"",
+      "textCs": "Don Cristóbal de Vega: „Tak přece jen jste přišel až sem, kapitáne. Obdivuhodné. Ale Corona neklekne před hrstkou trupů. Pozná Halcyon nového pána — a nebude to vaše koruna.\"",
       "kind": "comm"
     },
     {
       "id": "mission11-trg-corona-half",
       "speaker": "agent",
       "text": "Don Cristóbal de Vega: \"Impossible… Corona is bleeding? Keep firing, you cowards! For the silver and the crown!\"",
+      "textCs": "Don Cristóbal de Vega: „Nemožné… Corona krvácí? Držte palbu, vy zbabělci! Za stříbro a korunu!\"",
       "kind": "comm"
     },
     {
       "id": "mission11-trg-tactic",
       "speaker": "mate",
       "text": "Rusk: \"Corona has more guns than both our ships of the line together. We can't let her concentrate her fire — Valiant to port, us to starboard, the frigates rake her stern. We hem her in against Sentinel Rock.\"",
+      "textCs": "Rusk: „Corona má víc děl než dvě naše řadové lodi dohromady. Nesmíme jí dovolit soustředit palbu — Valiant zleva, my zprava, fregaty jí rakujou záď. Sevřeme ji o Strážní skálu.\"",
       "kind": "comm"
     },
     {
       "id": "side01-trg-brief",
       "speaker": "port",
       "text": "Revenue Office: \"Three of them, Swallow, all in trader's clothing. Close the range and their manifests will not bear looking at. Bring them in with their holds full if you can — the crew will thank you for it.\"",
+      "textCs": "Celní úřad: „Jsou tři, Vlaštovko, všichni v kupeckém převleku. Zkraťte vzdálenost a jejich manifesty neobstojí. Přiveďte je s plným podpalubím, půjde-li to — posádka vám poděkuje.\"",
       "kind": "comm"
     },
     {
       "id": "side01-trg-chase",
       "speaker": "gunner",
       "text": "Chain shot to bring down their spars, captain, then round to finish or grape to clear a deck for boarding. A struck sloop with her hold full is worth three sent to the bottom.",
+      "textCs": "Řetězové na ráhna, kapitáne, pak plné koule na dorážku — nebo kartáče vyčistit palubu před boardingem. Šalupa se spuštěnou vlajkou a plným podpalubím má cenu tří poslaných ke dnu.",
       "kind": "comm"
     },
     {
       "id": "side01-trg-lesson",
       "speaker": "mate",
       "text": "They draw a fathom and a half at most and will run for the Sieve and the shoals the instant they smell us. Cut the corner, get to windward, and mind we don't pile the Swallow onto that reef ourselves.",
+      "textCs": "Neponoří víc než půldruhého sáhu a poběží k Cedníku a do mělčin, jakmile nás ucítí. Řízni zatáčku, dostaň se do návětří — a hlavně ať Vlaštovku na ten útes nenavezeme sami.",
       "kind": "comm"
     },
     {
       "id": "side01-trg-unmask",
       "speaker": "narrator",
       "text": "The sloops throw off their merchant colours and scatter — smugglers, and armed!",
+      "textCs": "Šalupy odhazují kupecké vlajky a rozprchávají se — pašeráci, a ozbrojení!",
       "kind": "message"
     },
     {
       "id": "side01-trg-unmask-2",
       "speaker": "enemy-captain",
       "text": "Contrabandista: \"Colours down, lads — it's a king's dog! Zorra, Nightjar, into the shoals! I'll hold the deep water and buy you the run!\"",
+      "textCs": "Contrabandista: „Vlajky dolů, chlapci — královský pes! Zorro, Lelku, do mělčin! Já podržím hlubokou vodu a získám vám náskok!\"",
       "kind": "comm"
     },
     {
       "id": "side02-b-struck",
       "speaker": "pirate-captain",
       "text": "From the brig: \"Enough — I strike! Put out the fire on the Rock, damn you, before it draws another soul onto the Comb.\"",
+      "textCs": "Z brigy: „Dost — spouštím vlajku! Uhaste ten oheň na Skále, k čertu, než na Hřeben přiláká další duši.\"",
       "kind": "comm"
     },
     {
       "id": "side02-trg-aground",
       "speaker": "bosun",
       "text": "We're on the reef, captain! Back the sails and warp her off before the wreckers close — this is exactly how they meant to have us!",
+      "textCs": "Jsme na útesu, kapitáne! Zpětný vítr do plachet a stáhnout ji, než se vraci přiblíží — přesně takhle nás chtěli dostat!",
       "kind": "comm"
     },
     {
       "id": "side02-trg-brief",
       "speaker": "mate",
       "text": "There's the false light on the Rock, and there's the Santa Rosa on the Comb — poor devils. The channels run deep between the reefs; keep to them and we'll have the wreckers where they thought they were safe.",
+      "textCs": "Tamhle je falešné světlo na Skále — a tamhle Santa Rosa na Hřebeni, chudáci. Kanály mezi útesy jsou hluboké; drž se jich a dostaneme vraky přesně tam, kde si mysleli, že jsou v bezpečí.",
       "kind": "comm"
     },
     {
       "id": "side02-trg-reef-warn",
       "speaker": "lookout",
       "text": "The galley's trying to draw us over the Grinder, captain — she draws nothing and skips clean across. Don't follow her onto the coral. Make her come to the deep water, or work the channels and rake her as she turns.",
+      "textCs": "Koráb se nás snaží přetáhnout přes Drtič, kapitáne — neponoří nic a přeskočí ho čistě. Nechoď za ním na korál. Donutíme ho do hluboké vody, nebo pracuj v kanálech a rakuj ho v obratu.",
       "kind": "comm"
     },
     {
       "id": "side02-trg-taunt",
       "speaker": "gunner",
       "text": "The brig's hull is soft and her gunnery worse than ours — hull her with round shot. The galley's all oars and men: grape will thin them before they can think of boarding.",
+      "textCs": "Briga má měkký trup a střílí hůř než my — plnými koulemi do trupu. Koráb jsou samá vesla a mužstvo: kartáče je proředí dřív, než pomyslí na boarding.",
       "kind": "comm"
     },
     {
       "id": "side02-trg-wake",
       "speaker": "narrator",
       "text": "The wreckers rouse — the galley runs out her oars and the brig makes sail!",
+      "textCs": "Vraci se probouzejí — koráb vysouvá vesla a briga napíná plachty!",
       "kind": "message"
     },
     {
       "id": "side02-trg-wake-2",
       "speaker": "pirate-captain",
       "text": "From the brig: \"A king's frigate, is it? Then come and get us, captain — come across the Comb. The reef takes deep keels; we'll take what's left.\"",
+      "textCs": "Z brigy: „Královská fregata, jo? Tak si pro nás pojď, kapitáne — pojď přes Hřeben. Útes si bere hluboké kýly; my si vezmeme, co zbude.\"",
       "kind": "comm"
     },
     {
       "id": "story-defeat",
       "speaker": "narrator",
       "text": "The sea forgives nothing. The ship is gone, the prize escaped — but a captain who learns his lesson puts to sea again.",
+      "textCs": "Moře nepromíjí. Loď je pryč, kořist unikla — ale kapitán, který se poučí, vypluje znovu.",
       "kind": "story"
     },
     {
       "id": "story-intro",
       "speaker": "narrator",
       "text": "The Halcyon Archipelago: a hundred islands, two flag-tongues and one sea that belongs to no one. To the west, the Crown of Albion — mercantile, cautious, rich on customs duties and deadly at the guns. To the south, Castilla — proud, slow and set on the treasure galleons that twice a year carry silver home from the colonies. And between them, in the shadow of every strait and the lee of every island, the free pirates: prize sloops and patched brigs that own no flag and take everything that floats.\n\nYou are a captain of the Royal Navy of Albion. The campaign follows your service, from customs patrol in the straits to the hunt for pirate captains and Castillan treasure fleets. Wind, islands and point of sail decide as much as guns do: the faster ship chooses when and where the fight happens — and whether it happens at all.",
+      "textCs": "Souostroví Halcyon: stovka ostrovů, dva vlajkové jazyky a jedno moře, které nikomu nepatří. Na západě Koruna Albionu — obchodní, opatrná, bohatá z cel a přesná u děl. Na jihu Castilla — hrdá, pomalá a napřená k pokladním galeonám, které dvakrát ročně vezou stříbro z kolonií domů. A mezi nimi, ve stínu každé úžiny a závětří každého ostrova, volní piráti: kořistní šalupy a látané brigy, které neuznávají vlajku a berou všechno, co plave.\n\nTy jsi kapitán Královského námořnictva Albionu. Kampaň sleduje tvou službu od celní hlídky v úžinách po lov na pirátské kapitány i castillské pokladní flotily. Vítr, ostrovy a bod plavby rozhodují stejně jako děla: rychlejší loď si vybírá, kdy a kde se bojuje — a jestli vůbec.",
       "kind": "story"
     },
     {
       "id": "story-mission01-epilog",
       "speaker": "narrator",
       "text": "The Sea Maiden was no merchantman. Under her canvas she carried military rigging and sealed orders bearing a Castillan seal — the first thread in a net someone is weaving across Halcyon. The port authority says nothing. You already know the patrol is over and something larger is beginning.",
+      "textCs": "Mořská panna nebyla kupec. Pod plátnem vezla vojenský takeláž a zapečetěné rozkazy s castillskou pečetí — první nit v síti, kterou někdo splétá napříč Halcyonem. Kapitanát mlčí. Ty už víš, že hlídka skončila a začíná něco většího.",
       "kind": "story"
     },
     {
       "id": "story-mission01-epilog-lose",
       "speaker": "narrator",
       "text": "The Sea Maiden slipped past the buoy into open water, and everything she carried with her. The port authority will log it as \"contact lost\". You know it was a trail — and it got away from you.",
+      "textCs": "Mořská panna zmizela za bójí do volného moře i s tím, co vezla. Kapitanát to zapíše jako „kontakt ztracen\". Ty víš, že to byla stopa — a utekla ti.",
       "kind": "story"
     },
     {
       "id": "story-mission01-prolog",
       "speaker": "narrator",
       "text": "The strait off Turtle Island, at dawn. The wind blows to the east and the water ripples. The port authority has handed you a name — Sea Maiden — and a feeling that something is not right.",
+      "textCs": "Úžina u Želvího ostrova, svítání. Vítr vane k východu, hladina se čeří. Kapitanát ti předal jméno — Mořská panna — a pocit, že něco nesedí.",
       "kind": "story"
     },
     {
       "id": "story-mission02-epilog",
       "speaker": "narrator",
       "text": "The pack scattered and the convoy got through. But in the hold of the pirate brig they found the same sealed orders as aboard the Sea Maiden — someone is paying the pirates of Halcyon to throttle Albion trade. And that someone speaks Castillan.",
+      "textCs": "Smečka se rozprchla a konvoj prošel. V podpalubí pirátské brigy se ale našly stejné zapečetěné rozkazy jako na Mořské panně — někdo platí pirátům Halcyonu, aby škrtili albionský obchod. A ten někdo mluví castillsky.",
       "kind": "story"
     },
     {
       "id": "story-mission02-epilog-lose",
       "speaker": "narrator",
       "text": "The convoy stayed on the bottom of the Narrows. Cargo, ships, crews — the sea swallowed it all, while the pirates melted into the lee of the islands.",
+      "textCs": "Konvoj zůstal na dně Soutěsky. Náklad, lodě, posádky — všechno pohltilo moře, zatímco piráti mizeli do závětří ostrovů.",
       "kind": "story"
     },
     {
       "id": "story-mission02-prolog",
       "speaker": "narrator",
       "text": "The Narrows between Boar Island and Mist Island, at noon. Two merchantmen hang off your stern, the strait tightens, and something stirs to windward.",
+      "textCs": "Soutěska mezi Kančím a Mlžným ostrovem, poledne. Dva kupci ti visí na zádi, úžina se zužuje a v návětří se něco hýbe.",
       "kind": "story"
     },
     {
       "id": "story-mission03-epilog",
       "speaker": "narrator",
       "text": "It was no merchantman, but a Castillan wolf in sheep's clothing. From her deck a voice sounded for the first time — the one meant to be behind it all: Don Cristóbal de Vega. The trap snapped shut on empty air — and the net finally has a name.",
+      "textCs": "Nebyl to kupec, ale castillský vlk v beránčí kůži. Z jeho paluby zazněl poprvé hlas, který má za vším stát: Don Cristóbal de Vega. Past sklapla naprázdno — a síť má konečně jméno.",
       "kind": "story"
     },
     {
       "id": "story-mission03-epilog-lose",
       "speaker": "narrator",
       "text": "The Q-ship got the first broadside for free and the Fortuna did not survive it. De Vega struck one frigate off his list.",
+      "textCs": "Q-loď dostala první salvu zadarmo a Fortuna ji nepřežila. De Vega si škrtl jednu fregatu ze seznamu.",
       "kind": "story"
     },
     {
       "id": "story-mission03-prolog",
       "speaker": "narrator",
       "text": "Cauldron Island, a dead afternoon. A lone merchantman with no escort — exactly what the admiralty warned you about. Ready your sides and close in slowly.",
+      "textCs": "Kotlový ostrov, mrtvé odpoledne. Osamělý kupec bez eskorty — přesně to, před čím tě admiralita varovala. Připrav boky a přibližuj se pomalu.",
       "kind": "story"
     },
     {
       "id": "story-mission04-epilog",
       "speaker": "narrator",
       "text": "The Céfiro never made port. From the dispatches a picture takes shape: de Vega answers to someone higher, someone with a treasure fleet and the rank of almirante. Silver and war are one and the same plan.",
+      "textCs": "Céfiro nedoplul. Z depeší se skládá obraz: de Vega odpovídá někomu výš, komusi s pokladní flotilou a hodností almiranteho. Stříbro a válka jsou tentýž plán.",
       "kind": "story"
     },
     {
       "id": "story-mission04-epilog-lose",
       "speaker": "narrator",
       "text": "The courier slipped under the fortress by a hair. The dispatches are safe in Castillan hands — and you were left standing in its range with empty hands.",
+      "textCs": "Kurýr proklouzl pod pevnost o vlásek. Depeše jsou v bezpečí Castilly — a ty jsi zůstal stát v jejím dostřelu s prázdnýma rukama.",
       "kind": "story"
     },
     {
       "id": "story-mission04-prolog",
       "speaker": "narrator",
       "text": "The waters off Punta Negra, a fresh wind. The courier already has a lead and is making for the guns of the fortress. If you want those dispatches, you must sail better than he does.",
+      "textCs": "Vody u Punta Negry, čerstvý vítr. Kurýr už má náskok a míří pod děla pevnosti. Jestli chceš ty depeše, musíš plout líp než on.",
       "kind": "story"
     },
     {
       "id": "story-mission05-epilog",
       "speaker": "narrator",
       "text": "The nest burned and Rourke fell — or knelt. Before he fell silent, he gave up the last piece of the net: almirante Herrera and the last of the silver are making for the strait at the Three Beacons. That is where it will be decided.",
+      "textCs": "Hnízdo vyhořelo a Rourke padl — či klekl. Než zmlkl, vydal poslední kus sítě: almirante Herrera a poslední stříbro míří na úžinu u Tří majáků. Tam se to rozhodne.",
       "kind": "story"
     },
     {
       "id": "story-mission05-epilog-lose",
       "speaker": "narrator",
       "text": "The battery and the pack were more than two ships could handle. The Fortuna stayed behind in the bay of Bone Island, and Rourke laughs on.",
+      "textCs": "Baterie a smečka byly nad síly dvou lodí. Fortuna zůstala v zátoce Kostivého ostrova a Rourke se směje dál.",
       "kind": "story"
     },
     {
       "id": "story-mission05-prolog",
       "speaker": "narrator",
       "text": "The bay of Bone Island at dawn. Somewhere in that shadow Silas Rourke lies at anchor — a pirate paid by Castillan silver. The Goshawk guards your flank; sail in and smash the nest.",
+      "textCs": "Zátoka Kostivého ostrova za úsvitu. Někde v tom stínu kotví Silas Rourke — pirát, kterého platí castillské stříbro. Ostříž ti kryje bok; vpluj a rozbij hnízdo.",
       "kind": "story"
     },
     {
       "id": "story-mission06-epilog",
       "speaker": "narrator",
       "text": "The Trueno is silent, the silver lies on the bottom of the strait and Herrera's squadron is broken. The war someone in Castilla wove so carefully does not come to pass today at the Three Beacons — but de Vega, the hand behind it all, has vanished into shadow. This was not the end. It was the beginning of open war.",
+      "textCs": "Trueno mlčí, stříbro leží na dně úžiny a Herrerova eskadra je rozbita. Válka, kterou někdo v Castille tak pečlivě splétal, se dnes u Tří majáků nekoná — ale de Vega, ruka za vším, zmizel do stínu. Tohle nebyl konec. Byl to začátek otevřené války.",
       "kind": "story"
     },
     {
       "id": "story-mission06-epilog-lose",
       "speaker": "narrator",
       "text": "The Fortuna fell at the Three Beacons and the silver sailed on to the straits. The war you were meant to prevent has just begun — and you will not be there for it.",
+      "textCs": "Fortuna padla u Tří majáků a stříbro proplulo na úžiny. Válka, které jsi měl předejít, právě začala — a ty už u ní nebudeš.",
       "kind": "story"
     },
     {
       "id": "story-mission06-prolog",
       "speaker": "narrator",
       "text": "The strait at the Three Beacons. On the horizon a Castillan squadron and, with it, the war de Vega has been preparing all along. Three ships of yours against a ship of the line and a frigate. This is where it breaks.",
+      "textCs": "Úžina u Tří majáků. Na obzoru castillská eskadra a s ní válka, kterou de Vega chystal celou dobu. Tři tvé lodě proti řadové lodi a fregatě. Tady se to láme.",
       "kind": "story"
     },
     {
       "id": "story-mission07-epilog",
       "speaker": "narrator",
       "text": "The reprisal is beaten off, three Castillan frigates broken against Gull Island. De Vega has learned that brute force is not enough against you — and pulled back to plan something larger. The war is spilling toward his own shores.",
+      "textCs": "Odveta odražena, tři castillské fregaty rozbité o Rackův ostrov. De Vega zjistil, že hrubá síla proti tobě nestačí — a stáhl se plánovat něco většího. Válka se přelévá k jeho břehům.",
       "kind": "story"
     },
     {
       "id": "story-mission07-epilog-lose",
       "speaker": "narrator",
       "text": "The station at Gull Island burns, and your squadron with it. De Vega has his revenge.",
+      "textCs": "Stanice u Rackova ostrova hoří a s ní tvá eskadra. De Vega má svou pomstu.",
       "kind": "story"
     },
     {
       "id": "story-mission07-prolog",
       "speaker": "narrator",
       "text": "Gull Island, early morning. Smoke over the anchor station and frigate sails to windward — Castilla strikes back. De Vega wants blood for the Three Beacons.",
+      "textCs": "Rackův ostrov, časné ráno. Kouř nad kotvící stanicí a plachty fregat v návětří — Castilla vrací úder. De Vega chce krev za Tři majáky.",
       "kind": "story"
     },
     {
       "id": "story-mission08-epilog",
       "speaker": "narrator",
       "text": "The courier got away from you, but his shield has fallen: the Q-ship and both frigates lie on the bottom. De Vega reached Cádiz stripped and cornered — and you know where to find him. All that remains is to break the gate.",
+      "textCs": "Kurýr ti utekl, ale jeho štít padl: Q-loď i obě fregaty leží na dně. De Vega doplul do Cádizu nahý a zavřený — a ty víš, kde ho najít. Zbývá prolomit bránu.",
       "kind": "story"
     },
     {
       "id": "story-mission08-epilog-lose",
       "speaker": "narrator",
       "text": "De Vega and his escort vanished over the horizon toward Cádiz. The hunt ended in failure.",
+      "textCs": "De Vega i jeho eskorta zmizeli za obzorem k Cádizu. Lov skončil neúspěchem.",
       "kind": "story"
     },
     {
       "id": "story-mission08-prolog",
       "speaker": "narrator",
       "text": "At last a trail straight to him. De Vega himself, on a fast courier, is fleeing to Cádiz — and his escort stands in your way. This time it is personal.",
+      "textCs": "Konečně stopa přímo k němu. De Vega osobně, na rychlém kurýru, prchá k Cádizu — a jeho eskorta se ti staví do cesty. Tentokrát je to osobní.",
       "kind": "story"
     },
     {
       "id": "story-mission09-epilog",
       "speaker": "narrator",
       "text": "The outer defence of Cádiz is broken and de Vega is shut inside with the treasure fleet. The Sovereign proved to be the fist Albion needed. All that remains is to take his silver — and then the man himself.",
+      "textCs": "Vnější obrana Cádizu je prolomená a de Vega zavřený uvnitř s pokladní flotilou. Sovereign se ukázala jako pěst, jakou Albion potřeboval. Zbývá vzít mu stříbro — a pak jeho samotného.",
       "kind": "story"
     },
     {
       "id": "story-mission09-epilog-lose",
       "speaker": "narrator",
       "text": "The Sovereign went down under the guns of Cádiz. The blockade is broken and de Vega free.",
+      "textCs": "Sovereign klesla pod děly Cádizu. Blokáda je zlomena a de Vega volný.",
       "kind": "story"
     },
     {
       "id": "story-mission09-prolog",
       "speaker": "narrator",
       "text": "For the first time three gun decks thunder beneath you: HMS Sovereign, a ship of the line. Before you the gate of Cádiz — a fortress and a squadron, and behind them de Vega and his silver.",
+      "textCs": "Poprvé pod tebou duní tři paluby děl: HMS Sovereign, řadová loď. Před tebou brána Cádizu — pevnost a eskadra, za nimi de Vega a jeho stříbro.",
       "kind": "story"
     },
     {
       "id": "story-mission10-epilog",
       "speaker": "narrator",
       "text": "The silver fleet is finished, the galleons on the bottom or in your hands. Without silver, de Vega's war is dying. One thing remains: the man himself and Corona, his floating throne.",
+      "textCs": "Stříbrná flotila je vyřízena, galeony na dně nebo v tvých rukou. Bez stříbra de Vegova válka umírá. Zbývá jediné: on sám a Corona, jeho plovoucí trůn.",
       "kind": "story"
     },
     {
       "id": "story-mission10-epilog-lose",
       "speaker": "narrator",
       "text": "The Sovereign fell among the galleons and the silver sailed on. De Vega will make you pay for this war yet.",
+      "textCs": "Sovereign padla mezi galeonami a stříbro proplulo. De Vega si válku ještě zaplatí.",
       "kind": "story"
     },
     {
       "id": "story-mission10-prolog",
       "speaker": "narrator",
       "text": "Behind the fortress lies Castilla's last treasure fleet at anchor — two galleons of silver and their guardians. This silver is the engine of de Vega's war. Take it.",
+      "textCs": "Za pevností kotví poslední pokladní flotila Castilly — dvě galeony stříbra a jejich strážci. Tohle stříbro je motor de Vegovy války. Ber ho.",
       "kind": "story"
     },
     {
       "id": "story-mission11-epilog",
       "speaker": "narrator",
       "text": "Corona is silent. Castillan power in Halcyon is broken and de Vega's game for two crowns and one sea is over. The wind, the islands and the silver belong once more to those who can read them — and today that was you, captain. The war you were meant to avoid you did not, in the end, prevent; but you won it — and Halcyon will remember.",
+      "textCs": "Corona mlčí. Castillská moc v Halcyonu je zlomená a de Vegova hra o dvě koruny a jedno moře skončila. Vítr, ostrovy a stříbro patří zas těm, kdo je umí číst — a to jsi dnes byl ty, kapitáne. Válce, které ses měl vyhnout, jsi nakonec nepředešel; ale vyhrál jsi ji — a Halcyon si to bude pamatovat.",
       "kind": "story"
     },
     {
       "id": "story-mission11-epilog-lose",
       "speaker": "narrator",
       "text": "The Sovereign sinks into the Cádiz roadstead, and the Albion line with it. Corona sails on and Halcyon gets a new master — Don Cristóbal de Vega. The war is lost.",
+      "textCs": "Sovereign klesá do rejdy Cádizu a s ní albionská linie. Corona pluje dál a Halcyon dostane nového pána — Dona Cristóbala de Vegu. Válka je prohraná.",
       "kind": "story"
     },
     {
       "id": "story-mission11-prolog",
       "speaker": "narrator",
       "text": "The Cádiz roadstead, the last day of the war. Against your fleet stands Corona — four decks of de Vega's pride — and the remnant of Castillan power. Here it will be decided who is master of Halcyon.",
+      "textCs": "Rejda Cádizu, poslední den války. Proti tvé flotile stojí Corona — čtyři paluby de Vegovy pýchy — a zbytek castillské moci. Tady se rozhodne, kdo je pánem Halcyonu.",
       "kind": "story"
     },
     {
       "id": "story-side01-epilog",
       "speaker": "narrator",
       "text": "The smugglers' run is broken. Whatever came out of their holds — brandy and powder, and manifests that named no honest port — will not reach the free ports now. It was no part of the war against de Vega, but the crew have their prize money and the Cays are quiet, and a captain takes his easy days where the sea offers them.",
+      "textCs": "Pašerácká trasa je zlomená. Co vydala jejich podpalubí — brandy, prach a manifesty bez jediného poctivého přístavu — do svobodných přístavů už nedopluje. S válkou proti de Vegovi to nemělo nic společného, ale posádka má své prémie, nad ostrůvky je klid — a kapitán bere lehké dny tam, kde mu je moře nabídne.",
       "kind": "story"
     },
     {
       "id": "story-side01-epilog-lose",
       "speaker": "narrator",
       "text": "The sloops scattered into the shoals where the Swallow could not follow, and took their cargo with them. The Revenue Office logs it as \"contact lost\". A small failure, in the scale of the war — but the free ports will drink to it.",
+      "textCs": "Šalupy se rozprchly do mělčin, kam za nimi Vlaštovka nemohla, a náklad vzaly s sebou. Celní úřad to zapíše jako „kontakt ztracen\". V měřítku války malé selhání — ale ve svobodných přístavech na ně budou pít.",
       "kind": "story"
     },
     {
       "id": "story-side01-prolog",
       "speaker": "narrator",
       "text": "The Tin Cays, a bright forenoon and a steady wind. No fleet action here, no Castillan seal — only the Revenue Office, a tip-off, and three trim sloops wearing an honest face that will not survive a second look. HMS Swallow lies across their run; the rest is chase and gunnery.",
+      "textCs": "Cínové ostrůvky, jasné dopoledne a stálý vítr. Žádná bitva flotil, žádná castillská pečeť — jen celní úřad, tip od udavače a tři úhledné šalupy s poctivou tváří, která nepřežije druhý pohled. HMS Vlaštovka jim leží napříč trasou; zbytek je honička a dělostřelba.",
       "kind": "story"
     },
     {
       "id": "story-side02-epilog",
       "speaker": "narrator",
       "text": "The false light is out and the wreckers are finished — sunk or struck and bound for a rope ashore. No silver in it, no seal, no thread of the great net: only a stretch of reef that honest men may cross again without a lie to drown them. Some victories are worth more than the war remembers.",
+      "textCs": "Falešné světlo zhaslo a s vraky je konec — potopení, nebo se spuštěnou vlajkou a s vyhlídkou na provaz na břehu. Žádné stříbro, žádná pečeť, žádná nit velké sítě: jen kus útesu, který poctiví lidé zase přeplují bez lži, jež by je utopila. Některá vítězství mají větší cenu, než si válka zapamatuje.",
       "kind": "story"
     },
     {
       "id": "story-side02-epilog-lose",
       "speaker": "narrator",
       "text": "The Goshawk found the coral the wreckers meant her to find, and Widow's Comb took a frigate for its tally. The false light still burns on Beacon Rock, and the next ship down the channel will trust it just as the Santa Rosa did.",
+      "textCs": "Krahujec našel korál přesně tam, kde ho vraci chtěli mít, a Vdovin hřeben si do svých účtů připsal fregatu. Falešné světlo na Majákové skále hoří dál — a příští loď v kanálu mu uvěří stejně jako Santa Rosa.",
       "kind": "story"
     },
     {
       "id": "story-side02-prolog",
       "speaker": "narrator",
       "text": "Widow's Comb, in the last of the light. This is no campaign against a crown, but a reckoning owed to every captain lost on these reefs to a lantern that lied. The false light burns on Beacon Rock; the Santa Rosa lies broken on the coral; and somewhere in the shoals the wreckers wait. HMS Goshawk draws deep — sail carefully, and settle the account.",
+      "textCs": "Vdovin hřeben v posledním světle dne. Tohle není tažení proti koruně, ale zúčtování dlužné každému kapitánovi, kterého na těchhle útesech zahubila lucerna, co lhala. Falešné světlo hoří na Majákové skále; Santa Rosa leží zlomená na korálu; a kdesi v mělčinách čekají vraci. Krahujec ponoří hodně — pluj opatrně a vyrovnej účet.",
       "kind": "story"
     }
   ]

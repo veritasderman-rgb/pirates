@@ -21,23 +21,35 @@ if (!key) { console.error('ELEVENLABS_API_KEY is not set'); process.exit(1) }
 
 const args = process.argv.slice(2)
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null
+const lang = args.includes('--lang') ? args[args.indexOf('--lang') + 1] : 'en'
 const force = args.includes('--force')
 const dry = args.includes('--dry')
 
 const { lines } = JSON.parse(await readFile(resolve(outDir, 'manifest.json'), 'utf8'))
 const todo = lines.filter(l => !only || l.id.startsWith(only))
-await mkdir(outDir, { recursive: true })
+// cs klipy žijí v public/vo/cs/ a čtou textCs; chybějící překlad je tvrdá
+// chyba, ať česká verze nikdy tiše nemluví anglicky
+const langDir = lang === 'cs' ? resolve(outDir, 'cs') : outDir
+if (lang === 'cs') {
+  const missing = todo.filter(l => !l.textCs)
+  if (missing.length) {
+    console.error('missing Czech translations for:', missing.map(l => l.id).join(', '))
+    process.exit(1)
+  }
+}
+await mkdir(langDir, { recursive: true })
 
 const exists = async p => { try { await access(p); return true } catch { return false } }
 const sleep = ms => new Promise(r => setTimeout(r, ms))
 
 let made = 0, skipped = 0, failed = 0, chars = 0
 for (const [i, line] of todo.entries()) {
-  const file = resolve(outDir, `${line.id}.mp3`)
+  const file = resolve(langDir, `${line.id}.mp3`)
   if (!force && await exists(file)) { skipped++; continue }
   const voice = VOICES[line.speaker] ?? DEFAULT_VOICE
-  const tag = `[${i + 1}/${todo.length}] ${line.id} (${line.speaker} → ${voice.name}, ${line.text.length}c)`
-  if (dry) { console.log(`DRY ${tag}`); chars += line.text.length; continue }
+  const text = lang === 'cs' ? line.textCs : line.text
+  const tag = `[${i + 1}/${todo.length}] ${lang}:${line.id} (${line.speaker} → ${voice.name}, ${text.length}c)`
+  if (dry) { console.log(`DRY ${tag}`); chars += text.length; continue }
 
   let ok = false
   for (let attempt = 1; attempt <= 3 && !ok; attempt++) {
@@ -46,7 +58,7 @@ for (const [i, line] of todo.entries()) {
         method: 'POST',
         headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: line.text,
+          text,
           model_id: MODEL_ID,
           voice_settings: {
             stability: voice.stability ?? 0.5,
@@ -58,7 +70,7 @@ for (const [i, line] of todo.entries()) {
       })
       if (!res.ok) throw new Error(`HTTP ${res.status} ${(await res.text()).slice(0, 160)}`)
       await writeFile(file, Buffer.from(await res.arrayBuffer()))
-      ok = true; made++; chars += line.text.length
+      ok = true; made++; chars += text.length
       console.log(`ok  ${tag}`)
     } catch (e) {
       if (attempt === 3) { failed++; console.error(`FAIL ${tag}: ${e.message}`) }

@@ -381,7 +381,7 @@ export interface ShipCondition {
 }
 
 export type WorkerInMsg =
-  | { kind: 'init'; scenarioId: string; upgrades?: ShipMods; flagshipClass?: string; condition?: ShipCondition; scenario?: Scenario }
+  | { kind: 'init'; scenarioId: string; upgrades?: ShipMods; flagshipClass?: string; condition?: ShipCondition; scenario?: Scenario; lang?: 'en' | 'cs' }
   | { kind: 'order'; order: Order }
   | { kind: 'setCompression'; factor: number }
   | { kind: 'snapshotRequest' }

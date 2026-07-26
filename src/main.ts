@@ -18,7 +18,12 @@ import { CAMPAIGN_NODES, CAMPAIGN_ISLES, isMissionUnlocked, isPaidMission } from
 import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, PAYWALL_ENABLED, STORE_PRICE_LABEL, UNLOCK_PERKS } from './data/entitlement'
 import { buildSkirmish, SKIRMISH_PLAYER_SHIPS, SKIRMISH_ENEMY_SHIPS, WEATHER_LABEL, MAP_LABEL, type SkirmishOptions, type Weather, type SkirmishMap } from './data/skirmish'
 import { SHIP_CLASSES } from './data/defs'
+import { initLang, setLang, t, activeLang } from './i18n'
+import { tp } from './i18n/core'
 import type { Scenario, SimState } from './sim/types'
+
+// jazyk co nejdřív — všechno UI včetně panelů se kreslí až po tomhle
+const uiLang = initLang()
 
 const canvas = document.getElementById('plot') as HTMLCanvasElement
 
@@ -84,12 +89,12 @@ applyOwnDevFlag(location.search)
 const owned = (): boolean => !PAYWALL_ENABLED || allUnlocked || isOwned()
 
 const startMission = (id: string): void =>
-  bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship))
+  bridge.start(id, modsFrom(profile.up), profile.flagship, shipCondition(profile, profile.flagship), undefined, uiLang)
 
 // skirmish: hotový scénář se posílá přímo do workeru; žádné kampaňové upgrady
 // ani opotřebení (čistý, férový souboj s vybranou lodí). Poslední drží REPLAY.
 let lastSkirmish: Scenario | null = null
-const startSkirmish = (sc: Scenario): void => { lastSkirmish = sc; bridge.start(sc.id, undefined, undefined, undefined, sc) }
+const startSkirmish = (sc: Scenario): void => { lastSkirmish = sc; bridge.start(sc.id, undefined, undefined, undefined, sc, uiLang) }
 
 const audio = new AudioManager()
 audio.setMenuMode(true)
@@ -182,31 +187,36 @@ function showCampaignMap(): void {
     const attr = st !== 'locked' ? ` data-mission="${esc(n.id)}" data-paid="${st === 'paid' ? '1' : '0'}"` : ''
     return `<g class="cm-node ${st}${n.optional ? ' opt' : ''}"${attr} transform="translate(${n.x},${n.y})">`
       + `<circle r="19" class="cm-c"/><text class="cm-num" y="5">${badge}</text>`
-      + `<text class="cm-title" y="37">${esc(sc.title)}</text></g>`
+      + `<text class="cm-title" y="37">${esc(t(sc.title))}</text></g>`
   }).join('')
   // „jsi tady" — první nesplněný dostupný uzel (kam plout dál), jinak poslední
   const next = CAMPAIGN_NODES.find(n => !cleared.has(n.id) && avail(n))
     ?? CAMPAIGN_NODES[CAMPAIGN_NODES.length - 1]
   const marker = `<g transform="translate(${next.x},${next.y - 34})" class="cm-you">`
-    + `<text class="cm-you-i" y="0">⛵</text><text class="cm-you-t" y="15">you are here</text></g>`
+    + `<text class="cm-you-i" y="0">⛵</text><text class="cm-you-t" y="15">${t('you are here')}</text></g>`
 
-  const flagName = SHIP_CLASSES[profile.flagship]?.name ?? profile.flagship
+  const flagName = t(SHIP_CLASSES[profile.flagship]?.name ?? profile.flagship)
   const el = overlay(
     `<h1>PIRATES</h1>`
-    + `<div class="brief story">${esc(firstSentence(CAMPAIGN_INTRO))}</div>`
-    + `<div class="cm-bar"><span>Treasury: <b>${profile.money} 🪙</b></span>`
-    + `<span>Flagship: <b>${esc(flagName)}</b></span>`
-    + `<button id="btn-port">🛠 PORT — shipyard &amp; outfitting</button>`
-    + `<button id="btn-skirmish"${owned() ? '' : ' class="cm-locked-feat"'}>⚔ Skirmish${owned() ? '' : ' 🔒'}</button>`
-    + (owned() ? '' : `<button id="btn-store" class="cm-buy">🔓 Unlock full game — ${esc(STORE_PRICE_LABEL)}</button>`)
+    + `<div class="brief story">${esc(firstSentence(t(CAMPAIGN_INTRO)))}</div>`
+    + `<div class="cm-bar"><span>${t('Treasury:')} <b>${profile.money} 🪙</b></span>`
+    + `<span>${t('Flagship:')} <b>${esc(flagName)}</b></span>`
+    + `<button id="btn-port">${t('🛠 PORT — shipyard & outfitting').replace('&', '&amp;')}</button>`
+    + `<button id="btn-skirmish"${owned() ? '' : ' class="cm-locked-feat"'}>${t('⚔ Skirmish')}${owned() ? '' : ' 🔒'}</button>`
+    + (owned() ? '' : `<button id="btn-store" class="cm-buy">${esc(tp('🔓 Unlock full game — {p}', { p: STORE_PRICE_LABEL }))}</button>`)
+    + `<button id="btn-lang" title="Language / Jazyk">🌐 ${uiLang === 'cs' ? 'English' : 'Česky'}</button>`
     + `</div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
-    + (allUnlocked ? `<div class="fc-hint" style="color:#e8c874">🔓 DEV: all missions unlocked (append <b>?unlock=off</b> to the URL to restore normal progression).</div>` : '')
-    + `<div class="fc-hint">Click a port (node) = set sail on the mission. A cleared mission (✔) unlocks the next. `
-    + `Cleared ones can be replayed (smaller reward). At port, buy a new hull or upgrade the one you have.</div>`)
+    + (allUnlocked ? `<div class="fc-hint" style="color:#e8c874">${t('🔓 DEV: all missions unlocked (append ')}<b>?unlock=off</b>${t(' to the URL to restore normal progression).')}</div>` : '')
+    + `<div class="fc-hint">${t('Click a port (node) = set sail on the mission. A cleared mission (✔) unlocks the next. Cleared ones can be replayed (smaller reward). At port, buy a new hull or upgrade the one you have.')}</div>`)
   el.querySelector('.box')!.classList.add('wide')
   el.querySelector('#btn-port')!.addEventListener('click', () => { el.remove(); showOutfitting() })
   el.querySelector('#btn-store')?.addEventListener('click', () => { el.remove(); showStore() })
+  // přepínač jazyka — uloží volbu a přenačte stránku (nejjednodušší konzistentní stav)
+  el.querySelector('#btn-lang')!.addEventListener('click', () => {
+    setLang(uiLang === 'cs' ? 'en' : 'cs')
+    location.href = location.pathname
+  })
   // skirmish je placený obsah: bez vlastnictví vede tlačítko do storu
   el.querySelector('#btn-skirmish')!.addEventListener('click', () => { el.remove(); owned() ? showSkirmish() : showStore() })
   el.querySelectorAll<SVGGElement>('g[data-mission]').forEach(g =>
@@ -224,24 +234,24 @@ function showCampaignMap(): void {
  * test placeného obsahu lokálně použij ?own=1.
  */
 function showStore(): void {
-  const perks = UNLOCK_PERKS.map(p => `<li>${esc(p)}</li>`).join('')
+  const perks = UNLOCK_PERKS.map(p => `<li>${esc(t(p))}</li>`).join('')
   const el = overlay(
-    `<h1>UNLOCK THE FULL GAME</h1>`
-    + `<div class="brief story">Four missions in, the war for the Halcyon Archipelago is only beginning. One payment opens the rest of the campaign and the skirmish sandbox — forever.</div>`
-    + `<div class="store-price">${esc(STORE_PRICE_LABEL)} <span class="dim">· one-time</span></div>`
+    `<h1>${t('UNLOCK THE FULL GAME')}</h1>`
+    + `<div class="brief story">${t('Four missions in, the war for the Halcyon Archipelago is only beginning. One payment opens the rest of the campaign and the skirmish sandbox — forever.')}</div>`
+    + `<div class="store-price">${esc(STORE_PRICE_LABEL)} <span class="dim">${t('· one-time')}</span></div>`
     + `<ul class="store-perks">${perks}</ul>`
     + (isDevOwned() ? `<div class="fc-hint" style="color:#e8c874">🔓 DEV: ownership simulated via <b>?own=1</b> (append <b>?own=off</b> to restore the paywall).</div>` : '')
     + `<div id="store-msg" class="store-msg"></div>`
     + `<div class="store-actions">`
-    + `<button id="btn-buy">🔓 Buy — ${esc(STORE_PRICE_LABEL)}</button>`
-    + `<button id="btn-restore">Restore purchase</button>`
-    + `<button id="btn-store-back">← Back to map</button>`
+    + `<button id="btn-buy">${esc(tp('🔓 Buy — {p}', { p: STORE_PRICE_LABEL }))}</button>`
+    + `<button id="btn-restore">${t('Restore purchase')}</button>`
+    + `<button id="btn-store-back">${t('← Back to map')}</button>`
     + `</div>`)
   const msg = el.querySelector('#store-msg') as HTMLElement
   const setMsg = (t: string, bad = false): void => { msg.textContent = t; msg.className = `store-msg ${bad ? 'bad' : 'ok'}` }
 
   el.querySelector('#btn-buy')!.addEventListener('click', async () => {
-    setMsg('Opening secure checkout…')
+    setMsg(t('Opening secure checkout…'))
     try {
       const res = await fetch('/api/create-checkout', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -252,14 +262,14 @@ function showStore(): void {
       if (data.url) location.href = data.url
       else throw new Error('no checkout url')
     } catch {
-      setMsg('Checkout is unavailable here (needs the deployed server). Locally, append ?own=1 to test.', true)
+      setMsg(t('Checkout is unavailable here (needs the deployed server). Locally, append ?own=1 to test.'), true)
     }
   })
 
   el.querySelector('#btn-restore')!.addEventListener('click', async () => {
-    const email = prompt('Enter the email you purchased with:')?.trim()
+    const email = prompt(t('Enter the email you purchased with:'))?.trim()
     if (!email) return
-    setMsg('Looking up your purchase…')
+    setMsg(t('Looking up your purchase…'))
     try {
       const res = await fetch('/api/restore', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -268,13 +278,13 @@ function showStore(): void {
       const data = await res.json() as { token?: string; error?: string }
       if (res.ok && data.token) {
         saveLicense({ token: data.token, email, issuedAt: Date.now() })
-        setMsg('Purchase restored — the full game is unlocked!')
+        setMsg(t('Purchase restored — the full game is unlocked!'))
         setTimeout(() => { el.remove(); showCampaignMap() }, 900)
       } else {
-        setMsg(data.error || 'No purchase found for that email.', true)
+        setMsg(data.error || t('No purchase found for that email.'), true)
       }
     } catch {
-      setMsg('Restore is unavailable here (needs the deployed server).', true)
+      setMsg(t('Restore is unavailable here (needs the deployed server).'), true)
     }
   })
 
@@ -298,26 +308,26 @@ function showSkirmish(): void {
   const shipCard = (id: string, sel: boolean, group: 'pc' | 'ec'): string => {
     const def = SHIP_CLASSES[id]
     return `<button class="sk-ship ${sel ? 'on' : ''}" data-${group}="${esc(id)}">`
-      + `<b>${esc(def?.name ?? id)}</b>`
-      + `<span class="sk-s">${def?.gunsPerBroadside ?? '?'}/side · hull ${def?.hullPoints ?? '?'}</span></button>`
+      + `<b>${esc(t(def?.name ?? id))}</b>`
+      + `<span class="sk-s">${tp('{n}/side · hull {h}', { n: def?.gunsPerBroadside ?? '?', h: def?.hullPoints ?? '?' })}</span></button>`
   }
   const draw = (): void => {
     const players = SKIRMISH_PLAYER_SHIPS.map(id => shipCard(id, opts.playerClass === id, 'pc')).join('')
     const enemies = SKIRMISH_ENEMY_SHIPS.map(id => shipCard(id, opts.enemyClass === id, 'ec')).join('')
     const counts = [1, 2, 3, 4].map(n => `<button class="sk-opt ${opts.enemyCount === n ? 'on' : ''}" data-count="${n}">${n}</button>`).join('')
     const weathers = (['calm', 'breeze', 'storm'] as Weather[]).map(w =>
-      `<button class="sk-opt ${opts.weather === w ? 'on' : ''}" data-weather="${w}">${esc(WEATHER_LABEL[w])}</button>`).join('')
+      `<button class="sk-opt ${opts.weather === w ? 'on' : ''}" data-weather="${w}">${esc(t(WEATHER_LABEL[w]))}</button>`).join('')
     const maps = (['open', 'islands', 'reef'] as SkirmishMap[]).map(m =>
-      `<button class="sk-opt ${opts.map === m ? 'on' : ''}" data-map="${m}">${esc(MAP_LABEL[m])}</button>`).join('')
-    box.innerHTML = `<h1>SKIRMISH</h1>`
-      + `<div class="hint">A free battle on your terms — pick your ship, the enemy squadron, the weather and the ground, then fight. No campaign upgrades: a clean duel.</div>`
-      + `<h2>Your ship</h2><div class="sk-grid">${players}</div>`
-      + `<h2>Enemy ship</h2><div class="sk-grid">${enemies}</div>`
-      + `<h2>Enemy squadron</h2><div class="sk-row">${counts}</div>`
-      + `<h2>Weather</h2><div class="sk-row">${weathers}</div>`
-      + `<h2>Ground</h2><div class="sk-row">${maps}</div>`
-      + `<div style="margin-top:16px"><button id="btn-fight" class="sk-fight">⚔ BATTLE</button> `
-      + `<button id="btn-sk-back">← Back to map</button></div>`
+      `<button class="sk-opt ${opts.map === m ? 'on' : ''}" data-map="${m}">${esc(t(MAP_LABEL[m]))}</button>`).join('')
+    box.innerHTML = `<h1>${t('SKIRMISH')}</h1>`
+      + `<div class="hint">${t('A free battle on your terms — pick your ship, the enemy squadron, the weather and the ground, then fight. No campaign upgrades: a clean duel.')}</div>`
+      + `<h2>${t('Your ship')}</h2><div class="sk-grid">${players}</div>`
+      + `<h2>${t('Enemy ship')}</h2><div class="sk-grid">${enemies}</div>`
+      + `<h2>${t('Enemy squadron')}</h2><div class="sk-row">${counts}</div>`
+      + `<h2>${t('Weather')}</h2><div class="sk-row">${weathers}</div>`
+      + `<h2>${t('Ground')}</h2><div class="sk-row">${maps}</div>`
+      + `<div style="margin-top:16px"><button id="btn-fight" class="sk-fight">${t('⚔ BATTLE')}</button> `
+      + `<button id="btn-sk-back">${t('← Back to map')}</button></div>`
     box.querySelectorAll<HTMLButtonElement>('[data-pc]').forEach(b =>
       b.addEventListener('click', () => { opts.playerClass = b.dataset.pc!; draw() }))
     box.querySelectorAll<HTMLButtonElement>('[data-ec]').forEach(b =>
@@ -346,15 +356,15 @@ function showOutfitting(): void {
       const owned = profile.fleet.includes(e.classId)
       const active = profile.flagship === e.classId
       const canBuy = !owned && profile.money >= e.price
-      const stats = stat('hull', `${def.hullPoints}`) + stat('guns/side', `${def.gunsPerBroadside}`)
-        + stat('range', `${def.gunRange} m`) + (def.canRow ? stat('oars', 'yes') : '')
-      const action = active ? `<span class="mdesc ok">⚓ you command this ship</span>`
-        : owned ? `<button data-pick="${esc(e.classId)}">Command this ship</button>`
-        : `<button data-hull="${esc(e.classId)}" ${canBuy ? '' : 'disabled'}>Buy — ${e.price} 🪙</button>`
+      const stats = stat(t('hull'), `${def.hullPoints}`) + stat(t('guns/side'), `${def.gunsPerBroadside}`)
+        + stat(t('range'), `${def.gunRange} m`) + (def.canRow ? stat(t('oars'), t('yes')) : '')
+      const action = active ? `<span class="mdesc ok">${t('⚓ you command this ship')}</span>`
+        : owned ? `<button data-pick="${esc(e.classId)}">${t('Command this ship')}</button>`
+        : `<button data-hull="${esc(e.classId)}" ${canBuy ? '' : 'disabled'}>${tp('Buy — {p} 🪙', { p: e.price })}</button>`
       return `<div class="mrow sy-ship ${active ? 'active' : ''}">`
-        + `<div class="row"><b>${esc(def.name)}</b>${owned && !active ? ' <span class="dim">(in the shipyard)</span>' : ''}</div>`
+        + `<div class="row"><b>${esc(t(def.name))}</b>${owned && !active ? ` <span class="dim">${t('(in the shipyard)')}</span>` : ''}</div>`
         + `<div class="sy-stats">${stats}</div>`
-        + `<div class="mdesc">${esc(e.blurb)}</div>${action}</div>`
+        + `<div class="mdesc">${esc(t(e.blurb))}</div>${action}</div>`
     }).join('')
     // ---- vylepšení stávající lodi ----
     const rows = UP_ORDER.map(k => {
@@ -363,14 +373,14 @@ function showOutfitting(): void {
       const can = !maxed && profile.money >= cost
       const pips = '●'.repeat(lvl) + '○'.repeat(d.max - lvl)
       const bonus = Math.round(lvl * d.per * 100)
-      return `<div class="mrow"><div class="row"><b>${esc(d.name)}</b> <span class="dim">${pips}${bonus ? ` (+${bonus}%)` : ''}</span></div>`
-        + `<div class="mdesc">${esc(d.desc)}</div>`
-        + (maxed ? `<div class="mdesc ok">✔ MAX</div>`
-          : `<button data-buy="${k}" ${can ? '' : 'disabled'}>Buy lvl ${lvl + 1} — ${cost} 🪙</button>`)
+      return `<div class="mrow"><div class="row"><b>${esc(t(d.name))}</b> <span class="dim">${pips}${bonus ? ` (+${bonus}%)` : ''}</span></div>`
+        + `<div class="mdesc">${esc(t(d.desc))}</div>`
+        + (maxed ? `<div class="mdesc ok">${t('✔ MAX')}</div>`
+          : `<button data-buy="${k}" ${can ? '' : 'disabled'}>${tp('Buy lvl {n} — {c} 🪙', { n: lvl + 1, c: cost })}</button>`)
         + `</div>`
     }).join('')
     // ---- oprava: vlajková loď se opotřebuje mezi misemi, tady se careenuje ----
-    const flagName = SHIP_CLASSES[profile.flagship]?.name ?? profile.flagship
+    const flagName = t(SHIP_CLASSES[profile.flagship]?.name ?? profile.flagship)
     const cond = shipCondition(profile, profile.flagship)
     const cbar = (label: string, v: number): string => {
       const pct = Math.round(Math.max(0, Math.min(1, v)) * 100)
@@ -379,22 +389,22 @@ function showOutfitting(): void {
         + `<span class="cond-bar"><i style="width:${pct}%;background:${col}"></i></span></div>`
     }
     const rcost = repairCost(cond)
-    const repairHtml = `<h2>Repair &amp; careen</h2>`
-      + `<div class="mrow"><div class="row"><b>${esc(flagName)}</b> — condition</div>`
-      + cbar('hull', cond.hull) + cbar('rigging', cond.rigging) + cbar('rudder', cond.rudder)
-      + cbar('port guns', cond.gunsPort) + cbar('stbd guns', cond.gunsStbd) + cbar('crew', cond.crew)
+    const repairHtml = `<h2>${t('Repair & careen').replace('&', '&amp;')}</h2>`
+      + `<div class="mrow"><div class="row"><b>${esc(flagName)}</b> ${t('— condition')}</div>`
+      + cbar(t('hull'), cond.hull) + cbar(t('rigging'), cond.rigging) + cbar(t('rudder'), cond.rudder)
+      + cbar(t('port guns'), cond.gunsPort) + cbar(t('stbd guns'), cond.gunsStbd) + cbar(t('crew'), cond.crew)
       + (isDamaged(cond)
-        ? `<div class="mdesc">Battle damage carries between missions — patch her up before she sails again.</div>`
-          + `<button data-repair="1" ${profile.money >= rcost ? '' : 'disabled'}>Repair to full — ${rcost} 🪙</button>`
-        : `<div class="mdesc ok">✔ fully repaired — she's ready for sea</div>`)
+        ? `<div class="mdesc">${t('Battle damage carries between missions — patch her up before she sails again.')}</div>`
+          + `<button data-repair="1" ${profile.money >= rcost ? '' : 'disabled'}>${tp('Repair to full — {c} 🪙', { c: rcost })}</button>`
+        : `<div class="mdesc ok">${t('✔ fully repaired — she\'s ready for sea')}</div>`)
       + `</div>`
-    box.innerHTML = `<h1>PORT</h1>`
-      + `<div class="score"><div class="stot">Treasury: <b>${profile.money} 🪙</b></div></div>`
-      + `<div class="hint">Spend doubloons on a <b>stronger hull</b> (shipyard), <b>upgrades</b> for the one you command, or <b>repairs</b> after a hard fight. Upgrades and damage both carry through the campaign.</div>`
-      + `<h2>Shipyard — flagship</h2>${ships}`
+    box.innerHTML = `<h1>${t('PORT')}</h1>`
+      + `<div class="score"><div class="stot">${t('Treasury:')} <b>${profile.money} 🪙</b></div></div>`
+      + `<div class="hint">${t('Spend doubloons on a <b>stronger hull</b> (shipyard), <b>upgrades</b> for the one you command, or <b>repairs</b> after a hard fight. Upgrades and damage both carry through the campaign.')}</div>`
+      + `<h2>${t('Shipyard — flagship')}</h2>${ships}`
       + repairHtml
-      + `<h2>Flagship outfitting</h2>${rows}`
-      + `<div style="margin-top:12px"><button id="btn-back">← BACK TO MAP</button></div>`
+      + `<h2>${t('Flagship outfitting')}</h2>${rows}`
+      + `<div style="margin-top:12px"><button id="btn-back">${t('← BACK TO MAP')}</button></div>`
     box.querySelectorAll<HTMLButtonElement>('button[data-hull]').forEach(b =>
       b.addEventListener('click', () => {
         const c = b.dataset.hull!, e = shipEntry(c)
@@ -426,7 +436,7 @@ function showOutfitting(): void {
 }
 
 function showBriefing(sc: Scenario): void {
-  const prolog = MISSION_STORY[sc.id]?.prolog
+  const prolog = MISSION_STORY[sc.id]?.prolog && t(MISSION_STORY[sc.id].prolog!)
   const scene = MISSION_SCENES[sc.id]
   const el = overlay(
     (scene ? `<img class="brief-img" src="img/${scene}.png" alt="" onerror="this.remove()">` : '')
@@ -434,14 +444,9 @@ function showBriefing(sc: Scenario): void {
     + (prolog ? `<div class="brief story">${esc(prolog)}</div>` : '')
     + `<div class="brief">${esc(sc.briefing)}</div>`
     + (touch
-      ? `<div class="hint">Controls: tap your own ship = select · tap a target = lock on · `
-        + `tap water = set course · <b>drag = pan</b> · <b>pinch = zoom</b> · <b>double-tap = centre</b> · `
-        + `the buttons around the edges handle sails, oars, fire and shot type.</div>`
-      : `<div class="hint">Controls: click your own ship = select · click a target = lock on · `
-        + `click water = set course · <b>drag = pan the map</b> · wheel = zoom · `
-        + `<b>buttons at right (arrows/＋/－/◎) = pan, zoom and centre on ship</b> · `
-        + `space = pause · W sails · E oars · Q/R broadside · A auto · 1/2/3 shot type</div>`)
-    + `<button id="btn-start">SET SAIL</button>`)
+      ? `<div class="hint">${t('Controls: tap your own ship = select · tap a target = lock on · tap water = set course · <b>drag = pan</b> · <b>pinch = zoom</b> · <b>double-tap = centre</b> · the buttons around the edges handle sails, oars, fire and shot type.')}</div>`
+      : `<div class="hint">${t('Controls: click your own ship = select · click a target = lock on · click water = set course · <b>drag = pan the map</b> · wheel = zoom · <b>buttons at right (arrows/＋/－/◎) = pan, zoom and centre on ship</b> · space = pause · W sails · E oars · Q/R broadside · A auto · 1/2/3 shot type')}</div>`)
+    + `<button id="btn-start">${t('SET SAIL')}</button>`)
   // dabing: prolog a briefing namluví vypravěč hned po otevření obrazovky
   audio.resetVoice()
   audio.speak(`story-${sc.id}-prolog`)
@@ -498,26 +503,27 @@ function showOutcome(state: SimState): void {
       if (!already) profile.cleared.push(currentMissionId)
       saveProfile(profile)
     }
-    rewardHtml = `<div class="score"><div class="stot">Plunder: <b>+${rew.total} 🪙</b>`
-      + (allUnlocked ? ` <span class="dim">(dev — not saved)</span>` : ` · treasury: ${profile.money} 🪙`) + `</div>`
+    rewardHtml = `<div class="score"><div class="stot">${t('Plunder:')} <b>+${rew.total} 🪙</b>`
+      + (allUnlocked ? ` <span class="dim">${t('(dev — not saved)')}</span>` : ` ${t('· treasury:')} ${profile.money} 🪙`) + `</div>`
       + rew.parts.map(p => `<div class="row"><span>${esc(p.label)}</span><span class="ok">${p.coins ? '+' + p.coins : ''}</span></div>`).join('')
-      + `</div>` + (allUnlocked ? '' : `<div class="hint">Prizes (captured ships) earn more than sinking — at port, spend doubloons to upgrade your flagship.</div>`)
+      + `</div>` + (allUnlocked ? '' : `<div class="hint">${t('Prizes (captured ships) earn more than sinking — at port, spend doubloons to upgrade your flagship.')}</div>`)
   }
   const story = MISSION_STORY[currentMissionId]
-  const epilog = win ? story?.epilog : (story?.epilogLose ?? DEFEAT_GENERIC)
-  const scoreHtml = `<div class="score"><div class="stot">Score: <b>${score.total}</b></div>`
+  const epilogEn = win ? story?.epilog : (story?.epilogLose ?? DEFEAT_GENERIC)
+  const epilog = epilogEn && t(epilogEn)
+  const scoreHtml = `<div class="score"><div class="stot">${t('Score:')} <b>${score.total}</b></div>`
     + score.breakdown.map(l => `<div class="row"><span>${esc(l.label)}</span><span class="${l.points >= 0 ? 'ok' : 'bad'}">${l.points >= 0 ? '+' : ''}${l.points}</span></div>`).join('')
     + `</div>`
   const el = overlay(
-    `<h2 class="${win ? 'win' : 'lose'}">${win ? '⚓ VICTORY' : '☠ DEFEAT'}</h2>`
-    + `<div class="brief">Mission ended at ${fmtTime(state.t)}.</div>`
+    `<h2 class="${win ? 'win' : 'lose'}">${t(win ? '⚓ VICTORY' : '☠ DEFEAT')}</h2>`
+    + `<div class="brief">${tp('Mission ended at {t}.', { t: fmtTime(state.t) })}</div>`
     + objs
     + (win ? scoreHtml : '')
     + rewardHtml
     + (epilog ? `<div class="brief story">${esc(epilog)}</div>` : '')
-    + `<div style="margin-top:14px"><button id="btn-again">REPLAY</button> `
-    + (isSkirmish ? `<button id="btn-newsk">⚔ NEW SKIRMISH</button> ` : (win ? `<button id="btn-port">🛠 PORT</button> ` : ''))
-    + `<button id="btn-menu">CAMPAIGN MAP</button></div>`)
+    + `<div style="margin-top:14px"><button id="btn-again">${t('REPLAY')}</button> `
+    + (isSkirmish ? `<button id="btn-newsk">${t('⚔ NEW SKIRMISH')}</button> ` : (win ? `<button id="btn-port">${t('🛠 PORT')}</button> ` : ''))
+    + `<button id="btn-menu">${t('CAMPAIGN MAP')}</button></div>`)
   // dabing: vypravěč přečte epilog mise (skirmish žádný nemá). Vítěznou hlášku
   // z téhož snapshotu (např. „strikes her colours") nechá dohrát — epilog se
   // zařadí ZA ni, ne přes ni.
@@ -564,7 +570,7 @@ async function handlePurchaseReturn(): Promise<boolean> {
   if (purchase === 'success') {
     const sessionId = q.get('session_id')
     clean()
-    const el = overlay(`<h1>UNLOCKING…</h1><div class="brief">Confirming your purchase with the payment provider…</div>`)
+    const el = overlay(`<h1>${t('UNLOCKING…')}</h1><div class="brief">${t('Confirming your purchase with the payment provider…')}</div>`)
     try {
       const res = await fetch('/api/verify-session', {
         method: 'POST', headers: { 'content-type': 'application/json' },
@@ -574,12 +580,12 @@ async function handlePurchaseReturn(): Promise<boolean> {
       el.remove()
       if (res.ok && data.token) {
         saveLicense({ token: data.token, email: data.email, issuedAt: Date.now() })
-        const ok = overlay(`<h1 class="win">⚓ THANK YOU</h1><div class="brief story">The full game is unlocked — the whole archipelago is yours to take.</div>`
-          + `<div style="margin-top:14px"><button id="btn-go">SET SAIL</button></div>`)
+        const ok = overlay(`<h1 class="win">${t('⚓ THANK YOU')}</h1><div class="brief story">${t('The full game is unlocked — the whole archipelago is yours to take.')}</div>`
+          + `<div style="margin-top:14px"><button id="btn-go">${t('SET SAIL')}</button></div>`)
         ok.querySelector('#btn-go')!.addEventListener('click', () => { ok.remove(); showCampaignMap() })
       } else {
-        const bad = overlay(`<h1 class="lose">Payment not confirmed</h1><div class="brief">${esc(data.error || 'We could not verify the purchase.')} If you were charged, use “Restore purchase”.</div>`
-          + `<div style="margin-top:14px"><button id="btn-go">Back to map</button></div>`)
+        const bad = overlay(`<h1 class="lose">${t('Payment not confirmed')}</h1><div class="brief">${esc(data.error || t('We could not verify the purchase.'))} ${t('If you were charged, use “Restore purchase”.')}</div>`
+          + `<div style="margin-top:14px"><button id="btn-go">${t('Back to map')}</button></div>`)
         bad.querySelector('#btn-go')!.addEventListener('click', () => { bad.remove(); showCampaignMap() })
       }
     } catch {

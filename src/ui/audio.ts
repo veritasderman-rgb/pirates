@@ -4,6 +4,7 @@
  * Stejný efekt hraje max ~1× za 60 ms (dávky událostí při kompresi času).
  */
 import type { SimState } from '../sim/types'
+import { activeLang } from '../i18n/core'
 import { SHIP_CLASSES } from '../data/defs'
 import { dist } from '../sim/vec'
 import { hostileTo } from '../sim/util'
@@ -103,7 +104,7 @@ export class AudioManager {
   private pumpVoice(): void {
     const id = this.voQueue[0]
     if (id === undefined) { this.vo = null; this.duckMusic(false); return }
-    const el = new Audio(`vo/${encodeURIComponent(id)}.mp3`)
+    const el = new Audio(`vo/${activeLang() === 'cs' ? 'cs/' : ''}${encodeURIComponent(id)}.mp3`)
     el.volume = 0.95
     this.vo = el
     this.duckMusic(true)

@@ -10,6 +10,7 @@ import {
   BOARD_DEF_CASUALTY, BOARD_ATK_CASUALTY, BOARD_DEF_MORALE, BOARD_ABORT_CREW,
 } from './constants'
 import { rand } from './rng'
+import { TXT } from './text'
 import { dist } from './vec'
 import { effectiveGuns } from './weapons'
 import { hostileTo } from './util'
@@ -44,7 +45,7 @@ export function demandSurrender(state: SimState, from: ShipState, targetId: numb
   } else {
     state.events.push({
       t: state.t, kind: 'comm', side: target.side, speaker: 'enemy-captain',
-      text: `${target.name} refuses to strike her colours!`,
+      text: TXT.refuseStrike(target.name),
       voiceId: 'bark-refuse-strike',
     })
   }
@@ -61,7 +62,7 @@ export function strike(state: SimState, ship: ShipState): void {
   state.events.push({
     t: state.t, kind: 'surrender', shipId: ship.id, side: ship.side, pos: { ...ship.pos },
     slowdown: true, speaker: 'enemy-captain',
-    text: `${ship.name} has struck her colours and surrenders!`,
+    text: TXT.struckColours(ship.name),
   })
 }
 
@@ -101,7 +102,7 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
     if (from.doctrine === 'player') {
       state.events.push({
         t: state.t, kind: 'message', shipId: from.id, side: from.side, speaker: 'mate',
-        text: 'To board we must lay alongside — close to ~60 m!',
+        text: TXT.boardRange(),
         voiceId: 'bark-board-range',
       })
     }
@@ -112,11 +113,9 @@ export function board(state: SimState, from: ShipState, targetId: number): void 
   // ohlaš šance před vrhem háků (risk/odměna: hráč vidí, do čeho jde)
   if (from.doctrine === 'player' && !already) {
     const odds = Math.round(boardingOdds(from, target) * 100)
-    const verdict = target.surrendered ? 'she has struck — a sure prize'
-      : odds >= 65 ? 'the advantage is ours' : odds >= 45 ? 'even odds — risky!' : 'we\'re outmatched — expect losses!'
     state.events.push({
       t: state.t, kind: 'comm', shipId: from.id, side: from.side, speaker: 'bosun', slowdown: true,
-      text: `Grapples onto ${target.name}! Our odds ~${odds}% — ${verdict}`,
+      text: TXT.grapples(target.name, odds, target.surrendered),
       voiceId: 'bark-grapples',
     })
   }
@@ -155,7 +154,7 @@ export function updateBoarding(state: SimState, dt: number): void {
         if (from.doctrine === 'player') {
           state.events.push({
             t: state.t, kind: 'comm', shipId: from.id, side: from.side, speaker: 'bosun', slowdown: true,
-            text: `Boarding party thrown back — we're pulling off ${target.name}! Soften her with fire.`,
+            text: TXT.boardingRepulsed(target.name),
             voiceId: 'bark-boarding-repulsed',
           })
         }
@@ -175,7 +174,7 @@ export function updateBoarding(state: SimState, dt: number): void {
       state.events.push({
         t: state.t, kind: 'board', shipId: target.id, side: from.side, pos: { ...target.pos },
         slowdown: true, speaker: 'captain',
-        text: `${target.name} boarded and taken! The prize is ours.`,
+        text: TXT.boarded(target.name),
       })
     }
   }

@@ -4,6 +4,7 @@
  * které si hráč nese celou kampaní. Deterministické, čistě klientské.
  */
 import type { ShipMods, ShipCondition } from '../sim/types'
+import { t, tp } from '../i18n/core'
 
 export type UpKey = 'gun' | 'hull' | 'speed' | 'acc' | 'board'
 export type Upgrades = Record<UpKey, number>
@@ -122,11 +123,11 @@ export interface RewardBreak { label: string; coins: number }
 
 export function computeReward(r: MissionResult, alreadyCleared: boolean): { total: number; parts: RewardBreak[] } {
   if (!r.win) return { total: 0, parts: [] }
-  const parts: RewardBreak[] = [{ label: 'Victory', coins: 100 }]
-  if (r.enemySunk) parts.push({ label: `Sunk (${r.enemySunk}×)`, coins: r.enemySunk * 45 })
-  if (r.prizes) parts.push({ label: `Prizes — captured (${r.prizes}×)`, coins: r.prizes * 140 })
-  if (r.objectivesDone) parts.push({ label: `Objectives met (${r.objectivesDone}×)`, coins: r.objectivesDone * 40 })
+  const parts: RewardBreak[] = [{ label: t('Victory'), coins: 100 }]
+  if (r.enemySunk) parts.push({ label: tp('Sunk ({n}×)', { n: r.enemySunk }), coins: r.enemySunk * 45 })
+  if (r.prizes) parts.push({ label: tp('Prizes — captured ({n}×)', { n: r.prizes }), coins: r.prizes * 140 })
+  if (r.objectivesDone) parts.push({ label: tp('Objectives met ({n}×)', { n: r.objectivesDone }), coins: r.objectivesDone * 40 })
   let total = parts.reduce((s, p) => s + p.coins, 0)
-  if (alreadyCleared) { total = Math.round(total * 0.4); parts.push({ label: 'Replay (×0.4)', coins: 0 }) }
+  if (alreadyCleared) { total = Math.round(total * 0.4); parts.push({ label: t('Replay (×0.4)'), coins: 0 }) }
   return { total, parts }
 }
