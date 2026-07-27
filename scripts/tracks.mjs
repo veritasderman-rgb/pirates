@@ -21,6 +21,13 @@ const IDENTITY =
 
 export const MISSION_TRACKS = [
   {
+    id: 'mission00',
+    prompt: IDENTITY + 'Around 104 BPM. A training morning at the naval academy — no '
+      + 'enemy, no danger. The lightest and most open piece of the score: the heroic '
+      + 'motif stated simply and hopefully on tin whistle and strings over gentle hand '
+      + 'drums, brass warm rather than martial. Bright, expectant, a career beginning.',
+  },
+  {
     id: 'mission01',
     prompt: IDENTITY + 'Around 110 BPM. A dawn patrol in a narrow strait that turns out '
       + 'wrong: watchful and restrained at first, low strings and a lone drum, then the '

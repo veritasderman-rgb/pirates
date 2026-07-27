@@ -91,8 +91,10 @@ describe('kampaňová mapa', () => {
   })
 
   it('zámek postupu: první mise otevřená, pozdější zamčené bez prerekvizity', () => {
-    expect(isMissionUnlocked('mission01', [])).toBe(true)       // bez requires
-    expect(isMissionUnlocked('mission02', [])).toBe(false)      // vyžaduje mission01
+    expect(isMissionUnlocked('mission00', [])).toBe(true)       // tutoriál — bez requires
+    expect(isMissionUnlocked('mission01', [])).toBe(false)      // vyžaduje tutoriál
+    expect(isMissionUnlocked('mission01', ['mission00'])).toBe(true)
+    expect(isMissionUnlocked('mission02', ['mission00'])).toBe(false)  // vyžaduje mission01
     expect(isMissionUnlocked('mission02', ['mission01'])).toBe(true)
     expect(isMissionUnlocked('mission11', [])).toBe(false)      // URL/záložka neobejde
     expect(isMissionUnlocked('neexistuje', ['mission01'])).toBe(false)

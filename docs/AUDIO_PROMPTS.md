@@ -123,7 +123,7 @@ ElevenLabs Music:
 
 ```bash
 export ELEVENLABS_API_KEY=...
-node scripts/gen-music.mjs          # 13 stop misí + ambient racků
+node scripts/gen-music.mjs          # 14 stop misí + ambient racků
 node scripts/gen-music.mjs --dry    # co by se generovalo
 ```
 

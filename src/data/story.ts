@@ -27,6 +27,22 @@ export const DEFEAT_GENERIC =
   + 'who learns his lesson puts to sea again.'
 
 export const MISSION_STORY: Record<string, MissionStory> = {
+  mission00: {
+    prolog:
+      'The roadstead below the Royal Naval Academy at Port Kestrel, a bright and '
+      + 'ordinary morning. Three years of rope, geometry and other men\'s orders come '
+      + 'down to one forenoon on the water — and to an old admiral who has failed '
+      + 'better cadets than you for less.',
+    epilog:
+      'Signed, sealed and read out on the Diligence\'s quarterdeck: the sloop HMS '
+      + 'Swallow is yours. She is small, she is old, and she is the first thing in '
+      + 'your life the crown has ever put in your hands. The strait off Turtle Island '
+      + 'is expecting a customs patrol by the end of the week.',
+    epilogLose:
+      'The Swallow is on the bottom of the Academy roadstead in flat water, in fair '
+      + 'weather, with nobody shooting at her. Admiral Thorne says nothing at all, '
+      + 'which is worse. Rig her again and take the examination over.',
+  },
   mission01: {
     prolog:
       'The strait off Turtle Island, at dawn. The wind blows to the east and the '

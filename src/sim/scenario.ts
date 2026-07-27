@@ -42,7 +42,9 @@ export function spawnShip(state: SimState, spec: ShipSpec): ShipState {
     reloadBow: 0,
     reloadStern: 0,
     destroyed: false,
-    surrendered: false,
+    // scénář smí loď postavit rovnou se staženou vlajkou (opuštěný vrak, kořist
+    // před misí) — boarding je pak nesporný a nikoho nestojí posádku
+    surrendered: spec.surrendered ?? false,
     boarded: false,
     doctrine: spec.doctrine ?? 'attack',
     fireControl: spec.fireControl ?? { mode: 'hold', shot: 'round', engaged: false },

@@ -12,7 +12,22 @@ mechaniky (vítr, plavba/vesla, terén).
 
 **Stav projektu:** hratelný prototyp (milníky M1–M4). Vítr a body plavby,
 vesla + křižování, ostrovy (kolize / závětří / mlha), boční dělové salvy se
-třemi typy střeliva, raking, kapitulace a boarding, dvě mise s příběhem.
+třemi typy střeliva, raking, kapitulace a boarding, tutoriál a kampaň
+s příběhem.
+
+## Kde to běží
+
+Produkční adresa je **<https://weathergage.io>**.
+
+*Weather gage* je návětrná pozice — výhoda lodi, která má vítr za sebou a může
+si vybrat, kdy a jak se bitva svede. Je to zároveň ústřední mechanika hry
+(v HUD ji hráč vidí jako `⚑ gage`), takže adresa říká, o čem hra je, a dá se
+nadiktovat do telefonu.
+
+Adresa je zapsaná v `index.html` (canonical + Open Graph) a v
+`public/manifest.webmanifest` (`id`, PWA). Doména se přidává v nastavení
+projektu na Vercelu; případné další domény ať jen přesměrovávají sem, aby
+odkazy a náhledy na sociálních sítích mířily na jedno místo.
 
 ## Spuštění
 
