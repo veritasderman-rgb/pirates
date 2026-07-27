@@ -101,6 +101,10 @@ export const CS_UI: Record<string, string> = {
   '🛠 PORT — shipyard & outfitting': '🛠 PŘÍSTAV — loděnice a výbava',
   '⚔ Skirmish': '⚔ Volná bitva',
   'you are here': 'jsi tady',
+  'Intro': 'Úvod', 'Play the opening film again': 'Přehrát úvodní film znovu',
+
+  // ---------- úvodní film (komentář ve videu je vždy anglicky) ----------
+  'SKIP ▸': 'PŘESKOČIT ▸', '▶ WATCH THE INTRO': '▶ PŘEHRÁT ÚVOD',
   'Click a port (node) = set sail on the mission. A cleared mission (✔) unlocks the next. Cleared ones can be replayed (smaller reward). At port, buy a new hull or upgrade the one you have.':
     'Klikni na přístav (uzel) = vypluješ na misi. Splněná mise (✔) odemkne další. Splněné lze opakovat (menší odměna). V přístavu kup nový trup, nebo vylepši ten svůj.',
   '🔓 DEV: all missions unlocked (append ': '🔓 DEV: všechny mise odemčené (přidej ',

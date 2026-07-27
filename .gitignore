@@ -6,3 +6,7 @@ dist/
 .env.*
 !.env.example
 .vercel/
+# pracovní adresáře generátorů médií (uklízí se samy, zůstanou jen po pádu)
+.video-tmp/
+.audio-tmp/
+.intro-tmp/

@@ -121,9 +121,26 @@
     .brief { line-height: 1.5; margin: 8px 0; white-space: pre-wrap; }
     .brief.story { color: #a9c8ce; font-style: italic; }
     .hint { font-size: 11px; color: #6a8a90; margin: 10px 0; line-height: 1.5; }
-    .brief-img, .menu-img { display: block; width: 100%; max-height: 260px; object-fit: cover;
+    .brief-img, .menu-img, .brief-video { display: block; width: 100%; max-height: 260px; object-fit: cover;
       border: 1px solid #2a6b78; border-radius: 3px; margin: 0 0 12px; }
     .menu-img { max-height: 220px; }
+    /* mapa kampaně už je sama o sobě obrázek — nahoře stačí úzký pruh */
+    .menu-img.slim { max-height: 120px; }
+    /* briefingová smyčka — video běží potichu pod textem, poster drží obrázek,
+       než se načte (a zůstane, když video chybí nebo ho prohlížeč nepustí) */
+    .brief-video { background: #061a20; }
+    /* úvodní film */
+    .intro { position: absolute; inset: 0; background: #000; z-index: 40; display: flex;
+      align-items: center; justify-content: center; }
+    .intro video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .intro-skip { position: absolute; right: 18px; bottom: 18px; z-index: 41; }
+    /* autoplay se zvukem prohlížeč bez gesta nepustí — film pak spouští tohle */
+    .intro-play { position: absolute; z-index: 41; font-size: 18px; letter-spacing: 2px;
+      padding: 14px 26px; color: #d8c24f; border-color: #d8c24f; background: #0a2630e6; }
+    .intro-title { position: absolute; left: 0; right: 0; bottom: 16%; text-align: center;
+      color: #d8c24f; letter-spacing: 10px; font-size: 34px; text-shadow: 0 2px 14px #000;
+      pointer-events: none; opacity: 0; transition: opacity 1.4s ease; }
+    .intro-title.on { opacity: 1; }
     .mrow { margin: 6px 0; }
     .mrow button { font-size: 14px; }
     .mdesc { font-size: 11px; color: #7f97a0; margin: 2px 0 0 4px; }
