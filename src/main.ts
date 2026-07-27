@@ -142,21 +142,117 @@ function firstSentence(t: string): string {
   return i >= 0 ? t.slice(0, i + 1) : t
 }
 
-/** Úvodní scéna/obrázek mise (public/img/<hodnota>.png); chybějící se skryje. */
+/**
+ * Úvodní scéna mise — soubor v public/img/ (i s příponou). Ke každé scéně smí
+ * existovat i rozpohybovaná smyčka public/video/brief-<mise>.mp4 (viz
+ * scripts/shots.mjs); chybí-li, zůstane vidět obrázek.
+ */
 const MISSION_SCENES: Record<string, string> = {
-  mission01: 'ship-sloop-albion',
-  mission02: 'scene-ambush',
-  mission03: 'ship-merch',
-  mission04: 'scene-castilla-port',
-  mission05: 'scene-pirate-cove',
-  mission06: 'scene-beacons',
-  mission07: 'ship-liner-castilla',
-  mission08: 'scene-castilla-port',
-  mission09: 'ship-frigate-albion',
-  mission10: 'ship-galleon-castilla',
-  mission11: 'scene-beacons',
-  side01: 'scene-ambush',
-  side02: 'scene-pirate-cove',
+  mission01: 'scene-merchantman-mist.jpg',
+  mission02: 'scene-convoy-defence.jpg',
+  mission03: 'scene-gundeck-broadside.jpg',
+  mission04: 'scene-coastal-fortress.jpg',
+  mission05: 'scene-pirate-sloop-storm.jpg',
+  mission06: 'scene-castilian-frigate-storm.jpg',
+  mission07: 'scene-fireship-night.jpg',
+  mission08: 'scene-moonlit-chase.jpg',
+  mission09: 'scene-fortress-bombardment.jpg',
+  mission10: 'scene-silver-galleon.jpg',
+  mission11: 'scene-castilian-three-decker.jpg',
+  side01: 'scene-port-unloading.jpg',
+  side02: 'scene-rescue-dawn.jpg',
+}
+
+/** Obrázky ostatních obrazovek (public/img/); chybějící se prostě neukáže. */
+const SCREEN_IMG = {
+  map: 'scene-war-council.jpg',
+  port: 'scene-careening-beach.jpg',
+  store: 'scene-frigate-under-sail.jpg',
+  skirmish: 'scene-frigate-duel.jpg',
+  win: 'scene-prize-black-flag.jpg',
+  lose: 'scene-damaged-frigate-dusk.jpg',
+}
+
+const menuImg = (file: string): string =>
+  `<img class="menu-img" src="img/${esc(file)}" alt="" onerror="this.remove()">`
+
+/**
+ * Scéna briefingu: rozpohybovaná smyčka s obrázkem jako posterem. Video běží
+ * potichu (jinak by ho autoplay politika nepustila) a dokola. Poster drží
+ * obrázek, dokud se klip nenačte — a `wireBriefMedia` ho nechá napevno, když
+ * video chybí. Hra tak vypadá dobře i bez vygenerovaných videí.
+ */
+const briefMedia = (missionId: string): string => {
+  const scene = MISSION_SCENES[missionId]
+  if (!scene) return ''
+  return `<video class="brief-video" poster="img/${esc(scene)}" src="video/brief-${esc(missionId)}.mp4"`
+    + ` autoplay muted loop playsinline></video>`
+}
+
+/** Chybí-li klip, vymění video za statický obrázek (aby nezůstal prázdný rám). */
+function wireBriefMedia(el: HTMLElement): void {
+  const v = el.querySelector<HTMLVideoElement>('video.brief-video')
+  if (!v) return
+  v.addEventListener('error', () => {
+    const img = document.createElement('img')
+    img.className = 'brief-img'
+    img.src = v.poster
+    img.alt = ''
+    v.replaceWith(img)
+  })
+  // autoplay může selhat i u ztlumeného videa — poster pak zůstane jako obrázek
+  void v.play().catch(() => { /* poster stačí */ })
+}
+
+/**
+ * Úvodní film (public/video/intro.mp4). Hraje se při prvním spuštění hry, pak
+ * už jen na vyžádání z mapy (nebo přes `?intro=1`). Komentář vypravěče je
+ * zapečený ve videu a je VŽDY anglicky, i v české verzi hry.
+ *
+ * Zvuk musí povolit uživatel (autoplay politika), takže když prohlížeč
+ * přehrání odmítne, ukáže se tlačítko „přehrát". Chybějící soubor přeskočíme.
+ */
+const INTRO_SEEN_KEY = 'pirates.introSeen'
+const introSeen = (): boolean => {
+  try { return localStorage.getItem(INTRO_SEEN_KEY) === '1' } catch { return true }
+}
+
+function showIntro(onDone: () => void): void {
+  const el = document.createElement('div')
+  el.className = 'intro'
+  el.innerHTML = `<video playsinline preload="auto" src="video/intro.mp4"></video>`
+    + `<div class="intro-title">PIRATES</div>`
+    + `<button class="intro-skip">${t('SKIP ▸')}</button>`
+  document.body.appendChild(el)
+  const video = el.querySelector('video')!
+  const title = el.querySelector('.intro-title')!
+
+  audio.setIntroMode(true)
+  let finished = false
+  const finish = (): void => {
+    if (finished) return
+    finished = true
+    try { localStorage.setItem(INTRO_SEEN_KEY, '1') } catch { /* ignore */ }
+    video.pause()
+    el.remove()
+    audio.setIntroMode(false)
+    onDone()
+  }
+  el.querySelector('.intro-skip')!.addEventListener('click', finish)
+  video.addEventListener('ended', finish)
+  video.addEventListener('error', finish)   // film chybí → rovnou na mapu
+  // titul hry naskočí na závěrečné stmívačce
+  video.addEventListener('timeupdate', () => {
+    if (video.duration && video.currentTime > video.duration - 3) title.classList.add('on')
+  })
+  video.play().catch(() => {
+    // autoplay se zvukem zakázán → nech uživatele film spustit klepnutím
+    const play = document.createElement('button')
+    play.className = 'intro-play'
+    play.textContent = t('▶ WATCH THE INTRO')
+    play.addEventListener('click', () => { play.remove(); void video.play().catch(finish) })
+    el.appendChild(play)
+  })
 }
 
 function showCampaignMap(): void {
@@ -198,12 +294,14 @@ function showCampaignMap(): void {
   const flagName = t(SHIP_CLASSES[profile.flagship]?.name ?? profile.flagship)
   const el = overlay(
     `<h1>PIRATES</h1>`
+    + `<img class="menu-img slim" src="img/${SCREEN_IMG.map}" alt="" onerror="this.remove()">`
     + `<div class="brief story">${esc(firstSentence(t(CAMPAIGN_INTRO)))}</div>`
     + `<div class="cm-bar"><span>${t('Treasury:')} <b>${profile.money} 🪙</b></span>`
     + `<span>${t('Flagship:')} <b>${esc(flagName)}</b></span>`
     + `<button id="btn-port">${t('🛠 PORT — shipyard & outfitting').replace('&', '&amp;')}</button>`
     + `<button id="btn-skirmish"${owned() ? '' : ' class="cm-locked-feat"'}>${t('⚔ Skirmish')}${owned() ? '' : ' 🔒'}</button>`
     + (owned() ? '' : `<button id="btn-store" class="cm-buy">${esc(tp('🔓 Unlock full game — {p}', { p: STORE_PRICE_LABEL }))}</button>`)
+    + `<button id="btn-intro" title="${esc(t('Play the opening film again'))}">🎬 ${t('Intro')}</button>`
     + `<button id="btn-lang" title="Language / Jazyk">🌐 ${uiLang === 'cs' ? 'English' : 'Česky'}</button>`
     + `</div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
@@ -212,6 +310,7 @@ function showCampaignMap(): void {
   el.querySelector('.box')!.classList.add('wide')
   el.querySelector('#btn-port')!.addEventListener('click', () => { el.remove(); showOutfitting() })
   el.querySelector('#btn-store')?.addEventListener('click', () => { el.remove(); showStore() })
+  el.querySelector('#btn-intro')!.addEventListener('click', () => { el.remove(); showIntro(showCampaignMap) })
   // přepínač jazyka — uloží volbu a přenačte stránku (nejjednodušší konzistentní stav)
   el.querySelector('#btn-lang')!.addEventListener('click', () => {
     setLang(uiLang === 'cs' ? 'en' : 'cs')
@@ -237,6 +336,7 @@ function showStore(): void {
   const perks = UNLOCK_PERKS.map(p => `<li>${esc(t(p))}</li>`).join('')
   const el = overlay(
     `<h1>${t('UNLOCK THE FULL GAME')}</h1>`
+    + menuImg(SCREEN_IMG.store)
     + `<div class="brief story">${t('Four missions in, the war for the Halcyon Archipelago is only beginning. One payment opens the rest of the campaign and the skirmish sandbox — forever.')}</div>`
     + `<div class="store-price">${esc(STORE_PRICE_LABEL)} <span class="dim">${t('· one-time')}</span></div>`
     + `<ul class="store-perks">${perks}</ul>`
@@ -320,6 +420,7 @@ function showSkirmish(): void {
     const maps = (['open', 'islands', 'reef'] as SkirmishMap[]).map(m =>
       `<button class="sk-opt ${opts.map === m ? 'on' : ''}" data-map="${m}">${esc(t(MAP_LABEL[m]))}</button>`).join('')
     box.innerHTML = `<h1>${t('SKIRMISH')}</h1>`
+      + menuImg(SCREEN_IMG.skirmish)
       + `<div class="hint">${t('A free battle on your terms — pick your ship, the enemy squadron, the weather and the ground, then fight. No campaign upgrades: a clean duel.')}</div>`
       + `<h2>${t('Your ship')}</h2><div class="sk-grid">${players}</div>`
       + `<h2>${t('Enemy ship')}</h2><div class="sk-grid">${enemies}</div>`
@@ -399,6 +500,7 @@ function showOutfitting(): void {
         : `<div class="mdesc ok">${t('✔ fully repaired — she\'s ready for sea')}</div>`)
       + `</div>`
     box.innerHTML = `<h1>${t('PORT')}</h1>`
+      + menuImg(SCREEN_IMG.port)
       + `<div class="score"><div class="stot">${t('Treasury:')} <b>${profile.money} 🪙</b></div></div>`
       + `<div class="hint">${t('Spend doubloons on a <b>stronger hull</b> (shipyard), <b>upgrades</b> for the one you command, or <b>repairs</b> after a hard fight. Upgrades and damage both carry through the campaign.')}</div>`
       + `<h2>${t('Shipyard — flagship')}</h2>${ships}`
@@ -437,9 +539,8 @@ function showOutfitting(): void {
 
 function showBriefing(sc: Scenario): void {
   const prolog = MISSION_STORY[sc.id]?.prolog && t(MISSION_STORY[sc.id].prolog!)
-  const scene = MISSION_SCENES[sc.id]
   const el = overlay(
-    (scene ? `<img class="brief-img" src="img/${scene}.png" alt="" onerror="this.remove()">` : '')
+    briefMedia(sc.id)
     + `<h2>${esc(sc.title)}</h2>`
     + (prolog ? `<div class="brief story">${esc(prolog)}</div>` : '')
     + `<div class="brief">${esc(sc.briefing)}</div>`
@@ -447,8 +548,11 @@ function showBriefing(sc: Scenario): void {
       ? `<div class="hint">${t('Controls: tap your own ship = select · tap a target = lock on · tap water = set course · <b>drag = pan</b> · <b>pinch = zoom</b> · <b>double-tap = centre</b> · the buttons around the edges handle sails, oars, fire and shot type.')}</div>`
       : `<div class="hint">${t('Controls: click your own ship = select · click a target = lock on · click water = set course · <b>drag = pan the map</b> · wheel = zoom · <b>buttons at right (arrows/＋/－/◎) = pan, zoom and centre on ship</b> · space = pause · W sails · E oars · Q/R broadside · A auto · 1/2/3 shot type')}</div>`)
     + `<button id="btn-start">${t('SET SAIL')}</button>`)
+  wireBriefMedia(el)
   // dabing: prolog a briefing namluví vypravěč hned po otevření obrazovky
   audio.resetVoice()
+  // bojová hudba téhle mise (chybí-li stopa, hraje se obecná music-combat)
+  audio.setMissionTheme(sc.id)
   audio.speak(`story-${sc.id}-prolog`)
   audio.speak(`brief-${sc.id}`)
   el.querySelector('#btn-start')!.addEventListener('click', () => {
@@ -516,6 +620,7 @@ function showOutcome(state: SimState): void {
     + `</div>`
   const el = overlay(
     `<h2 class="${win ? 'win' : 'lose'}">${t(win ? '⚓ VICTORY' : '☠ DEFEAT')}</h2>`
+    + menuImg(win ? SCREEN_IMG.win : SCREEN_IMG.lose)
     + `<div class="brief">${tp('Mission ended at {t}.', { t: fmtTime(state.t) })}</div>`
     + objs
     + (win ? scoreHtml : '')
@@ -597,12 +702,15 @@ async function handlePurchaseReturn(): Promise<boolean> {
 }
 
 // start: nejdřív případný návrat z platby, pak `?mission=` (respektuje postup
-// kampaní i paywall — záložka/URL neobejde zámek), jinak kampaňová mapa
+// kampaní i paywall — záložka/URL neobejde zámek), jinak kampaňová mapa.
+// Úvodní film předchází mapě při prvním spuštění (nebo na `?intro=1`); přímý
+// vstup do mise ho nikdy nezdržuje.
 void (async (): Promise<void> => {
   if (await handlePurchaseReturn()) return
   const requested = new URLSearchParams(location.search).get('mission')
   const progressOk = requested && (allUnlocked || isMissionUnlocked(requested, profile.cleared))
   const payOk = requested && (!isPaidMission(requested) || owned())
   if (requested && SCENARIOS[requested] && progressOk && payOk) startMission(requested)
+  else if (new URLSearchParams(location.search).get('intro') === '1' || !introSeen()) showIntro(showCampaignMap)
   else showCampaignMap()
 })()
