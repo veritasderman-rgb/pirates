@@ -98,13 +98,16 @@ export const CS_EXTRA: Record<string, string> = {
     'Přímo do ní! A zapamatuj si ještě jeden trik: přejeď lodi příď nebo záď a celá '
     + 'tvoje salva projede palubou po délce. Tomu se říká PODÉLNÁ PALBA a bolí '
     + 'dvakrát tolik.',
-  ['Last one: the derelict to the east. Lay us alongside her — inside about '
-  + 'sixty metres — and give the BOARDING order. The party fights on its own '
-  + 'from there. A captured ship is worth far more than one on the bottom, so '
-  + 'take her whole.']:
-    'Poslední: ten vrak na východě. Přiraz nás k jejímu boku — tak na šedesát metrů — '
-    + 'a vydej rozkaz k BOARDINGU. Výsadek si dál poradí sám. Zajatá loď má mnohem '
-    + 'větší cenu než loď na dně, tak ji ber celou.',
+  ['Last one: the derelict to the east. She is a bare hulk — no crew, no '
+  + 'colours, nobody to fight. Lay us alongside her, inside about sixty metres, '
+  + 'and give the BOARDING order; the party does the rest. On a live enemy it is '
+  + 'a bloody business, so soften her with grape first — but a captured ship is '
+  + 'worth far more than one on the bottom.']:
+    'Poslední: ten vrak na východě. Je to holá hulka — bez posádky, bez vlajky, není '
+    + 'se s kým prát. Přiraz nás k jejímu boku, tak na šedesát metrů, a vydej rozkaz '
+    + 'k BOARDINGU; zbytek si výsadek zařídí. U živého nepřítele je to krvavá práce, '
+    + 'tak ho nejdřív změkči kartáčem — ale zajatá loď má mnohem větší cenu než loď '
+    + 'na dně.',
   'Cormorant is ours — prize crew aboard!': 'Kormorán je náš — posádka na kořist nastupuje!',
   ['Thorne: "You sank the exercise, captain. It counts — but a prize pays '
   + 'the crew and a wreck pays nobody. Remember that when it is a real hull."']:

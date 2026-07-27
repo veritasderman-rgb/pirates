@@ -82,6 +82,12 @@ export const mission00: Scenario = {
       classId: 'merch', side: 'enemy', name: 'Cormorant',
       pos: { x: 2100, y: 300 }, vel: { x: 0, y: 0 }, heading: 2.6, doctrine: 'buoy',
       sailsUp: false, trim: 0,
+      // Opuštěný vrak doopravdy: bez posádky, bez morálky a se staženou vlajkou.
+      // Boarding je tím nesporný (updateBoarding krvácí jen proti bránícímu se
+      // cíli), takže cvičení nestojí hráče ani jednoho muže — jinak by se ztráty
+      // posádky přenesly z tutoriálu do kampaně jako trvalé opotřebení vlajkové
+      // lodi (showOutcome ukládá stav přeživší lodi do profilu).
+      surrendered: true, morale: 0, subsystems: { crew: 0 },
       desc: 'A derelict brought in for the boarding exercise — no crew, no colours, '
         + 'just enough deck left to teach a boarding party where to put its feet.',
     },
@@ -159,7 +165,11 @@ export const mission00: Scenario = {
     },
     {
       id: 'trg-guns-done', once: true,
-      conditions: [{ kind: 'hullBelow', shipId: HULK, fraction: 0.8 }],
+      // práh musí padnout po JEDNÉ salvě, jinak by nováček správně vystřelil a
+      // nic by se nestalo. Šalupa má 4 děla po 6 poškození a do trupu jde jen
+      // část (round 0,55 · chain 0,25 · grape 0,2), takže na 120bodovém trupu
+      // hulky stačí 0,98 — projde i salva kartáčem, kterou lekce taky nabízí.
+      conditions: [{ kind: 'hullBelow', shipId: HULK, fraction: 0.98 }],
       actions: [
         { kind: 'objectiveComplete', objectiveId: 'obj-guns' },
         { kind: 'setFlag', flag: 'guns-fired' },
@@ -176,10 +186,11 @@ export const mission00: Scenario = {
       conditions: [{ kind: 'flag', flag: 'guns-fired' }],
       actions: [{
         kind: 'comm', speaker: 'bosun',
-        text: 'Last one: the derelict to the east. Lay us alongside her — inside about '
-          + 'sixty metres — and give the BOARDING order. The party fights on its own '
-          + 'from there. A captured ship is worth far more than one on the bottom, so '
-          + 'take her whole.',
+        text: 'Last one: the derelict to the east. She is a bare hulk — no crew, no '
+          + 'colours, nobody to fight. Lay us alongside her, inside about sixty metres, '
+          + 'and give the BOARDING order; the party does the rest. On a live enemy it is '
+          + 'a bloody business, so soften her with grape first — but a captured ship is '
+          + 'worth far more than one on the bottom.',
       }],
     },
     {

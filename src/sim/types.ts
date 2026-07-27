@@ -312,8 +312,10 @@ export interface Trigger {
 export interface Objective { id: string; text: string; state: 'open' | 'done' | 'failed' }
 
 /** Specifikace lodi ve scénáři (částečný ShipState + povinné položení). */
-export type ShipSpec = Partial<ShipState> & {
+export type ShipSpec = Omit<Partial<ShipState>, 'subsystems'> & {
   classId: string; side: Side; name: string; pos: Vec2; vel: Vec2
+  /** stačí vyjmenovat měněné subsystémy — zbytek doplní spawnShip na plný stav */
+  subsystems?: Partial<Subsystems>
 }
 
 export interface Scenario {
