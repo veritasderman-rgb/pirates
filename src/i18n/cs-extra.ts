@@ -5,6 +5,142 @@
  * úplnosti hlídá tests/i18n.test.ts). Přepisuje případné kolize z cs-content.
  */
 export const CS_EXTRA: Record<string, string> = {
+  // ==================== mise 0 — Akademie (tutoriál) ====================
+  'The Academy': 'Akademie',
+  ['The sheltered roadstead of the Royal Naval Academy at Port Kestrel. Before a '
+  + 'crown trusts you with a patrol, it wants to see you handle a ship. Admiral '
+  + 'Thorne has set the course himself and will be watching from the Diligence.\n\n'
+  + 'Three exercises: beat up to the windward mark, put a broadside into the old '
+  + 'target hulk, and take the derelict Cormorant as a prize. Nothing out here '
+  + 'shoots back — take your time and learn the ship.\n\n'
+  + 'TRAINING: the wind blows to the EAST. The mark lies to the WEST, straight '
+  + 'into it — you cannot sail there directly. Zigzag across the wind (TACK), or '
+  + 'put out the OARS.']:
+    'Chráněná rejda pod Královskou námořní akademií v Poštolčím přístavu. Než ti '
+    + 'koruna svěří hlídku, chce vidět, že loď udržíš. Trasu vytyčil sám admirál '
+    + 'Thorne a bude se dívat z paluby Diligence.\n\n'
+    + 'Tři cvičení: vykřižovat k návětrné bóji, poslat boční salvu do starého terče '
+    + 'a vzít vrak Kormorán jako kořist. Nic tady nestřílí zpátky — nespěchej a nauč '
+    + 'se svou loď.\n\n'
+    + 'VÝCVIK: vítr vane na VÝCHOD. Bóje leží na ZÁPAD, přímo proti němu — přímo k ní '
+    + 'doplout nejde. Křižuj (zigzag napříč větrem), nebo nasaď VESLA.',
+  'Beat up to the windward mark (within 250 m)': 'Vykřižuj k návětrné bóji (na 250 m)',
+  'Put a broadside into the target hulk': 'Zasáhni terč boční salvou',
+  'Take the derelict Cormorant as a prize': 'Vezmi vrak Kormorán jako kořist',
+  'Windward Mark': 'Návětrná bóje',
+  'Old Tortoise': 'Stará želva',
+  'Cormorant': 'Kormorán',
+  'HMS Diligence': 'HMS Diligence',
+  'Academy Point': 'Akademický výběžek',
+  'Kestrel Shoal': 'Poštolčí mělčina',
+  ['A tarred barrel on a mooring, dead upwind of the anchorage. The whole '
+  + 'point of it is that you cannot sail straight at it.']:
+    'Dehtovaný sud na kotevním laně, přesně proti větru od kotviště. Celý vtip je '
+    + 'v tom, že se k němu nedá plout přímo.',
+  ['A condemned merchant hull kept at moorings as a gunnery target. Her '
+  + 'timbers have absorbed more shot than most ships in the fleet.']:
+    'Odepsaný kupecký trup uvázaný u boje jako dělostřelecký terč. Jeho žebra '
+    + 'spolkla víc koulí než většina lodí celého loďstva.',
+  ['A derelict brought in for the boarding exercise — no crew, no colours, '
+  + 'just enough deck left to teach a boarding party where to put its feet.']:
+    'Vrak dotažený sem kvůli nácviku boardingu — bez posádky, bez vlajky, se zbytkem '
+    + 'paluby akorát na to, aby si na něm výsadek nacvičil, kam šlapat.',
+  ['The Academy\'s brig, at anchor with the examiners aboard. Every order '
+  + 'you give today is being written down.']:
+    'Briga Akademie, zakotvená se zkušební komisí na palubě. Každý rozkaz, který '
+    + 'dnes vydáš, si někdo zapisuje.',
+  ['Academy Point — a low green headland with the signal mast on its crown. '
+  + 'Generations of cadets have learned here that the wind does not care what '
+  + 'their orders say.']:
+    'Akademický výběžek — nízký zelený ostroh se signálním stěžněm na temeni. '
+    + 'Generace kadetů se tu naučily, že větru je jedno, co stojí v jejich rozkazech.',
+  ['Kestrel Shoal — sand and weed a fathom under the surface. It has never '
+  + 'sunk anyone, but it has ended a few careers.']:
+    'Poštolčí mělčina — písek a chaluhy sáh pod hladinou. Nikoho nepotopila, ale '
+    + 'pár kariér už ukončila.',
+  ['Admiral Thorne: "Welcome to your last day as a cadet, captain. Three '
+  + 'exercises, no enemy, no excuses. Show me you can read the wind and I will '
+  + 'give you a ship of your own."']:
+    'Admirál Thorne: „Vítejte v posledním dni v roli kadeta, kapitáne. Tři cvičení, '
+    + 'žádný nepřítel, žádné výmluvy. Ukažte mi, že umíte číst vítr, a dostanete '
+    + 'vlastní loď."',
+  ['SAILING SCHOOL: the wind blows to the EAST — see the rose in the corner. '
+  + 'Set sail (W) and click open water to steer. We run fastest with the wind on '
+  + 'our quarter; dead into it the sails go slack and we are IN IRONS.']:
+    'ŠKOLA PLAVBY: vítr vane na VÝCHOD — koukni na růžici v rohu. Napni plachty (W) '
+    + 'a klikni na volnou vodu, tím zadáš kurz. Nejrychleji jedeme se zadobočním '
+    + 'větrem; přímo proti němu plachty zplihnou a jsme V KLEŠTÍCH.',
+  ['The mark is dead upwind, so we cannot lay it in one board. TACK — steer '
+  + 'about forty-five degrees off the wind, run a leg, then cut across to the '
+  + 'other side. Zigzag up to it. In a flat calm, or if you get stuck, put out '
+  + 'the OARS (E) — slow, but they do not care where the wind is.']:
+    'Bóje je přesně proti větru, jedním tahem ji nevezmeme. KŘIŽUJ — drž kurz asi '
+    + 'pětačtyřicet stupňů od větru, ujeď kus, pak to přehoď na druhou stranu. '
+    + 'Zigzagem nahoru. V bezvětří nebo když uvázneš, nasaď VESLA (E) — pomalá, ale '
+    + 'je jim jedno, odkud fouká.',
+  ['Thorne: "Rounded, and not badly. That is the whole art of it — the '
+  + 'faster ship does not win, the one that reads the wind does. Now the guns: '
+  + 'the old hulk lies to the south-east."']:
+    'Thorne: „Obeplul, a nešikovně to nebylo. V tom je celé to umění — nevyhrává '
+    + 'rychlejší loď, vyhrává ta, co umí číst vítr. Teď děla: starý terč leží na '
+    + 'jihovýchod."',
+  ['GUNNERY: we fire from the SIDE, not the bow — bring the hulk abeam and '
+  + 'give her FIRE port or starboard (Q/R). Three shots to choose from (1/2/3): '
+  + 'ROUND tears the hull, CHAIN cuts sails and rigging to slow a runner, GRAPE '
+  + 'mows down the crew before a boarding.']:
+    'DĚLOSTŘELBA: pálíme BOKEM, ne přídí — nastav si terč na bok a spusť PALBU vlevo '
+    + 'nebo vpravo (Q/R). Na výběr jsou tři náboje (1/2/3): KOULE trhá trup, ŘETĚZ '
+    + 'seká plachty a lanoví, aby uprchlík zpomalil, KARTÁČ kosí posádku před '
+    + 'boardingem.',
+  ['Straight into her! Remember the other trick: cross a ship\'s bow or '
+  + 'stern and your whole broadside runs the length of her deck. That is a '
+  + 'RAKE, and it hurts twice as much.']:
+    'Přímo do ní! A zapamatuj si ještě jeden trik: přejeď lodi příď nebo záď a celá '
+    + 'tvoje salva projede palubou po délce. Tomu se říká PODÉLNÁ PALBA a bolí '
+    + 'dvakrát tolik.',
+  ['Last one: the derelict to the east. Lay us alongside her — inside about '
+  + 'sixty metres — and give the BOARDING order. The party fights on its own '
+  + 'from there. A captured ship is worth far more than one on the bottom, so '
+  + 'take her whole.']:
+    'Poslední: ten vrak na východě. Přiraz nás k jejímu boku — tak na šedesát metrů — '
+    + 'a vydej rozkaz k BOARDINGU. Výsadek si dál poradí sám. Zajatá loď má mnohem '
+    + 'větší cenu než loď na dně, tak ji ber celou.',
+  'Cormorant is ours — prize crew aboard!': 'Kormorán je náš — posádka na kořist nastupuje!',
+  ['Thorne: "You sank the exercise, captain. It counts — but a prize pays '
+  + 'the crew and a wreck pays nobody. Remember that when it is a real hull."']:
+    'Thorne: „Potopil jste cvičení, kapitáne. Uznává se — ale kořist posádku zaplatí, '
+    + 'vrak nezaplatí nikoho. Vzpomeňte si na to, až půjde o skutečný trup."',
+  ['Examination passed. Admiral Thorne: "Sloop HMS Swallow is yours, captain. '
+  + 'Report to the customs patrol in the strait off Turtle Island."']:
+    'Zkouška složena. Admirál Thorne: „Šalupa HMS Vlaštovka je vaše, kapitáne. '
+    + 'Hlaste se u celní hlídky v úžině u Želvího ostrova."',
+  ['You lost the Swallow on an examination day. The Academy has seen worse — but not much worse.']:
+    'Přišel jsi o Vlaštovku v den zkoušky. Akademie viděla i horší věci — ale o moc horší ne.',
+
+  // příběh mise 0
+  ['The roadstead below the Royal Naval Academy at Port Kestrel, a bright and '
+  + 'ordinary morning. Three years of rope, geometry and other men\'s orders come '
+  + 'down to one forenoon on the water — and to an old admiral who has failed '
+  + 'better cadets than you for less.']:
+    'Rejda pod Královskou námořní akademií v Poštolčím přístavu, jasné a všední '
+    + 'dopoledne. Tři roky lan, geometrie a cizích rozkazů se scvrkly do jednoho '
+    + 'dopoledne na vodě — a do starého admirála, který nechal propadnout i lepší '
+    + 'kadety za míň.',
+  ['Signed, sealed and read out on the Diligence\'s quarterdeck: the sloop HMS '
+  + 'Swallow is yours. She is small, she is old, and she is the first thing in '
+  + 'your life the crown has ever put in your hands. The strait off Turtle Island '
+  + 'is expecting a customs patrol by the end of the week.']:
+    'Podepsáno, zapečetěno a přečteno na velitelské palubě Diligence: šalupa HMS '
+    + 'Vlaštovka je tvoje. Je malá, je stará a je to první věc v tvém životě, kterou '
+    + 'ti koruna vložila do rukou. Úžina u Želvího ostrova čeká celní hlídku do konce '
+    + 'týdne.',
+  ['The Swallow is on the bottom of the Academy roadstead in flat water, in fair '
+  + 'weather, with nobody shooting at her. Admiral Thorne says nothing at all, '
+  + 'which is worse. Rig her again and take the examination over.']:
+    'Vlaštovka leží na dně akademické rejdy, na klidné vodě, za pěkného počasí a bez '
+    + 'jediného výstřelu. Admirál Thorne neřekne vůbec nic, což je horší. Vyzbroj ji '
+    + 'znovu a jdi na zkoušku od začátku.',
+
   // ==================== oprava: Corona lore (v historii je obrácená verze) ====================
   ['Corona — the largest hull the Castillan yards ever put to water. Four gun '
   + 'decks, gilding from keel to masthead and a crew of half a thousand men. She '

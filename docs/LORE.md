@@ -377,8 +377,15 @@ férový.
 ## 8. Mise kampaně
 
 Kampaň je stavěná ze **scénářů** (lodě + cíle + skriptované triggery se zvraty).
-Šest misí tvoří ucelený oblouk od celní hlídky po řadovou bitvu:
+Před kampaní stojí výcviková mise; zbytek tvoří ucelený oblouk od celní hlídky
+po řadovou bitvu:
 
+0. **Akademie** (výcvik) — závěrečná praktická zkouška na rejdě Královské
+   námořní akademie v Poštolčím přístavu. Tři cvičení bez jediného výstřelu
+   z druhé strany: vykřižovat k návětrné bóji (vítr a křižování), poslat salvu
+   do zakotveného terče (boční palba a typy střeliva) a vzít vrak *Kormorán*
+   jako kořist (boarding). Admirál **Thorne** se dívá z brigy *Diligence*
+   a na konci předá hráči šalupu *Vlaštovka*, se kterou začíná mise 1.
 1. **Hlídka u Želvího ostrova** (tutoriál) — celní kontrola v úžině. „Kupec"
    *Mořská panna* po výzvě odhodí masku a prchá na volné moře. Učí vítr, body
    plavby, trim, vesla a obeplutí ostrova — a odhalí první nit: vojenský takeláž

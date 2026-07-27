@@ -85,6 +85,13 @@
       "kind": "bark"
     },
     {
+      "id": "brief-mission00",
+      "speaker": "narrator",
+      "text": "The sheltered roadstead of the Royal Naval Academy at Port Kestrel. Before a crown trusts you with a patrol, it wants to see you handle a ship. Admiral Thorne has set the course himself and will be watching from the Diligence.\n\nThree exercises: beat up to the windward mark, put a broadside into the old target hulk, and take the derelict Cormorant as a prize. Nothing out here shoots back — take your time and learn the ship.\n\nTRAINING: the wind blows to the EAST. The mark lies to the WEST, straight into it — you cannot sail there directly. Zigzag across the wind (TACK), or put out the OARS.",
+      "textCs": "Chráněná rejda pod Královskou námořní akademií v Poštolčím přístavu. Než ti koruna svěří hlídku, chce vidět, že loď udržíš. Trasu vytyčil sám admirál Thorne a bude se dívat z paluby Diligence.\n\nTři cvičení: vykřižovat k návětrné bóji, poslat boční salvu do starého terče a vzít vrak Kormorán jako kořist. Nic tady nestřílí zpátky — nespěchej a nauč se svou loď.\n\nVÝCVIK: vítr vane na VÝCHOD. Bóje leží na ZÁPAD, přímo proti němu — přímo k ní doplout nejde. Křižuj (zigzag napříč větrem), nebo nasaď VESLA.",
+      "kind": "briefing"
+    },
+    {
       "id": "brief-mission01",
       "speaker": "narrator",
       "text": "HMS Swallow holds the customs patrol in the strait off Turtle Island. Port Command reports a merchantman, the Sea Maiden, with a suspicious manifest — carry out an inspection: close to within 300 metres. Beware: if she has something to hide, she will crowd on sail and run for open water.\n\nTRAINING: the wind blows to the east — catch it in your sails (you sail fastest on a broad reach, with the wind on your quarter), trim to suit, and put out oars in a calm or into the wind. The island must be sailed AROUND — do not run onto the shoals.",
@@ -174,6 +181,69 @@
       "text": "A SIDE COMMISSION, away from the campaign's main track. For a season now ships have been lost on Widow's Comb with never a storm to blame. The truth is worse than weather: wreckers on Beacon Rock burn a false light to draw honest captains onto the reefs, then row out to plunder the wrecks and cut down any who reach the shore.\n\nHMS Goshawk is sent to end it. A corsair galley and a pirate brig lurk in the shoals — sink them or force them to strike. The galley rows where the wind fails and draws too little to fear the reefs; the brig will bleed you into the shallows and rake you when you touch. The Goshawk draws three fathoms and more: hold the deep channels, read the reefs, and do NOT run her aground.",
       "textCs": "VEDLEJŠÍ ZAKÁZKA, stranou hlavní linie kampaně. Už celou sezónu se na Vdovině hřebeni ztrácejí lodě, a bouři z toho vinit nelze. Pravda je horší než počasí: vraci na Majákové skále pálí falešné světlo, lákají poctivé kapitány na útesy — a pak vyplouvají obrat vraky a pobít každého, kdo dosáhne břehu.\n\nHMS Krahujec pluje s tím skoncovat. V mělčinách číhá korzárský koráb a pirátská briga — potop je, nebo je přinuť spustit vlajku. Koráb vesluje tam, kde vítr selže, a ponoří tak málo, že se útesů bát nemusí; briga tě bude vykrvácet do mělčin a rakovat, jakmile škrtneš o dno. Krahujec ponoří tři sáhy i víc: drž se hlubokých kanálů, čti útesy a NENAJEĎ s ním na mělčinu.",
       "kind": "briefing"
+    },
+    {
+      "id": "mission00-trg-board-done",
+      "speaker": "mate",
+      "text": "Cormorant is ours — prize crew aboard!",
+      "textCs": "Kormorán je náš — posádka na kořist nastupuje!",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-board-lesson",
+      "speaker": "bosun",
+      "text": "Last one: the derelict to the east. Lay us alongside her — inside about sixty metres — and give the BOARDING order. The party fights on its own from there. A captured ship is worth far more than one on the bottom, so take her whole.",
+      "textCs": "Poslední: ten vrak na východě. Přiraz nás k jejímu boku — tak na šedesát metrů — a vydej rozkaz k BOARDINGU. Výsadek si dál poradí sám. Zajatá loď má mnohem větší cenu než loď na dně, tak ji ber celou.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-board-sunk",
+      "speaker": "admiral",
+      "text": "Thorne: \"You sank the exercise, captain. It counts — but a prize pays the crew and a wreck pays nobody. Remember that when it is a real hull.\"",
+      "textCs": "Thorne: „Potopil jste cvičení, kapitáne. Uznává se — ale kořist posádku zaplatí, vrak nezaplatí nikoho. Vzpomeňte si na to, až půjde o skutečný trup.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-gun-lesson",
+      "speaker": "gunner",
+      "text": "GUNNERY: we fire from the SIDE, not the bow — bring the hulk abeam and give her FIRE port or starboard (Q/R). Three shots to choose from (1/2/3): ROUND tears the hull, CHAIN cuts sails and rigging to slow a runner, GRAPE mows down the crew before a boarding.",
+      "textCs": "DĚLOSTŘELBA: pálíme BOKEM, ne přídí — nastav si terč na bok a spusť PALBU vlevo nebo vpravo (Q/R). Na výběr jsou tři náboje (1/2/3): KOULE trhá trup, ŘETĚZ seká plachty a lanoví, aby uprchlík zpomalil, KARTÁČ kosí posádku před boardingem.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-guns-done",
+      "speaker": "gunner",
+      "text": "Straight into her! Remember the other trick: cross a ship's bow or stern and your whole broadside runs the length of her deck. That is a RAKE, and it hurts twice as much.",
+      "textCs": "Přímo do ní! A zapamatuj si ještě jeden trik: přejeď lodi příď nebo záď a celá tvoje salva projede palubou po délce. Tomu se říká PODÉLNÁ PALBA a bolí dvakrát tolik.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-mark-done",
+      "speaker": "admiral",
+      "text": "Thorne: \"Rounded, and not badly. That is the whole art of it — the faster ship does not win, the one that reads the wind does. Now the guns: the old hulk lies to the south-east.\"",
+      "textCs": "Thorne: „Obeplul, a nešikovně to nebylo. V tom je celé to umění — nevyhrává rychlejší loď, vyhrává ta, co umí číst vítr. Teď děla: starý terč leží na jihovýchod.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-tack-lesson",
+      "speaker": "bosun",
+      "text": "The mark is dead upwind, so we cannot lay it in one board. TACK — steer about forty-five degrees off the wind, run a leg, then cut across to the other side. Zigzag up to it. In a flat calm, or if you get stuck, put out the OARS (E) — slow, but they do not care where the wind is.",
+      "textCs": "Bóje je přesně proti větru, jedním tahem ji nevezmeme. KŘIŽUJ — drž kurz asi pětačtyřicet stupňů od větru, ujeď kus, pak to přehoď na druhou stranu. Zigzagem nahoru. V bezvětří nebo když uvázneš, nasaď VESLA (E) — pomalá, ale je jim jedno, odkud fouká.",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-welcome",
+      "speaker": "admiral",
+      "text": "Admiral Thorne: \"Welcome to your last day as a cadet, captain. Three exercises, no enemy, no excuses. Show me you can read the wind and I will give you a ship of your own.\"",
+      "textCs": "Admirál Thorne: „Vítejte v posledním dni v roli kadeta, kapitáne. Tři cvičení, žádný nepřítel, žádné výmluvy. Ukažte mi, že umíte číst vítr, a dostanete vlastní loď.\"",
+      "kind": "comm"
+    },
+    {
+      "id": "mission00-trg-wind-lesson",
+      "speaker": "mate",
+      "text": "SAILING SCHOOL: the wind blows to the EAST — see the rose in the corner. Set sail (W) and click open water to steer. We run fastest with the wind on our quarter; dead into it the sails go slack and we are IN IRONS.",
+      "textCs": "ŠKOLA PLAVBY: vítr vane na VÝCHOD — koukni na růžici v rohu. Napni plachty (W) a klikni na volnou vodu, tím zadáš kurz. Nejrychleji jedeme se zadobočním větrem; přímo proti němu plachty zplihnou a jsme V KLEŠTÍCH.",
+      "kind": "comm"
     },
     {
       "id": "mission01-trg-flee",
@@ -509,6 +579,27 @@
       "speaker": "narrator",
       "text": "The Halcyon Archipelago: a hundred islands, two flag-tongues and one sea that belongs to no one. To the west, the Crown of Albion — mercantile, cautious, rich on customs duties and deadly at the guns. To the south, Castilla — proud, slow and set on the treasure galleons that twice a year carry silver home from the colonies. And between them, in the shadow of every strait and the lee of every island, the free pirates: prize sloops and patched brigs that own no flag and take everything that floats.\n\nYou are a captain of the Royal Navy of Albion. The campaign follows your service, from customs patrol in the straits to the hunt for pirate captains and Castillan treasure fleets. Wind, islands and point of sail decide as much as guns do: the faster ship chooses when and where the fight happens — and whether it happens at all.",
       "textCs": "Souostroví Halcyon: stovka ostrovů, dva vlajkové jazyky a jedno moře, které nikomu nepatří. Na západě Koruna Albionu — obchodní, opatrná, bohatá z cel a přesná u děl. Na jihu Castilla — hrdá, pomalá a napřená k pokladním galeonám, které dvakrát ročně vezou stříbro z kolonií domů. A mezi nimi, ve stínu každé úžiny a závětří každého ostrova, volní piráti: kořistní šalupy a látané brigy, které neuznávají vlajku a berou všechno, co plave.\n\nTy jsi kapitán Královského námořnictva Albionu. Kampaň sleduje tvou službu od celní hlídky v úžinách po lov na pirátské kapitány i castillské pokladní flotily. Vítr, ostrovy a bod plavby rozhodují stejně jako děla: rychlejší loď si vybírá, kdy a kde se bojuje — a jestli vůbec.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission00-epilog",
+      "speaker": "narrator",
+      "text": "Signed, sealed and read out on the Diligence's quarterdeck: the sloop HMS Swallow is yours. She is small, she is old, and she is the first thing in your life the crown has ever put in your hands. The strait off Turtle Island is expecting a customs patrol by the end of the week.",
+      "textCs": "Podepsáno, zapečetěno a přečteno na velitelské palubě Diligence: šalupa HMS Vlaštovka je tvoje. Je malá, je stará a je to první věc v tvém životě, kterou ti koruna vložila do rukou. Úžina u Želvího ostrova čeká celní hlídku do konce týdne.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission00-epilog-lose",
+      "speaker": "narrator",
+      "text": "The Swallow is on the bottom of the Academy roadstead in flat water, in fair weather, with nobody shooting at her. Admiral Thorne says nothing at all, which is worse. Rig her again and take the examination over.",
+      "textCs": "Vlaštovka leží na dně akademické rejdy, na klidné vodě, za pěkného počasí a bez jediného výstřelu. Admirál Thorne neřekne vůbec nic, což je horší. Vyzbroj ji znovu a jdi na zkoušku od začátku.",
+      "kind": "story"
+    },
+    {
+      "id": "story-mission00-prolog",
+      "speaker": "narrator",
+      "text": "The roadstead below the Royal Naval Academy at Port Kestrel, a bright and ordinary morning. Three years of rope, geometry and other men's orders come down to one forenoon on the water — and to an old admiral who has failed better cadets than you for less.",
+      "textCs": "Rejda pod Královskou námořní akademií v Poštolčím přístavu, jasné a všední dopoledne. Tři roky lan, geometrie a cizích rozkazů se scvrkly do jednoho dopoledne na vodě — a do starého admirála, který nechal propadnout i lepší kadety za míň.",
       "kind": "story"
     },
     {

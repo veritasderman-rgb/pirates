@@ -59,6 +59,13 @@ export const INTRO_SHOTS = [
 /** Briefing mise → záběr; klidnější pohyb, sestříhá se do smyčky pod text. */
 export const BRIEF_SHOTS = [
   {
+    id: 'brief-mission00', seed: 'scene-frigate-under-sail.jpg', loop: true,
+    prompt: STYLE + 'A trim sloop stands out of a sheltered anchorage on a bright '
+      + 'training morning, sails filling and drawing, calm green water sliding past '
+      + 'her side, a headland and signal mast beyond. Slow camera push in. Fresh, '
+      + 'orderly, everything still ahead.',
+  },
+  {
     id: 'brief-mission01', seed: 'scene-merchantman-mist.jpg', loop: true,
     prompt: STYLE + 'A lone merchantman drifts at anchor in a still morning mist, sails '
       + 'hanging slack, her reflection trembling on glassy water, thin fog curling past '

@@ -89,3 +89,20 @@ kvalita), `veo-3.1-fast-generate-preview`, výchozí je
 
 Přidat misi znamená doplnit řádek do `MISSION_SCENES`, záběr do `BRIEF_SHOTS`
 a spustit generátor. Nic dalšího se v kódu nemění.
+
+---
+
+## Vstupní karta a pořadí obrazovek
+
+Než se pustí úvodní film, ukáže se **vstupní karta** (`showEntry` v
+`src/main.ts`) s dvěma cestami dovnitř, každou ve svém jazyce: **ENTER**
+a **VSTUP**. Volba rovnou přepne jazyk celé hry, takže se nikde nepřenačítá
+stránka.
+
+Karta má i technický důvod: kliknutí je to **uživatelské gesto**, bez kterého
+prohlížeč nepustí zvuk. Díky němu může úvodní film rozjet komentář i hudbu
+naplno místo toho, aby čekal na tlačítko „přehrát".
+
+Pořadí je tedy: `vstupní karta → (při prvním spuštění) úvodní film →
+kampaňová mapa`. Vstup přímo do mise přes `?mission=` kartu ani film
+nezdržuje.

@@ -13,8 +13,11 @@ export interface CampaignNode {
 }
 
 export const CAMPAIGN_NODES: CampaignNode[] = [
-  { id: 'mission01', x: 90, y: 500 },
-  { id: 'mission02', x: 210, y: 430, requires: 'mission01' },
+  // mission00 je tutoriál — první uzel trasy, proto se začátek kampaně
+  // odsunul kousek doprava, aby se štítky uzlů v rohu mapy nepřekrývaly
+  { id: 'mission00', x: 58, y: 552 },
+  { id: 'mission01', x: 190, y: 465, requires: 'mission00' },
+  { id: 'mission02', x: 275, y: 400, requires: 'mission01' },
   { id: 'mission03', x: 165, y: 300, requires: 'mission02' },
   { id: 'mission04', x: 300, y: 250, requires: 'mission03' },
   { id: 'mission05', x: 420, y: 340, requires: 'mission04' },
@@ -25,7 +28,7 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
   { id: 'mission10', x: 850, y: 175, requires: 'mission09' },
   { id: 'mission11', x: 920, y: 80, requires: 'mission10' },
   // volitelné odbočky (bonusová kořist) — otevřou se po dané misi, nic je nevyžaduje
-  { id: 'side01', x: 330, y: 430, requires: 'mission02', optional: true },
+  { id: 'side01', x: 395, y: 455, requires: 'mission02', optional: true },
   { id: 'side02', x: 640, y: 380, requires: 'mission05', optional: true },
 ]
 
@@ -40,8 +43,12 @@ export function isMissionUnlocked(missionId: string, cleared: readonly string[])
   return !node.requires || cleared.includes(node.requires)
 }
 
-/** Kolik prvních hlavních misí je zdarma (demo). Zbytek je za jednorázový nákup. */
-export const FREE_MISSIONS = 4
+/**
+ * Kolik prvních hlavních misí je zdarma (demo). Zbytek je za jednorázový nákup.
+ * Tutoriál (mission00) se počítá taky, proto 5 — hráč má zdarma pořád stejný
+ * obsah jako dřív (výcvik + první čtyři ostré mise), tutoriál nikomu neubral.
+ */
+export const FREE_MISSIONS = 5
 
 /**
  * Je mise za paywallem? Zdarma jsou první FREE_MISSIONS hlavní (nevolitelné)

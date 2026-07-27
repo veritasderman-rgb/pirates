@@ -22,8 +22,10 @@ import { initLang, setLang, t, activeLang } from './i18n'
 import { tp } from './i18n/core'
 import type { Scenario, SimState } from './sim/types'
 
-// jazyk co nejdřív — všechno UI včetně panelů se kreslí až po tomhle
-const uiLang = initLang()
+// jazyk co nejdřív — všechno UI včetně panelů se kreslí až po tomhle.
+// Není to konstanta: vstupní karta (showEntry) ho může přepnout ještě dřív,
+// než se vykreslí první overlay, takže se nikde nemusí přenačítat stránka.
+let uiLang = initLang()
 
 const canvas = document.getElementById('plot') as HTMLCanvasElement
 
@@ -148,6 +150,7 @@ function firstSentence(t: string): string {
  * scripts/shots.mjs); chybí-li, zůstane vidět obrázek.
  */
 const MISSION_SCENES: Record<string, string> = {
+  mission00: 'scene-frigate-under-sail.jpg',
   mission01: 'scene-merchantman-mist.jpg',
   mission02: 'scene-convoy-defence.jpg',
   mission03: 'scene-gundeck-broadside.jpg',
@@ -165,9 +168,10 @@ const MISSION_SCENES: Record<string, string> = {
 
 /** Obrázky ostatních obrazovek (public/img/); chybějící se prostě neukáže. */
 const SCREEN_IMG = {
+  entry: 'scene-frigate-duel.jpg',
   map: 'scene-war-council.jpg',
   port: 'scene-careening-beach.jpg',
-  store: 'scene-frigate-under-sail.jpg',
+  store: 'scene-heavy-frigate-overcast.jpg',
   skirmish: 'scene-frigate-duel.jpg',
   win: 'scene-prize-black-flag.jpg',
   lose: 'scene-damaged-frigate-dusk.jpg',
@@ -202,6 +206,42 @@ function wireBriefMedia(el: HTMLElement): void {
   })
   // autoplay může selhat i u ztlumeného videa — poster pak zůstane jako obrázek
   void v.play().catch(() => { /* poster stačí */ })
+}
+
+/**
+ * Vstupní karta — úplně první obrazovka hry. Nabízí dvě cesty dovnitř, každou
+ * ve svém jazyce: **ENTER** (anglicky) a **VSTUP** (česky). Volba rovnou
+ * nastaví jazyk celé hry, takže se nikde nemusí přenačítat stránka.
+ *
+ * Kliknutí je zároveň to uživatelské gesto, které prohlížeč vyžaduje, než
+ * pustí zvuk — díky němu může úvodní film rozjet komentář i hudbu naplno.
+ */
+function showEntry(onDone: () => void): void {
+  const el = document.createElement('div')
+  el.className = 'entry'
+  const btn = (lang: 'en' | 'cs', label: string, note: string): string =>
+    `<button data-lang="${lang}" class="${uiLang === lang ? 'on' : ''}">${label}<small>${note}</small></button>`
+  el.innerHTML =
+    `<img class="entry-art" src="img/${SCREEN_IMG.entry}" alt="" onerror="this.remove()">`
+    + `<div class="entry-box">`
+    + `<h1>PIRATES</h1>`
+    + `<div class="entry-sub">The Halcyon Archipelago · Souostroví Halcyon</div>`
+    + `<div class="entry-actions">${btn('en', 'ENTER', 'English')}${btn('cs', 'VSTUP', 'Česky')}</div>`
+    + `</div>`
+  document.body.appendChild(el)
+
+  el.querySelectorAll<HTMLButtonElement>('button[data-lang]').forEach(b =>
+    b.addEventListener('click', () => {
+      const lang = b.dataset.lang as 'en' | 'cs'
+      // pořadí je důležité: jazyk musí být nastavený DŘÍV, než se vykreslí
+      // první overlay — ten už si texty přeloží sám přes t()
+      setLang(lang)
+      uiLang = lang
+      try { document.documentElement.lang = lang } catch { /* ignore */ }
+      audio.unlock()   // kliknutí je to gesto, na které čeká autoplay
+      el.remove()
+      onDone()
+    }))
 }
 
 /**
@@ -710,7 +750,11 @@ void (async (): Promise<void> => {
   const requested = new URLSearchParams(location.search).get('mission')
   const progressOk = requested && (allUnlocked || isMissionUnlocked(requested, profile.cleared))
   const payOk = requested && (!isPaidMission(requested) || owned())
-  if (requested && SCENARIOS[requested] && progressOk && payOk) startMission(requested)
-  else if (new URLSearchParams(location.search).get('intro') === '1' || !introSeen()) showIntro(showCampaignMap)
-  else showCampaignMap()
+  if (requested && SCENARIOS[requested] && progressOk && payOk) { startMission(requested); return }
+  // vstupní karta (volba jazyka) → případný úvodní film → kampaňová mapa
+  const forceIntro = new URLSearchParams(location.search).get('intro') === '1'
+  showEntry(() => {
+    if (forceIntro || !introSeen()) showIntro(showCampaignMap)
+    else showCampaignMap()
+  })
 })()
