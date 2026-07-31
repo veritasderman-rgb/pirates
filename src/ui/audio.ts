@@ -21,6 +21,12 @@ const MUSIC_VOL = 0.6
 const MUSIC_DUCK_VOL = 0.16
 /** stejný bojový výkřik nejdřív takhle po sobě (ať se neopakuje dokola) */
 const BARK_COOLDOWN_MS = 25_000
+/** racci: kolik variant, jak hlasitě a jak často (první / dál náhodně v rozpětí) */
+const GULL_FILES = ['gulls-1', 'gulls-2', 'gulls-3']
+const GULL_VOL = 0.3
+const GULL_FIRST_MS = 20_000
+const GULL_MIN_MS = 45_000
+const GULL_MAX_MS = 105_000
 
 export class AudioManager {
   private ctx: AudioContext | null = null
@@ -36,6 +42,14 @@ export class AudioManager {
   private unlocked = false
   private calmSince = 0
   private fadeTimer = 0
+  /** mise s vlastní bojovou stopou (public/audio/mission-<id>.mp3) */
+  private missionId: string | null = null
+  /** běží úvodní film — hudební automat celou dobu mlčí */
+  private introMode = false
+
+  // ---------- ambient racků ----------
+  private gullTimer = 0
+  private gullAt = 0
 
   // ---------- dabing (voiceover) ----------
   private vo: HTMLAudioElement | null = null
@@ -47,7 +61,11 @@ export class AudioManager {
   voiceMuted = false
 
   unlock(): void {
-    if (!this.unlocked) { this.unlocked = true; this.setMusic(this.menuMode ? 'menu' : 'cruise') }
+    if (!this.unlocked) {
+      this.unlocked = true
+      this.setMusic(this.menuMode ? 'menu' : 'cruise')
+      this.startGulls()
+    }
     // dabing čekal na gesto (autoplay) — teď ho rozjeď od zadržené repliky
     if (this.voBlocked && !this.vo && this.voQueue.length) { this.voBlocked = false; this.pumpVoice() }
     if (this.ctx) return
@@ -143,6 +161,57 @@ export class AudioManager {
   setMenuMode(on: boolean): void {
     this.menuMode = on
     if (this.unlocked && on) this.setMusic('menu')
+  }
+
+  /**
+   * Bojová stopa aktuální mise. Ve stavu `combat` se místo obecné
+   * `music-combat.mp3` pouští `mission-<id>.mp3`, takže má každá mise vlastní
+   * vrchol boje; klidné stavy zůstávají společné, aby crossfady pořád zněly
+   * jako jedna skladba. Chybí-li stopa mise, spadne se na obecnou (viz
+   * ensureTrack) — hra tedy funguje i s neúplnou hudbou.
+   */
+  setMissionTheme(id: string | null): void {
+    if (this.missionId === id) return
+    this.missionId = id
+    // zahoď načtenou bojovou stopu, ať se příště vytvoří ze správného souboru
+    const old = this.tracks.combat
+    if (old) { old.pause(); delete this.tracks.combat }
+    if (this.music === 'combat') { this.music = null; this.setMusic('combat') }
+  }
+
+  /** Úvodní film má vlastní zvukovou stopu — hudba hry po tu dobu mlčí. */
+  setIntroMode(on: boolean): void {
+    if (this.introMode === on) return
+    this.introMode = on
+    if (on) {
+      for (const el of Object.values(this.tracks)) el?.pause()
+      this.music = null
+    } else if (this.unlocked) {
+      this.setMusic(this.menuMode ? 'menu' : 'cruise')
+    }
+  }
+
+  /**
+   * Racci — občasný ambient nad klidnou hudbou (menu, plavba, napětí). V boji
+   * a pod mluveným slovem mlčí, ať nepřekáží. Chybějící soubor se tiše ignoruje.
+   */
+  private startGulls(): void {
+    if (this.gullTimer) return
+    this.gullAt = performance.now() + GULL_FIRST_MS
+    this.gullTimer = window.setInterval(() => this.maybeGulls(), 5000)
+  }
+
+  private maybeGulls(): void {
+    if (this.muted || this.introMode || this.vo) return
+    if (this.music === 'combat' || this.music === 'victory' || this.music === 'defeat') return
+    const now = performance.now()
+    if (now < this.gullAt) return
+    this.gullAt = now + GULL_MIN_MS + Math.random() * (GULL_MAX_MS - GULL_MIN_MS)
+    const file = GULL_FILES[Math.floor(Math.random() * GULL_FILES.length)]
+    const el = new Audio(`audio/${file}.mp3`)
+    el.volume = GULL_VOL
+    el.addEventListener('error', () => { /* ambient chybí — nevadí */ })
+    void el.play().catch(() => { /* autoplay/404 */ })
   }
 
   /** Určení hudebního stavu z posledního snapshotu. */
@@ -244,21 +313,28 @@ export class AudioManager {
 
   // ---------- hudba (HTMLAudioElement, crossfade; chybějící soubor = ticho) ----------
   private ensureTrack(state: MusicState): HTMLAudioElement {
-    let el = this.tracks[state]
-    if (!el) {
-      el = new Audio(`audio/music-${state}.mp3`)
-      el.loop = state !== 'victory' && state !== 'defeat'
-      el.volume = 0
-      el.preload = 'auto'
-      // chybějící soubor (404) tiše ignoruj
-      el.addEventListener('error', () => { /* žádná hudba — nevadí */ })
-      this.tracks[state] = el
-    }
+    const cached = this.tracks[state]
+    if (cached) return cached
+    const generic = `audio/music-${state}.mp3`
+    // boj hraje stopu mise, je-li nějaká nastavená; ostatní stavy jsou společné
+    const wanted = state === 'combat' && this.missionId ? `audio/mission-${this.missionId}.mp3` : generic
+    const el = new Audio(wanted)
+    el.loop = state !== 'victory' && state !== 'defeat'
+    el.volume = 0
+    el.preload = 'auto'
+    el.addEventListener('error', () => {
+      // stopa mise chybí (404) → spadni jednou na obecnou bojovou hudbu;
+      // když chybí i ta, zůstane ticho a hra běží dál
+      if (wanted === generic || el.src.endsWith(generic)) return
+      el.src = generic
+      if (this.music === state) void el.play().catch(() => { /* autoplay/404 */ })
+    })
+    this.tracks[state] = el
     return el
   }
 
   private setMusic(state: MusicState): void {
-    if (this.music === state) return
+    if (this.introMode || this.music === state) return
     this.music = state
     const next = this.ensureTrack(state)
     if (next.paused) { next.currentTime = 0; void next.play().catch(() => { /* autoplay/404 */ }) }

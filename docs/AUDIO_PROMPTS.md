@@ -104,6 +104,40 @@ nejlíp loopuje.
 
 ---
 
+## Bojová hudba po misích (`mission-<id>.mp3`)
+
+Nad rámec šesti stop výše má **každá mise vlastní bitevní stopu**. Ve stavu
+`combat` se místo obecné `music-combat.mp3` pouští
+`public/audio/mission-<mise>.mp3` — vrchol boje tak zní v každé misi jinak,
+zatímco klidné stavy (`menu`/`cruise`/`tension`) zůstávají společné, takže
+crossfady pořád znějí jako jedna skladba. Chybí-li stopa mise, spadne se
+automaticky na `music-combat.mp3`.
+
+Stopy drží tutéž hudební identitu jako zbytek soundtracku (D moll, hrdinský
+motiv D–A–B♭–A, orchestr + taiko + housle a píšťala); mění se jen barva a
+náboj podle mise — od opatrné hlídky v misi 1 přes honičku, přepad pirátského
+hnízda a obléhání Cádizu až po finále proti Coroně.
+
+Zadání jednotlivých stop je v **`scripts/tracks.mjs`**, generují se přes
+ElevenLabs Music:
+
+```bash
+export ELEVENLABS_API_KEY=...
+node scripts/gen-music.mjs          # 14 stop misí + ambient racků
+node scripts/gen-music.mjs --dry    # co by se generovalo
+```
+
+Každá stopa se sestříhá do **bezešvé smyčky** (konec se prolne přes začátek),
+takže ji hudební automat může točit dokola bez slyšitelného střihu. Hotové
+soubory se přeskakují — přegenerování vynutí `--force`.
+
+## Racci (`gulls-1..3.mp3`)
+
+Krátký ambient, který hra pouští **občas a jen v klidu** (menu, plavba,
+napětí) — v boji, pod mluveným slovem a při výhře/prohře mlčí. Varianty se
+střídají náhodně s odstupem ~45–105 s, aby se zvuk neopakoval mechanicky.
+Generuje je taky `scripts/gen-music.mjs`.
+
 ## Postup
 
 1. V Suno u každé stopy vlož řádek **Style of Music** a do textu `[Instrumental]`

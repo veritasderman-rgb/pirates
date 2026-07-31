@@ -12,7 +12,22 @@ mechaniky (vítr, plavba/vesla, terén).
 
 **Stav projektu:** hratelný prototyp (milníky M1–M4). Vítr a body plavby,
 vesla + křižování, ostrovy (kolize / závětří / mlha), boční dělové salvy se
-třemi typy střeliva, raking, kapitulace a boarding, dvě mise s příběhem.
+třemi typy střeliva, raking, kapitulace a boarding, tutoriál a kampaň
+s příběhem.
+
+## Kde to běží
+
+Produkční adresa je **<https://weathergage.io>**.
+
+*Weather gage* je návětrná pozice — výhoda lodi, která má vítr za sebou a může
+si vybrat, kdy a jak se bitva svede. Je to zároveň ústřední mechanika hry
+(v HUD ji hráč vidí jako `⚑ gage`), takže adresa říká, o čem hra je, a dá se
+nadiktovat do telefonu.
+
+Adresa je zapsaná v `index.html` (canonical + Open Graph) a v
+`public/manifest.webmanifest` (`id`, PWA). Doména se přidává v nastavení
+projektu na Vercelu; případné další domény ať jen přesměrovávají sem, aby
+odkazy a náhledy na sociálních sítích mířily na jedno místo.
 
 ## Spuštění
 
@@ -42,14 +57,38 @@ postavy, popis všech typů lodí a herní mechanika tak, jak ji hráč zažív�
 🎨 **[Grafika — zadání a prompty](docs/ART_PROMPTS.md)** — portréty postav
 (a další grafika) s přesnými názvy souborů a prompty pro renderování.
 
-🎵 **[Hudba — prompty pro Suno.ai](docs/AUDIO_PROMPTS.md)** — adaptivní stopy
-(menu/plavba/napětí/boj/výhra/porážka) s prompty a jednotnou hudební identitou.
+🎵 **[Hudba — prompty a generátor](docs/AUDIO_PROMPTS.md)** — adaptivní stopy
+(menu/plavba/napětí/boj/výhra/porážka), **vlastní bitevní hudba ke každé misi**
+a ambient racků, s jednotnou hudební identitou.
+
+🎬 **[Video — úvodní film a briefingy](docs/VIDEO.md)** — úvodní film
+s komentářem vypravěče a rozpohybované smyčky pod briefingy misí (Veo 3.1).
 
 📄 **[Herní návrh a plán přenosu](docs/GAME_DESIGN.md)** — koncept vesmír→moře,
 recyklační tabulka (co kopírovat / upravit / napsat nově), detailní návrh
 větru a plavby, třídy lodí, model boje, mise a milníky implementace.
 
-### Assety (portréty a hudba)
+### Assety (grafika, hudba, video)
+
+Nic z toho není pro běh hry nutné — chybějící soubor se **tiše přeskočí**.
+Briefing bez videa zůstane u statické malby, mise bez vlastní stopy si vezme
+obecnou bojovou hudbu, chybějící úvodní film jde rovnou na kampaňovou mapu.
+
+Generátory berou API klíče **jen z prostředí** (nikdy z repa):
+
+```bash
+export GEMINI_API_KEY=...       # Veo 3.1 — video
+export ELEVENLABS_API_KEY=...   # dabing, hudba, ruchy
+
+node scripts/gen-voiceovers.mjs   # dabing replik (public/vo/)
+node scripts/gen-music.mjs        # bitevní hudba misí + racci
+node scripts/gen-videos.mjs       # záběry pro intro a briefingy
+node scripts/gen-intro.mjs        # slepí intro.mp4 (obraz + komentář + hudba)
+```
+
+Hotové soubory se přeskakují, takže opakované spuštění nespotřebovává kvótu —
+přegenerování vynutí `--force`. Video navíc potřebuje **ffmpeg** (`$FFMPEG`,
+`node_modules/ffmpeg-static`, nebo `ffmpeg` v PATH).
 
 Grafika ani hudba nejsou pro běh nutné. Jakmile vyrenderuješ **portréty**
 (`public/img/<mluvčí>.png`) nebo **hudbu** (`public/audio/music-<stav>.mp3`)
