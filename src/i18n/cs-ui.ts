@@ -7,7 +7,7 @@ export const CS_UI: Record<string, string> = {
   // ---------- souhlas s cookies ----------
   'This game measures anonymous traffic (Google Analytics). No cookies are stored without your consent.':
     'Hra měří anonymní návštěvnost (Google Analytics). Bez souhlasu se neukládají žádné cookies.',
-  'Accept': 'Souhlasím', 'Decline': 'Odmítnout',
+  'Accept': 'Souhlasím', 'Decline': 'Odmítnout', 'Cookies': 'Cookies',
 
   // ---------- topbar ----------
   'wind {kn} kn': 'vítr {kn} kn',
