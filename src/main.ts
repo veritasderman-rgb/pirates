@@ -19,6 +19,7 @@ import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, PAYWALL_ENABLED, STO
 import { buildSkirmish, SKIRMISH_PLAYER_SHIPS, SKIRMISH_ENEMY_SHIPS, WEATHER_LABEL, MAP_LABEL, type SkirmishOptions, type Weather, type SkirmishMap } from './data/skirmish'
 import { SHIP_CLASSES } from './data/defs'
 import { initLang, setLang, t, activeLang } from './i18n'
+import { analyticsConfigured, initAnalytics, openConsentSettings, refreshConsentBanner } from './ui/consent'
 import { tp } from './i18n/core'
 import type { Scenario, SimState } from './sim/types'
 
@@ -26,6 +27,9 @@ import type { Scenario, SimState } from './sim/types'
 // Není to konstanta: vstupní karta (showEntry) ho může přepnout ještě dřív,
 // než se vykreslí první overlay, takže se nikde nemusí přenačítat stránka.
 let uiLang = initLang()
+
+// GA4 + lišta souhlasu — až po initLang(), ať je lišta ve správném jazyce.
+initAnalytics()
 
 const canvas = document.getElementById('plot') as HTMLCanvasElement
 
@@ -237,6 +241,8 @@ function showEntry(onDone: () => void): void {
       // první overlay — ten už si texty přeloží sám přes t()
       setLang(lang)
       uiLang = lang
+      // lišta se souhlasem vznikla ještě před touhle volbou — přepsat texty
+      refreshConsentBanner()
       try { document.documentElement.lang = lang } catch { /* ignore */ }
       audio.unlock()   // kliknutí je to gesto, na které čeká autoplay
       el.remove()
@@ -343,6 +349,7 @@ function showCampaignMap(): void {
     + (owned() ? '' : `<button id="btn-store" class="cm-buy">${esc(tp('🔓 Unlock full game — {p}', { p: STORE_PRICE_LABEL }))}</button>`)
     + `<button id="btn-intro" title="${esc(t('Play the opening film again'))}">🎬 ${t('Intro')}</button>`
     + `<button id="btn-lang" title="Language / Jazyk">🌐 ${uiLang === 'cs' ? 'English' : 'Česky'}</button>`
+    + (analyticsConfigured() ? `<button id="btn-cookies">🍪 ${t('Cookies')}</button>` : '')
     + `</div>`
     + `<div class="cm-wrap"><svg viewBox="0 0 1000 600" class="cm-map">${isles}${routes}${nodes}${marker}</svg></div>`
     + (allUnlocked ? `<div class="fc-hint" style="color:#e8c874">${t('🔓 DEV: all missions unlocked (append ')}<b>?unlock=off</b>${t(' to the URL to restore normal progression).')}</div>` : '')
@@ -356,6 +363,8 @@ function showCampaignMap(): void {
     setLang(uiLang === 'cs' ? 'en' : 'cs')
     location.href = location.pathname
   })
+  // souhlas s cookies jde kdykoli změnit i odvolat
+  el.querySelector('#btn-cookies')?.addEventListener('click', () => openConsentSettings())
   // skirmish je placený obsah: bez vlastnictví vede tlačítko do storu
   el.querySelector('#btn-skirmish')!.addEventListener('click', () => { el.remove(); owned() ? showSkirmish() : showStore() })
   el.querySelectorAll<SVGGElement>('g[data-mission]').forEach(g =>
