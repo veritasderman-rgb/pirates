@@ -19,6 +19,7 @@ import { isOwned, applyOwnDevFlag, isDevOwned, saveLicense, PAYWALL_ENABLED, STO
 import { buildSkirmish, SKIRMISH_PLAYER_SHIPS, SKIRMISH_ENEMY_SHIPS, WEATHER_LABEL, MAP_LABEL, type SkirmishOptions, type Weather, type SkirmishMap } from './data/skirmish'
 import { SHIP_CLASSES } from './data/defs'
 import { initLang, setLang, t, activeLang } from './i18n'
+import { initAnalytics } from './ui/consent'
 import { tp } from './i18n/core'
 import type { Scenario, SimState } from './sim/types'
 
@@ -26,6 +27,9 @@ import type { Scenario, SimState } from './sim/types'
 // Není to konstanta: vstupní karta (showEntry) ho může přepnout ještě dřív,
 // než se vykreslí první overlay, takže se nikde nemusí přenačítat stránka.
 let uiLang = initLang()
+
+// GA4 + lišta souhlasu — až po initLang(), ať je lišta ve správném jazyce.
+initAnalytics()
 
 const canvas = document.getElementById('plot') as HTMLCanvasElement
 
